@@ -3,6 +3,7 @@
   "displayName": "advpl-snippets",
   "description": "",
   "version": "0.0.1",
+  "publisher": "felipednegredo",
   "engines": {
     "vscode": "^1.98.0"
   },
