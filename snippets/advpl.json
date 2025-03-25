@@ -1,320 +1,42 @@
 {
     "WhileTb": {
-      "prefix": "While em Tabela ADVPL",
-      "body": [
-        "\tWhile ${tabela}->(! Eof())",
-        "\t\t${processamento}",
-        "\t\t${tabela}->(DbSkip())",
-        "\tEndDo",
-        "\t${cursor}"
-      ],
-      "description": "Estrutura de loop WHILE para percorrer uma tabela em ADVPL"
-    },
-    "For": {
-      "prefix": "For ADVPL",
-      "body": [
-        "\tFor ${var} := 1 to Len(${array})",
-        "\t\t${processamento}",
-        "\tNext ${var}",
-        "\t${cursor}"
-      ],
-      "description": "Estrutura de loop FOR para percorrer um array em ADVPL"
-    },
-    "Case": {
-      "prefix": "Case ADVPL",
-      "body": [
-        "\tDo Case",
-        "\t\tCase ${condicao1}",
-        "\t\t\t${acao1}",
-        "\t\tCase ${condicao2}",
-        "\t\t\t${acao2}",
-        "\t\tCase ${condicao3}",
-        "\t\t\t${acao3}",
-        "\t\tCase ${condicao4}",
-        "\t\t\t${acao4}",
-        "\t\tOtherWise",
-        "\t\t\t${acaoDefault}",
-        "\tEndCase",
-        "\t${cursor}"
-      ],
-      "description": "Estrutura de decisão CASE em ADVPL"
-    },
-    "If": {
-      "prefix": "If Complexo ADVPL",
-      "body": [
-        "\tIf ${condicao1}",
-        "\t\t${acao1}",
-        "\tElseIf ${condicao2}",
-        "\t\t${acao2}",
-        "\tElse",
-        "\t\t${acaoDefault}",
-        "\tEndIf",
-        "\t${cursor}"
-      ],
-      "description": "Estrutura de decisão IF Complexo em ADVPL"
-    },
-    "BeginSql": {
-      "prefix": "BeginSql",
-      "body": [
-        "\tBeginSql Alias ${tabela}",
-        "\t\tSELECT",
-        "\t\t\t${campos}",
-        "\t\tFROM ${alias}",
-        "\t\tWHERE D_E_L_E_T_ = ' ' ${demaisCondicoes}",
-        "\t\tORDER BY ${orderBy}",
-        "\tEndSql",
-        "\t${cursor}"
-      ],
-      "description": "Estrutura para execução de comandos SQL em ADVPL"
-    },
-    "DOC": {
-    "prefix": "Doc ADVPL",
-    "body": [
-        "/*/{Protheus.doc} ${nomeFuncao}",
-        "(${descricao})",
-        "@author ${autor}",
-        "@since ${data}",
-        "@version ${versao}",
-        "@param ${parametros}, ${descricaoParametros}",
-        "@return ${retorno}, ${descricaoRetorno}",
-        "@example",
-        "${exemplos}",
-        "@see ${referencias}",
-        "/*/"
-    ],
-    "description": "Modelo de documentação de código ADVPL"
-    },
-    "Function": {
-    "prefix": "Function ADVPL",
-    "body": [
-        "User Function ${nomeFuncao}(${parametros})",
-        "\tLocal ${variaveisLocais}",
-        "\t${processamento}",
-        "\tReturn ${retorno}",
-        "Return"
-    ],
-    "description": "Modelo de função ADVPL"
-    },
-    "UserFunction": {
-    "prefix": "UserFunction ADVPL",
-    "body": [
-        "User Function ${nomeFuncao}(${parametros})",
-        "\tLocal ${variaveisLocais}",
-        "\t${processamento}",
-        "\tReturn ${retorno}",
-        "Return"
-    ],
-    "description": "Modelo de função ADVPL"
-    },
-    "StaticFunction": {
-    "prefix": "StaticFunction ADVPL",
-    "body": [
-        "Static Function ${nomeFuncao}(${parametros})",
-        "\tLocal ${variaveisLocais}",
-        "\t${processamento}",
-        "\tReturn ${retorno}",
-        "Return"
-    ],
-    "description": "Modelo de função estática ADVPL"
-    },
-    "BeginSqlIf": {
-        "prefix": "BeginSqlIf",
+        "prefix": "While em Tabela ADVPL",
         "body": [
-            "\tBeginSql Alias ${tabela}",
-            "\t\tSELECT",
-            "\t\t\t${campos}",
-            "\t\tFROM ${alias}",
-            "\t\tWHERE D_E_L_E_T_ = ' ' ${demaisCondicoes}",
-            "\t\tORDER BY ${orderBy}",
-            "\tEndSql",
-            "\tIf ${condicao}",
-            "\t\t${acao}",
-            "\tEndIf",
-            "\t${cursor}"
-        ],
-        "description": "Cria a estrutura completa do BeginSql com If no resultado"
-    },
-    "BeginSqlWhile": {
-        "prefix": "BeginSqlWhile",
-        "body": [
-            "\tBeginSql Alias ${tabela}",
-            "\t\tSELECT",
-            "\t\t\t${campos}",
-            "\t\tFROM ${alias}",
-            "\t\tWHERE D_E_L_E_T_ = ' ' ${demaisCondicoes}",
-            "\t\tORDER BY ${orderBy}",
-            "\tEndSql",
-            "\tWhile ${condicao}",
-            "\t\t${acao}",
-            "\tEndDo",
-            "\t${cursor}"
-        ],
-        "description": "Cria a estrutura completa do BeginSql com While no resultado"
-    },
-    "DbGoTo": {
-        "prefix": "DbGoTo",
-        "body": [
-            "\tDbGoTo(${registro})",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com DbGoTo"
-    },
-    "DbSeekIf": {
-        "prefix": "DbSeekIf",
-        "body": [
-            "\tDbSeek(${chave})",
-            "\tIf ${condicao}",
-            "\t\t${acao}",
-            "\tEndIf",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com If no resultado"
-    },
-    "DbSeekIfXFilial": {
-        "prefix": "DbSeekIfXFilial",
-        "body": [
-            "\tDbSeek(${chave})",
-            "\tIf ${condicao} .and. ${xFilial}",
-            "\t\t${acao}",
-            "\tEndIf",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com If no resultado com xFilial no posicionamento"
-    },
-    "DbSeekWhile": {
-        "prefix": "DbSeekWhile",
-        "body": [
-            "\tDbSeek(${chave})",
-            "\tWhile ${condicao}",
-            "\t\t${acao}",
-            "\tEndDo",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com While no resultado"
-    },
-    "DbSeekRecLock": {
-        "prefix": "DbSeekRecLock",
-        "body": [
-            "\tDbSeek(${chave})",
-            "\tIf ${condicao}",
-            "\t\tRecLock(${tabela})",
-            "\t\t${acao}",
-            "\tEndIf",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com If e RecLock no resultado"
-    },
-    "MsSeekIf": {
-        "prefix": "MsSeekIf",
-        "body": [
-            "\tMsSeek(${chave})",
-            "\tIf ${condicao}",
-            "\t\t${acao}",
-            "\tEndIf",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com MsSeek com If no resultado"
-    },
-    "MsSeekIfXFilial": {
-        "prefix": "MsSeekIfXFilial",
-        "body": [
-            "\tMsSeek(${chave})",
-            "\tIf ${condicao} .and. ${xFilial}",
-            "\t\t${acao}",
-            "\tEndIf",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com MsSeek com If no resultado com xFilial no posicionamento"
-    },
-    "MsSeekWhile": {
-        "prefix": "MsSeekWhile",
-        "body": [
-            "\tMsSeek(${chave})",
-            "\tWhile ${condicao}",
-            "\t\t${acao}",
-            "\tEndDo",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com MsSeek com While no resultado"
-    },
-    "MsSeekRecLock": {
-        "prefix": "MsSeekRecLock",
-        "body": [
-            "\tMsSeek(${chave})",
-            "\tIf ${condicao}",
-            "\t\tRecLock(${tabela})",
-            "\t\t${acao}",
-            "\tEndIf",
-            "\t${cursor}"
-        ],
-        "description": "Cria posicionamento com MsSeek com If e RecLock no resultado"
-    },
-    "DBSelectArea": {
-        "prefix": "DBSelectArea",
-        "body": [
-            "\tDBSelectArea(${tabela})",
-            "\t${cursor}"
-        ],
-        "description": "Cria a seleção de área de trabalho com DBSelectArea"
-    },
-    "DBSetOrder": {
-        "prefix": "DBSetOrder",
-        "body": [
-            "\tDBSetOrder(${ordem})",
-            "\t${cursor}"
-        ],
-        "description": "Cria a seleção de ordem de trabalho com DBSetOrder"
-    },
-    "DBSetFilter": {
-        "prefix": "DBSetFilter",
-        "body": [
-            "\tDBSetFilter(${filtro})",
-            "\t${cursor}"
-        ],
-        "description": "Cria a seleção de filtro de trabalho com DBSetFilter"
-    },
-    "DBSeek": {
-        "prefix": "DBSeek",
-        "body": [
-            "\tDBSeek(${chave})",
-            "\t${cursor}"
-        ],
-        "description": "Cria a seleção de chave de trabalho com DBSeek"
-    },
-    "DBGoTop": {
-        "prefix": "DBGoTop",
-        "body": [
-            "\tDBGoTop()",
-            "\t${cursor}"
-        ],
-        "description": "Cria a seleção de topo de trabalho com DBGoTop"
-    },
-    "DBGoBottom": {
-        "prefix": "DBGoBottom",
-        "body": [
-            "\tDBGoBottom()",
-            "\t${cursor}"
-        ],
-        "description": "Cria a seleção de fundo de trabalho com DBGoBottom"
-    },
-    "If Ternário": {
-        "prefix": "If Ternário",
-        "body": [
-            "\t$ Iif({condicao},${acao1},${acao2})",
-            "\t${cursor}"
-        ],
-        "description": "Cria a estrutura de decisão IF Ternário"
-    },
-    "While EoF":
-    {
-        "prefix": "While EoF",
-        "body": [
-            "\tWhile !Eof()",
+            "\tWhile ${tabela}->(! Eof())",
             "\t\t${processamento}",
-            "\t\tDbSkip()",
+            "\t\t${tabela}->(DbSkip())",
             "\tEndDo",
             "\t${cursor}"
         ],
         "description": "Estrutura de loop WHILE para percorrer uma tabela em ADVPL"
+    },
+    "For": {
+        "prefix": "For ADVPL",
+        "body": [
+            "\tFor ${var} := 1 to Len(${array})",
+            "\t\t${processamento}",
+            "\tNext ${var}",
+            "\t${cursor}"
+        ],
+        "description": "Estrutura de loop FOR para percorrer um array em ADVPL"
+    },
+    "Case": {
+        "prefix": "Case ADVPL",
+        "body": [
+            "\tDo Case",
+            "\t\tCase ${condicao1}",
+            "\t\t\t${acao1}",
+            "\t\tCase ${condicao2}",
+            "\t\t\t${acao2}",
+            "\t\tCase ${condicao3}",
+            "\t\t\t${acao3}",
+            "\t\tCase ${condicao4}",
+            "\t\t\t${acao4}",
+            "\t\tOtherWise",
+            "\t\t\t${acaoDefault}",
+            "\tEndCase",
+            "\t${cursor}"
+        ],
+        "description": "Estrutura de decisão CASE em ADVPL"
     }
 }

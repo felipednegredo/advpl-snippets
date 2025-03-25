@@ -20,7 +20,13 @@
     "commands": [{
       "command": "advpl-snippets.helloWorld",
       "title": "Hello World"
-    }]
+    }],
+    "snippets": [
+      {
+        "language": "advpl",
+        "path": "./snippets/advpl.json"
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",
