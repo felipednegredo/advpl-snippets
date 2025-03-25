@@ -1,4 +1,15 @@
 {
+    "While": {
+        "prefix": "While ADVPL",
+        "body": [
+            "\tWhile ${condicao}",
+            "\t\t${processamento}",
+            "\tEndDo",
+            "\t${cursor}"
+        ],
+        "description": "Estrutura de loop WHILE em ADVPL",
+        "documentation": "https://tdn.totvs.com/display/public/framework/WHILE+...+ENDDO"
+    },
     "WhileTb": {
         "prefix": "While em Tabela ADVPL",
         "body": [
@@ -8,7 +19,8 @@
             "\tEndDo",
             "\t${cursor}"
         ],
-        "description": "Estrutura de loop WHILE para percorrer uma tabela em ADVPL"
+        "description": "Estrutura de loop WHILE para percorrer uma tabela em ADVPL",
+        "documentation": "https://tdn.totvs.com/display/public/framework/WHILE+...+ENDDO"
     },
     "For": {
         "prefix": "For ADVPL",
@@ -18,7 +30,8 @@
             "\tNext ${var}",
             "\t${cursor}"
         ],
-        "description": "Estrutura de loop FOR para percorrer um array em ADVPL"
+        "description": "Estrutura de loop FOR para percorrer um array em ADVPL",
+        "documentation": "https://tdn.totvs.com/display/public/framework/FOR+...+NEXT"
     },
     "Case": {
         "prefix": "Case ADVPL",
@@ -37,6 +50,127 @@
             "\tEndCase",
             "\t${cursor}"
         ],
-        "description": "Estrutura de decisão CASE em ADVPL"
+        "description": "Estrutura de decisão CASE em ADVPL",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DO+CASE"
+    },
+    "DOC" : {
+        "prefix": "DOC",
+        "body": [
+            "{Protheus.doc} nomeFunction",
+            "(long_description)",
+            "@type user function",
+            "@author ${env:VSCODE_USER_NAME}",
+            "@since ${CURRENT_DATE}}/${CURRENT_MONTH}/{CURRENT_YEAR}",
+            "@version version",
+            "@param param_name, param_type, param_descr",
+            "@return return_var, return_type, return_description",
+            "@example",
+            "(examples)",
+            "@see (links_or_references)"
+        ],
+        "description": "Cabeçalho de Documentação de Programa ADVPL"
+    },
+    "UserFunction": {
+        "prefix": "UserFunction",
+        "body": [
+            "{Protheus.doc} nomeFunction",
+            "(long_description)",
+            "@type user function",
+            "@author ${env:VSCODE_USER_NAME}",
+            "@since ${CURRENT_DATE}}/${CURRENT_MONTH}/{CURRENT_YEAR}",
+            "@version version",
+            "@param param_name, param_type, param_descr",
+            "@return return_var, return_type, return_description",
+            "@example",
+            "(examples)",
+            "@see (links_or_references)",
+            "User Function nomeFunction()",
+            "{",
+            "\t${cursor}",
+            "}"
+        ],
+        "description": "Estrutura de Função de Usuário em ADVPL"
+
+    },
+    "StaticFunction": {
+        "prefix": "StaticFunction",
+        "body": [
+            "{Protheus.doc} nomeFunction",
+            "(long_description)",
+            "@type static function",
+            "@author ${env:VSCODE_USER_NAME}",
+            "@since ${CURRENT_DATE}}/${CURRENT_MONTH}/{CURRENT_YEAR}",
+            "@version version",
+            "@param param_name, param_type, param_descr",
+            "@return return_var, return_type, return_description",
+            "@example",
+            "(examples)",
+            "@see (links_or_references)",
+            "Static Function nomeFunction()",
+            "{",
+            "\t${cursor}",
+            "}"
+        ],
+        "description": "Estrutura de Função Estática em ADVPL"
+    },
+    "DbSelectArea" : {
+        "prefix": "DbSelectArea",
+        "body": [
+            "DbSelectArea( ${alias} )",
+            "{",
+            "\t${cursor}",
+            "}"
+        ],
+        "description": "Estrutura de Seleção de Área de Banco de Dados em ADVPL"
+    },
+    "DbUseArea" : {
+        "prefix": "DbUseArea",
+        "body": [
+            "DbUseArea( ${alias} )",
+            "{",
+            "\t${cursor}",
+            "}"
+        ],
+        "description": "Estrutura de Uso de Área de Banco de Dados em ADVPL"
+    },
+    "DbSeek" : {
+        "prefix": "DbSeek",
+        "body": [
+            "DbSeek( ${alias}, ${key} )",
+            "{",
+            "\t${cursor}",
+            "}"
+        ],
+        "description": "Estrutura de Busca de Registro em Área de Banco de Dados em ADVPL"
+    },
+    "DbGoTop" : {
+        "prefix": "DbGoTop",
+        "body": [
+            "DbGoTop( ${alias} )",
+            "{",
+            "\t${cursor}",
+            "}"
+        ],
+        "description": "Estrutura de Posicionamento no Início da Tabela em Área de Banco de Dados em ADVPL"
+    },
+    "DbGoBottom" : {
+        "prefix": "DbGoBottom",
+        "body": [
+            "DbGoBottom( ${alias} )",
+            "{",
+            "\t${cursor}",
+            "}"
+        ],
+        "description": "Estrutura de Posicionamento no Fim da Tabela em Área de Banco de Dados em ADVPL"
+    },
+    "DbSkip" : {
+        "prefix": "DbSkip",
+        "body": [
+            "DbSkip( ${alias} )",
+            "{",
+            "\t${cursor}",
+            "}"
+        ],
+        "description": "Estrutura de Avanço de Registro em Área de Banco de Dados em ADVPL"
     }
 }
