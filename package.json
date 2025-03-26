@@ -2,7 +2,7 @@
   "name": "advpl-devtools",
   "displayName": "advpl-devtools",
   "description": "Uma extensão para facilitar o desenvolvimento em ADVPL",
-  "version": "${env:VERSION}",
+  "version": "v0.0.9",
   "publisher": "felipednegredo",
   "icon": "img/logo.png",
   "engines": {
