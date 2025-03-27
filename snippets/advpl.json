@@ -56,39 +56,36 @@
     "DOC": {
         "prefix": "DOC",
         "body": [
-            "/*",
-            " * {Protheus.doc} nomeFunction",
-            " * (long_description)",
-            " * @type user function",
-            " * @author ${env:VSCODE_USER_NAME}",
-            " * @since ${CURRENT_DATE}/${CURRENT_MONTH}/${CURRENT_YEAR}",
-            " * @version version",
-            " * @param param_name, param_type, param_descr",
-            " * @return return_var, return_type, return_description",
-            " * @example",
-            " * (examples)",
-            " * @see (links_or_references)",
-            " */",
-            "${cursor}"
+            "/*/ {Protheus.doc} ${cursor}",
+            "(long_description)",
+            "@type user function",
+            "@author ${env:VSCODE_USER_NAME}",
+            "@since ${CURRENT_DATE}/${CURRENT_MONTH}/${CURRENT_YEAR}",
+            "@version version",
+            "@param param_name, param_type, param_descr",
+            "@return return_var, return_type, return_description",
+            "@example",
+            "(examples)",
+            "@see (links_or_references)",
+            "/*/"
         ],
         "description": "Cabeçalho de Documentação de Programa ADVPL"
     },
     "UserFunction": {
         "prefix": "User Function",
         "body": [
-            "/*",
-            " * {Protheus.doc} ${cursor}",
-            " * (long_description)",
-            " * @type user function",
-            " * @author ${env:VSCODE_USER_NAME}",
-            " * @since ${CURRENT_DATE}/${CURRENT_MONTH}/${CURRENT_YEAR}",
-            " * @version version",
-            " * @param param_name, param_type, param_descr",
-            " * @return return_var, return_type, return_description",
-            " * @example",
-            " * (examples)",
-            " * @see (links_or_references)",
-            " */",
+            "/*/ {Protheus.doc} ${cursor}",
+            "(long_description)",
+            "@type user function",
+            "@author ${env:VSCODE_USER_NAME}",
+            "@since ${CURRENT_DATE}/${CURRENT_MONTH}/${CURRENT_YEAR}",
+            "@version version",
+            "@param param_name, param_type, param_descr",
+            "@return return_var, return_type, return_description",
+            "@example",
+            "(examples)",
+            "@see (links_or_references)",
+            "/*/",
             "User Function ${cursor}()"
         ],
         "description": "Estrutura de Função de Usuário em ADVPL"
@@ -97,19 +94,18 @@
     "StaticFunction": {
         "prefix": "Static Function",
         "body": [
-            "/*",
-            " * {Protheus.doc} ${cursor}",
-            " * (long_description)",
-            " * @type static function",
-            " * @author ${env:VSCODE_USER_NAME}",
-            " * @since ${CURRENT_DATE}/${CURRENT_MONTH}/${CURRENT_YEAR}",
-            " * @version version",
-            " * @param param_name, param_type, param_descr",
-            " * @return return_var, return_type, return_description",
-            " * @example",
-            " * (examples)",
-            " * @see (links_or_references)",
-            " */",
+            "/*/ {Protheus.doc} ${cursor}",
+            "(long_description)",
+            "@type user function",
+            "@author ${env:VSCODE_USER_NAME}",
+            "@since ${CURRENT_DATE}/${CURRENT_MONTH}/${CURRENT_YEAR}",
+            "@version version",
+            "@param param_name, param_type, param_descr",
+            "@return return_var, return_type, return_description",
+            "@example",
+            "(examples)",
+            "@see (links_or_references)",
+            "/*/",
             "Static Function ${cursor}()"
         ],
         "description": "Estrutura de Função Estática em ADVPL"
@@ -146,16 +142,14 @@
     "DbGoBottom" : {
         "prefix": "DbGoBottom",
         "body": [
-            "DbGoBottom( ${alias} )",
-            "\t${cursor}"
+            "DbGoBottom( ${alias} )"
         ],
         "description": "Estrutura de Posicionamento no Fim da Tabela em Área de Banco de Dados em ADVPL"
     },
     "DbSkip" : {
         "prefix": "DbSkip",
         "body": [
-            "DbSkip( ${alias} )",
-            "\t${cursor}"
+            "DbSkip( ${alias} )"
 
         ],
         "description": "Estrutura de Avanço de Registro em Área de Banco de Dados em ADVPL"
@@ -219,56 +213,56 @@
     "FWAlertError" : {
         "prefix": "FWAlertError",
         "body": [
-            "FWAlertError( ${message} )"
+            "FWAlertError(${message}, ${title}, ${callback} )"
         ],
         "description": "Função para Exibir um Alerta de Erro em ADVPL"
     },
     "FWAlertExitPage" : {
         "prefix": "FWAlertExitPage",
         "body": [
-            "FWAlertExitPage( ${message} )"
+            "FWAlertExitPage(${message}, ${title}, ${callback} )"
         ],
         "description": "Função para Exibir um Alerta e Sair da Página em ADVPL"
     },
     "FWAlertHelp" : {
         "prefix": "FWAlertHelp",
         "body": [
-            "FWAlertHelp( ${message} )"
+            "FWAlertHelp(${message}, ${title}, ${callback} )"
         ],
         "description": "Função para Exibir um Alerta de Ajuda em ADVPL"
     },
     "FWAlertInfo" : {
         "prefix": "FWAlertInfo",
         "body": [
-            "FWAlertInfo( ${message} )"
+            "FWAlertInfo(${message}, ${title} )"
         ],
         "description": "Função para Exibir um Alerta de Informação em ADVPL"
     },
     "FWAlertNoYes" : {
         "prefix": "FWAlertNoYes",
         "body": [
-            "FWAlertNoYes( ${message} )"
+            "FWAlertNoYes(${message}, ${title}, ${callbackNo}, ${callbackYes} )"
         ],
         "description": "Função para Exibir um Alerta com Opções Não e Sim em ADVPL"
     },
     "FWAlertSuccess" : {
         "prefix": "FWAlertSuccess",
         "body": [
-            "FWAlertSuccess( ${message} )"
+            "FWAlertSuccess(${message}, ${title} )"
         ],
         "description": "Função para Exibir um Alerta de Sucesso em ADVPL"
     },
     "FWAlertWarning" : {
         "prefix": "FWAlertWarning",
         "body": [
-            "FWAlertWarning( ${message} )"
+            "FWAlertWarning(${message}, ${title} )"
         ],
         "description": "Função para Exibir um Alerta de Aviso em ADVPL"
     },
     "FWAlertYesNo" : {
         "prefix": "FWAlertYesNo",
         "body": [
-            "FWAlertYesNo( ${message} )"
+            "FWAlertYesNo(${message}, ${title}, ${callbackYes}, ${callbackNo} )"
         ],
         "description": "Função para Exibir um Alerta com Opções Sim e Não em ADVPL"
     }
