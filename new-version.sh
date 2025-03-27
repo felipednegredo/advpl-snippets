@@ -22,6 +22,5 @@ echo $NEW_VERSION > $VERSION_FILE
 # Exibir a nova versão
 echo "Versão atualizada para: $NEW_VERSION"
 
-# Substituir a variável de ambiente em todos os package.json e package-lock.json
-find . -type f \( -name "package.json" -o -name "package-lock.json" \) -exec sed -i "s/\${env:VERSION}/$NEW_VERSION/g" {} +
-
+# Substituir apenas quando o texto for no formato "version": "0.0.11"
+find . -type f \( -name "package.json" -o -name "package-lock.json" \) -exec sed -i -E "s/\"version\": \"$CURRENT_VERSION\"/\"version\": \"$NEW_VERSION\"/g" {} +
