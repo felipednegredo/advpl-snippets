@@ -203,13 +203,6 @@
         ],
         "description": "Função para Converter um Valor para String em ADVPL"
     },
-    "New JSON Object" : {
-        "prefix": "New JSON Object",
-        "body": [
-            "oJson := JsonObject():New()"
-        ],
-        "description": "Criação de um Objeto JSON em ADVPL"
-    },
     "FWAlertError" : {
         "prefix": "FWAlertError",
         "body": [
@@ -266,4 +259,5 @@
         ],
         "description": "Função para Exibir um Alerta com Opções Sim e Não em ADVPL"
     }
+
 }

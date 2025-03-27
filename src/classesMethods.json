@@ -1,0 +1,39 @@
+{
+    "FwFileReader": {
+        "description": "Classe para leitura de arquivos",
+        "methods": {
+            "New": {
+                "description": "Inicializa uma nova instância da classe FwFileReader",
+                "parameters": ["filePath"]
+            },
+            "Open": {
+                "description": "Abre o arquivo especificado para leitura"
+            },
+            "FullRead": {
+                "description": "Lê o conteúdo completo do arquivo"
+            },
+            "Close": {
+                "description": "Fecha o arquivo após a leitura"
+            }
+        }
+    },
+    "JsonObject": {
+        "description": "Classe para manipulação de objetos JSON",
+        "methods": {
+            "New": {
+                "description": "Cria uma nova instância de um objeto JSON"
+            },
+            "Add": {
+                "description": "Adiciona um par chave-valor ao objeto JSON",
+                "parameters": ["key", "value"]
+            },
+            "Get": {
+                "description": "Obtém o valor associado a uma chave no objeto JSON",
+                "parameters": ["key"]
+            },
+            "ToString": {
+                "description": "Converte o objeto JSON em uma string formatada"
+            }
+        }
+    }
+}

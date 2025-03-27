@@ -1,0 +1,22 @@
+{
+    "DbSelectArea": {
+        "description": "Estrutura de Seleção de Área de Banco de Dados em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbSelectArea"
+    },
+    "DbUseArea": {
+        "description": "Estrutura de Uso de Área de Banco de Dados em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbUseArea"
+    },
+    "DbSeek": {
+        "description": "Estrutura de Busca de Registro em Área de Banco de Dados em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbSeek"
+    },
+    "DbGoTop": {
+        "description": "Estrutura de Posicionamento no Início da Tabela em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbGoTop"
+    },
+    "FWNoAccent": {
+        "description": "Função para Remover Acentos de uma String em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/FWNoAccent"
+    }
+}
