@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Restaurar a variável de ambiente no package.json
-sed -i "s/$NEW_VERSION/\${env:VERSION}/" package.json
-
 # Caminho para o arquivo de versão
 VERSION_FILE="version.txt"
 
@@ -25,5 +22,6 @@ echo $NEW_VERSION > $VERSION_FILE
 # Exibir a nova versão
 echo "Versão atualizada para: $NEW_VERSION"
 
-# Substitua a variável de ambiente no package.json
-sed -i "s/\${env:VERSION}/$NEW_VERSION/" package.json
+# Substituir a variável de ambiente em todos os package.json e package-lock.json
+find . -type f \( -name "package.json" -o -name "package-lock.json" \) -exec sed -i "s/\${env:VERSION}/$NEW_VERSION/g" {} +
+
