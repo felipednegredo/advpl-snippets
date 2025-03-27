@@ -215,5 +215,61 @@
             "oJson := JsonObject():New()"
         ],
         "description": "Criação de um Objeto JSON em ADVPL"
+    },
+    "FWAlertError" : {
+        "prefix": "FWAlertError",
+        "body": [
+            "FWAlertError( ${message} )"
+        ],
+        "description": "Função para Exibir um Alerta de Erro em ADVPL"
+    },
+    "FWAlertExitPage" : {
+        "prefix": "FWAlertExitPage",
+        "body": [
+            "FWAlertExitPage( ${message} )"
+        ],
+        "description": "Função para Exibir um Alerta e Sair da Página em ADVPL"
+    },
+    "FWAlertHelp" : {
+        "prefix": "FWAlertHelp",
+        "body": [
+            "FWAlertHelp( ${message} )"
+        ],
+        "description": "Função para Exibir um Alerta de Ajuda em ADVPL"
+    },
+    "FWAlertInfo" : {
+        "prefix": "FWAlertInfo",
+        "body": [
+            "FWAlertInfo( ${message} )"
+        ],
+        "description": "Função para Exibir um Alerta de Informação em ADVPL"
+    },
+    "FWAlertNoYes" : {
+        "prefix": "FWAlertNoYes",
+        "body": [
+            "FWAlertNoYes( ${message} )"
+        ],
+        "description": "Função para Exibir um Alerta com Opções Não e Sim em ADVPL"
+    },
+    "FWAlertSuccess" : {
+        "prefix": "FWAlertSuccess",
+        "body": [
+            "FWAlertSuccess( ${message} )"
+        ],
+        "description": "Função para Exibir um Alerta de Sucesso em ADVPL"
+    },
+    "FWAlertWarning" : {
+        "prefix": "FWAlertWarning",
+        "body": [
+            "FWAlertWarning( ${message} )"
+        ],
+        "description": "Função para Exibir um Alerta de Aviso em ADVPL"
+    },
+    "FWAlertYesNo" : {
+        "prefix": "FWAlertYesNo",
+        "body": [
+            "FWAlertYesNo( ${message} )"
+        ],
+        "description": "Função para Exibir um Alerta com Opções Sim e Não em ADVPL"
     }
 }
