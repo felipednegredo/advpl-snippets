@@ -35,5 +35,17 @@
                 "description": "Converte o objeto JSON em uma string formatada"
             }
         }
+    },
+    "oSay": {
+        "description": "Classe para exibir mensagens no console",
+        "methods": {
+            "New": {
+                "description": "Cria uma nova instância da classe oSay"
+            },
+            "SetText": {
+                "description": "Escreve uma mensagem no console",
+                "parameters": ["message"]
+            }
+        }
     }
 }

@@ -1,47 +1,60 @@
 const vscode = require('vscode');
+const path = require('path');
+const fs = require('fs');
+
+// Carrega o arquivo functionsDescriptions.json
+const descriptionsPath = path.join(__dirname, 'src', 'functionsDescriptions.json');
+const descriptions = JSON.parse(fs.readFileSync(descriptionsPath, 'utf8'));
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-    console.log('Congratulations, your extension "advpl-snippets" is now active!');
+    console.log('ADVPL Snippets ativado!');
 
-    // Comando "Hello World"
-    const helloWorldDisposable = vscode.commands.registerCommand('advpl-snippets.helloWorld', function () {
-        vscode.window.showInformationMessage('Hello World from advpl-snippets!');
-    });
-    context.subscriptions.push(helloWorldDisposable);
+    // Registra o HoverProvider
+    const hoverProvider = vscode.languages.registerHoverProvider('advpl', {
+        provideHover(document, position) {
+            const range = document.getWordRangeAtPosition(position);
+            if (!range) return;
 
-    // Comando de compilação
-    const compileDisposable = vscode.commands.registerCommand('extension.compileFile', async () => {
-        const activeEditor = vscode.window.activeTextEditor;
+            const word = document.getText(range);
 
-        if (!activeEditor) {
-            vscode.window.showErrorMessage('Nenhum arquivo aberto para compilar.');
-            return;
-        }
-
-        const filePath = activeEditor.document.fileName;
-        try {
-            // Executa o comando original "totvs-developer-studio.build.file"
-            const compilationResult = await vscode.commands.executeCommand('totvs-developer-studio.build.file');
-
-            if (compilationResult) {
-                vscode.window.showInformationMessage('O arquivo foi compilado com sucesso!');
-            } else {
-                const errorMessage = (compilationResult || 'Erro desconhecido.');
-                vscode.window.showErrorMessage(`Erro ao compilar o arquivo: ${errorMessage}`);
+            if (descriptions[word]) {
+                const { description, documentation } = descriptions[word];
+                const markdown = new vscode.MarkdownString();
+                markdown.appendText(description);
+                if (documentation) {
+                    markdown.appendMarkdown(`\n\n[Documentação oficial](${documentation})`);
+                }
+                return new vscode.Hover(markdown);
             }
-        } catch (error) {
-            vscode.window.showErrorMessage(`Erro inesperado durante a compilação: ${error.message || error}`);
         }
     });
-    context.subscriptions.push(compileDisposable);
+    context.subscriptions.push(hoverProvider);
+
+    // Registra o CompletionItemProvider
+    const completionProvider = vscode.languages.registerCompletionItemProvider(
+        { language: 'advpl', scheme: 'file' },
+        {
+            provideCompletionItems(document, position) {
+                const completionItems = [];
+
+                for (const functionName in descriptions) {
+                    const functionInfo = descriptions[functionName];
+
+                    const item = new vscode.CompletionItem(functionName, vscode.CompletionItemKind.Function);
+                    item.detail = functionInfo.description;
+                    if (functionInfo.documentation) {
+                        item.documentation = new vscode.MarkdownString(`[Documentação oficial](${functionInfo.documentation})`);
+                    }
+                    completionItems.push(item);
+                }
+
+                return completionItems;
+            }
+        },
+        '.' // Ativador do IntelliSense
+    );
+    context.subscriptions.push(completionProvider);
 }
-
-function deactivate() {}
-
-module.exports = {
-    activate,
-    deactivate
-};
