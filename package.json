@@ -2,7 +2,7 @@
   "name": "advpl-devtools",
   "displayName": "advpl-devtools",
   "description": "Uma extensão para facilitar o desenvolvimento em ADVPL",
-  "version": "0.0.24",
+  "version": "0.0.26",
   "publisher": "felipednegredo",
   "icon": "img/logo.png",
   "engines": {
@@ -34,7 +34,7 @@
     "workspaceContains:*.pak",
     "workspaceContains:servers.json"
   ],
-  "main": "./extension.js",
+  "main": "./src/extension.js",
   "files": [
     "extension.js",
     "functionDescriptions.json"
