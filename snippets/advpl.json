@@ -199,56 +199,56 @@
     "ValToChar" : {
         "prefix": "ValToChar",
         "body": [
-            "ValToChar( ${value} )"
+            "ValToChar(${value})"
         ],
         "description": "Função para Converter um Valor para String em ADVPL"
     },
     "FWAlertError" : {
         "prefix": "FWAlertError",
         "body": [
-            "FWAlertError(${message}, ${title}, ${callback} )"
+            "FWAlertError(${message},${title}, ${callback})"
         ],
         "description": "Função para Exibir um Alerta de Erro em ADVPL"
     },
     "FWAlertExitPage" : {
         "prefix": "FWAlertExitPage",
         "body": [
-            "FWAlertExitPage(${message}, ${title}, ${callback} )"
+            "FWAlertExitPage(${message},${title}, ${callback})"
         ],
         "description": "Função para Exibir um Alerta e Sair da Página em ADVPL"
     },
     "FWAlertHelp" : {
         "prefix": "FWAlertHelp",
         "body": [
-            "FWAlertHelp(${message}, ${title}, ${callback} )"
+            "FWAlertHelp(${message}, ${title},${callback} )"
         ],
         "description": "Função para Exibir um Alerta de Ajuda em ADVPL"
     },
     "FWAlertInfo" : {
         "prefix": "FWAlertInfo",
         "body": [
-            "FWAlertInfo(${message}, ${title} )"
+            "FWAlertInfo(${message},${title})"
         ],
         "description": "Função para Exibir um Alerta de Informação em ADVPL"
     },
     "FWAlertNoYes" : {
         "prefix": "FWAlertNoYes",
         "body": [
-            "FWAlertNoYes(${message}, ${title}, ${callbackNo}, ${callbackYes} )"
+            "FWAlertNoYes(${message}, ${title}, ${callbackNo}, ${callbackYes})"
         ],
         "description": "Função para Exibir um Alerta com Opções Não e Sim em ADVPL"
     },
     "FWAlertSuccess" : {
         "prefix": "FWAlertSuccess",
         "body": [
-            "FWAlertSuccess(${message}, ${title} )"
+            "FWAlertSuccess(${message}, ${title})"
         ],
         "description": "Função para Exibir um Alerta de Sucesso em ADVPL"
     },
     "FWAlertWarning" : {
         "prefix": "FWAlertWarning",
         "body": [
-            "FWAlertWarning(${message}, ${title} )"
+            "FWAlertWarning(${message}, ${title})"
         ],
         "description": "Função para Exibir um Alerta de Aviso em ADVPL"
     },
