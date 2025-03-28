@@ -258,6 +258,61 @@
             "FWAlertYesNo(${message}, ${title}, ${callbackYes}, ${callbackNo} )"
         ],
         "description": "Função para Exibir um Alerta com Opções Sim e Não em ADVPL"
+    },
+    "FWGetArea" : {
+        "prefix": "FWGetArea",
+        "body": [
+            "FWGetArea(${alias})"
+        ],
+        "description": "Função para Obter a Área de um Banco de Dados em ADVPL"
+    },
+    "AllTrim" : {
+        "prefix": "AllTrim",
+        "body": [
+            "AllTrim(${string})"
+        ],
+        "description": "Função para Remover Espaços em Branco de uma String em ADVPL"
+    },
+    "Left" : {
+        "prefix": "Left",
+        "body": [
+            "Left(${string}, ${length})"
+        ],
+        "description": "Função para Obter os Caracteres da Esquerda de uma String em ADVPL"
+    },
+    "Right" : {
+        "prefix": "Right",
+        "body": [
+            "Right(${string}, ${length})"
+        ],
+        "description": "Função para Obter os Caracteres da Direita de uma String em ADVPL"
+    },
+    "TamSX3" : {
+        "prefix": "TamSX3",
+        "body": [
+            "TamSX3(${string})"
+        ],
+        "description": "Função para Obter o Tamanho de uma String em ADVPL"
+    },
+    "RecLock" : {
+        "prefix": "RecLock",
+        "body": [
+            "RecLock(${alias}, ${condition})"
+        ],
+        "description": "Função para Bloquear um Registro em ADVPL"
+    },
+    "MsUnlock" : {
+        "prefix": "MsUnlock",
+        "body": [
+            "MsUnlock(${alias})"
+        ],
+        "description": "Função para Desbloquear um Registro em ADVPL"
+    },
+    "ValType" : {
+        "prefix": "ValType",
+        "body": [
+            "ValType(${value})"
+        ],
+        "description": "Função para Obter o Tipo de Valor em ADVPL"
     }
-
 }
