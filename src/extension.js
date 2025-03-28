@@ -6,7 +6,7 @@ function activate(context) {
     let descriptions = {};
     let classesData = {};
 
-    // Tenta carregar o arquivo functionDescriptions.json
+    // Carrega o arquivo functionDescriptions.json
     try {
         const descriptionsPath = path.join(__dirname, 'functionDescriptions.json');
         descriptions = JSON.parse(fs.readFileSync(descriptionsPath, 'utf8'));
@@ -14,7 +14,7 @@ function activate(context) {
         console.error('Erro ao carregar functionDescriptions.json:', error.message);
     }
 
-    // Tenta carregar o arquivo classesMethods.json
+    // Carrega o arquivo classesMethods.json
     try {
         const classesPath = path.join(__dirname, 'classesMethods.json');
         classesData = JSON.parse(fs.readFileSync(classesPath, 'utf8'));
@@ -22,16 +22,19 @@ function activate(context) {
         console.error('Erro ao carregar classesMethods.json:', error.message);
     }
 
-    // Registra o provedor de hover para arquivos .prw e .tlpp
+    // Provedor de hover para arquivos .prw e .tlpp
     const hoverProvider = vscode.languages.registerHoverProvider(['prw', 'tlpp'], {
-        provideHover(document, position, token) {
+        provideHover(document, position) {
             const range = document.getWordRangeAtPosition(position);
             const word = document.getText(range);
 
             if (descriptions[word]) {
-                const { description, documentation } = descriptions[word];
+                const { description, documentation, example } = descriptions[word];
                 const markdown = new vscode.MarkdownString();
                 markdown.appendText(description);
+                if (example) {
+                    markdown.appendMarkdown(`\n\n**Exemplo:**\n\`\`\`advpl\n${example}\n\`\`\``);
+                }
                 if (documentation) {
                     markdown.appendMarkdown(`\n\n[Documentação oficial](${documentation})`);
                 }
@@ -43,14 +46,14 @@ function activate(context) {
         }
     });
 
-    // Registra o CompletionItemProvider para arquivos .prw e .tlpp
+    // Provedor de CompletionItem para arquivos .prw e .tlpp
     const completionProvider = vscode.languages.registerCompletionItemProvider(
-        { language: 'prw', scheme: 'file' }, // Adiciona suporte para .prw
+        ['prw', 'tlpp'], // Suporte para .prw e .tlpp
         {
             provideCompletionItems(document, position) {
                 const completionItems = [];
 
-                // Itera sobre as classes no arquivo JSON
+                // Adiciona classes e métodos como sugestões
                 for (const className in classesData) {
                     const classInfo = classesData[className];
 
@@ -86,52 +89,31 @@ function activate(context) {
         '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
     );
 
-    // Adiciona suporte para arquivos .tlpp
-    const tlppCompletionProvider = vscode.languages.registerCompletionItemProvider(
-        { language: 'tlpp', scheme: 'file' },
+    // Provedor adicional para palavras-chave e snippets
+    const snippetProvider = vscode.languages.registerCompletionItemProvider(
+        ['prw', 'tlpp'], // Suporte para .prw e .tlpp
         {
-            provideCompletionItems(document, position) {
-                const completionItems = [];
+            provideCompletionItems() {
+                const snippetCompletionIf = new vscode.CompletionItem('if');
+                snippetCompletionIf.insertText = new vscode.SnippetString('if (${1:condicao})\n\t${2:// codigo}\nendif');
+                snippetCompletionIf.documentation = new vscode.MarkdownString("Insere uma estrutura `if`.");
 
-                // Itera sobre as classes no arquivo JSON
-                for (const className in classesData) {
-                    const classInfo = classesData[className];
+                const snippetCompletionFunction = new vscode.CompletionItem('function');
+                snippetCompletionFunction.insertText = new vscode.SnippetString('function ${1:NomeFuncao}()\n\t${2:// codigo}\nreturn ${3:valor}\nendfunction');
+                snippetCompletionFunction.documentation = new vscode.MarkdownString("Insere uma estrutura de função.");
 
-                    // Adiciona a classe como sugestão
-                    const classItem = new vscode.CompletionItem(className, vscode.CompletionItemKind.Class);
-                    classItem.detail = classInfo.description;
-                    completionItems.push(classItem);
+                const snippetCompletionWhile = new vscode.CompletionItem('while');
+                snippetCompletionWhile.insertText = new vscode.SnippetString('while (${1:condicao})\n\t${2:// codigo}\nendwhile');
+                snippetCompletionWhile.documentation = new vscode.MarkdownString("Insere uma estrutura `while`.");
 
-                    // Adiciona métodos da classe como sugestões
-                    if (classInfo.methods) {
-                        for (const methodName in classInfo.methods) {
-                            const methodInfo = classInfo.methods[methodName];
-                            const methodItem = new vscode.CompletionItem(`${className}:${methodName}()`, vscode.CompletionItemKind.Method);
-                            methodItem.detail = methodInfo.description;
-
-                            // Adiciona parâmetros ao método, se existirem
-                            if (methodInfo.parameters) {
-                                methodItem.insertText = new vscode.SnippetString(
-                                    `${className}:${methodName}(${methodInfo.parameters.map((param, index) => `\${${index + 1}:${param}}`).join(', ')})`
-                                );
-                            } else {
-                                methodItem.insertText = `${className}:${methodName}()`;
-                            }
-
-                            completionItems.push(methodItem);
-                        }
-                    }
-                }
-
-                return completionItems;
+                return [snippetCompletionIf, snippetCompletionFunction, snippetCompletionWhile];
             }
-        },
-        '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
+        }
     );
 
     context.subscriptions.push(hoverProvider);
     context.subscriptions.push(completionProvider);
-    context.subscriptions.push(tlppCompletionProvider);
+    context.subscriptions.push(snippetProvider);
 }
 
 function deactivate() {}

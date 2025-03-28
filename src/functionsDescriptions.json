@@ -1,22 +1,27 @@
 {
     "DbSelectArea": {
         "description": "Estrutura de Seleção de Área de Banco de Dados em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/DbSelectArea"
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbSelectArea",
+        "example": "DbSelectArea('1')"
     },
     "DbUseArea": {
         "description": "Estrutura de Uso de Área de Banco de Dados em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/DbUseArea"
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbUseArea",
+        "example": "DbUseArea('ALIAS', 'DBF', 'INDEX')"
     },
     "DbSeek": {
         "description": "Estrutura de Busca de Registro em Área de Banco de Dados em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/DbSeek"
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbSeek",
+        "example": "DbSeek('KEY')"
     },
     "DbGoTop": {
         "description": "Estrutura de Posicionamento no Início da Tabela em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/DbGoTop"
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbGoTop",
+        "example": "DbGoTop()"
     },
     "FWNoAccent": {
         "description": "Função para Remover Acentos de uma String em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/FWNoAccent"
+        "documentation": "https://tdn.totvs.com/display/public/framework/FWNoAccent",
+        "example": "FWNoAccent('ação')"
     }
 }
