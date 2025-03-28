@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 
 function activate(context) {
+    console.log('Extension activated'); // Debug: Ativação da extensão
+
     let descriptions = {};
     let classesData = {};
 
@@ -10,6 +12,7 @@ function activate(context) {
     try {
         const descriptionsPath = path.join(__dirname, 'functionDescriptions.json');
         descriptions = JSON.parse(fs.readFileSync(descriptionsPath, 'utf8'));
+        console.log('functionDescriptions.json loaded:', descriptions); // Debug: Conteúdo do arquivo
     } catch (error) {
         console.error('Erro ao carregar functionDescriptions.json:', error.message);
     }
@@ -18,6 +21,7 @@ function activate(context) {
     try {
         const classesPath = path.join(__dirname, 'classesMethods.json');
         classesData = JSON.parse(fs.readFileSync(classesPath, 'utf8'));
+        console.log('classesMethods.json loaded:', classesData); // Debug: Conteúdo do arquivo
     } catch (error) {
         console.error('Erro ao carregar classesMethods.json:', error.message);
     }
@@ -27,9 +31,11 @@ function activate(context) {
         provideHover(document, position) {
             const range = document.getWordRangeAtPosition(position);
             const word = document.getText(range);
+            console.log('Hover triggered for word:', word); // Debug: Palavra detectada
 
             if (descriptions[word]) {
                 const { description, documentation, example } = descriptions[word];
+                console.log('Hover data found:', descriptions[word]); // Debug: Dados encontrados
                 const markdown = new vscode.MarkdownString();
                 markdown.appendText(description);
                 if (example) {
@@ -42,6 +48,7 @@ function activate(context) {
                 return new vscode.Hover(markdown);
             }
 
+            console.log('No hover data found for word:', word); // Debug: Nenhum dado encontrado
             return null; // Retorna null se não houver correspondência
         }
     });
@@ -51,11 +58,13 @@ function activate(context) {
         ['prw', 'tlpp'], // Suporte para .prw e .tlpp
         {
             provideCompletionItems(document, position) {
+                console.log('Completion triggered'); // Debug: IntelliSense ativado
                 const completionItems = [];
 
                 // Adiciona classes e métodos como sugestões
                 for (const className in classesData) {
                     const classInfo = classesData[className];
+                    console.log('Processing class:', className); // Debug: Classe processada
 
                     // Adiciona a classe como sugestão
                     const classItem = new vscode.CompletionItem(className, vscode.CompletionItemKind.Class);
@@ -65,7 +74,8 @@ function activate(context) {
                     // Adiciona métodos da classe como sugestões
                     if (classInfo.methods) {
                         for (const methodName in classInfo.methods) {
-                            const methodInfo = classInfo.methods[methodName];
+                            const methodInfo = classesData[className].methods[methodName];
+                            console.log(`Processing method: ${className}:${methodName}`); // Debug: Método processado
                             const methodItem = new vscode.CompletionItem(`${className}:${methodName}()`, vscode.CompletionItemKind.Method);
                             methodItem.detail = methodInfo.description;
 
@@ -83,40 +93,20 @@ function activate(context) {
                     }
                 }
 
+                console.log('Completion items generated:', completionItems); // Debug: Itens gerados
                 return completionItems;
             }
         },
         '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
     );
 
-    // Provedor adicional para palavras-chave e snippets
-    const snippetProvider = vscode.languages.registerCompletionItemProvider(
-        ['prw', 'tlpp'], // Suporte para .prw e .tlpp
-        {
-            provideCompletionItems() {
-                const snippetCompletionIf = new vscode.CompletionItem('if');
-                snippetCompletionIf.insertText = new vscode.SnippetString('if (${1:condicao})\n\t${2:// codigo}\nendif');
-                snippetCompletionIf.documentation = new vscode.MarkdownString("Insere uma estrutura `if`.");
-
-                const snippetCompletionFunction = new vscode.CompletionItem('function');
-                snippetCompletionFunction.insertText = new vscode.SnippetString('function ${1:NomeFuncao}()\n\t${2:// codigo}\nreturn ${3:valor}\nendfunction');
-                snippetCompletionFunction.documentation = new vscode.MarkdownString("Insere uma estrutura de função.");
-
-                const snippetCompletionWhile = new vscode.CompletionItem('while');
-                snippetCompletionWhile.insertText = new vscode.SnippetString('while (${1:condicao})\n\t${2:// codigo}\nendwhile');
-                snippetCompletionWhile.documentation = new vscode.MarkdownString("Insere uma estrutura `while`.");
-
-                return [snippetCompletionIf, snippetCompletionFunction, snippetCompletionWhile];
-            }
-        }
-    );
-
     context.subscriptions.push(hoverProvider);
     context.subscriptions.push(completionProvider);
-    context.subscriptions.push(snippetProvider);
 }
 
-function deactivate() {}
+function deactivate() {
+    console.log('Extension deactivated'); // Debug: Desativação da extensão
+}
 
 module.exports = {
     activate,
