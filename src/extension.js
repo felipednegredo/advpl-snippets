@@ -53,9 +53,11 @@ function activate(context) {
             provideCompletionItems(document, position) {
                 const completionItems = [];
 
-                // Adiciona variáveis declaradas no arquivo atual como sugestões
+                // Captura o texto do documento atual
                 const text = document.getText();
-                const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g; // Regex para capturar variáveis declaradas
+
+                // Regex para capturar variáveis declaradas no padrão AdvPL
+                const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g;
                 const variables = new Set();
 
                 let match;
@@ -64,13 +66,19 @@ function activate(context) {
                     variables.add(variableName);
                 }
 
-                // Adiciona variáveis baseadas no primeiro caractere do nome
+                // Log para verificar as variáveis capturadas (para debugging)
+                console.log("Variáveis capturadas:", Array.from(variables));
+
+                // Adiciona variáveis ao IntelliSense
                 variables.forEach(variableName => {
                     const firstChar = variableName.charAt(0).toUpperCase();
                     let variableType = 'Variável';
 
                     // Determina o tipo da variável com base no primeiro caractere
-                    switch (firstChar) {
+                    switch (firstChar.toUpperCase()) {
+                        case 'O':
+                            variableType = 'Object (Objeto)'; // Variável que começa com 'O' é considerada um objeto
+                            break;
                         case 'A':
                             variableType = 'Array (Matriz)';
                             break;
@@ -137,7 +145,6 @@ function activate(context) {
         },
         '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
     );
-
 
     context.subscriptions.push(hoverProvider);
     context.subscriptions.push(completionProvider);
