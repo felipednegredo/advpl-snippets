@@ -47,5 +47,46 @@
                 "parameters": ["message"]
             }
         }
+    },
+    "oWizard": {
+        "description": "Classe para criar assistentes (wizards) em ADVPL",
+        "methods": {
+            "New": {
+                "description": "Cria uma nova instância do assistente"
+            },
+           "ActiveUISteps": {
+                "description": "Define os passos ativos do assistente",
+                "parameters": ["stepCount"]
+            },
+            "Active": {
+                "description": "Ativa o assistente para exibição",
+                "parameters": []
+            },
+            "Destroy": {
+                "description": "Destrói a instância do assistente, liberando recursos"
+            }
+        }
+    },
+    "oNewPag": {
+        "description": "Classe para criar novas páginas em ADVPL",
+        "methods": {
+            "SetStepDescription": {
+                "description": "Define a descrição de um passo na nova página",
+                "parameters": ["stepDescription"]
+            },
+            "SetNextAction": {
+                "description": "Define a ação a ser executada ao avançar para o próximo passo",
+                "parameters": ["nextAction"]
+            },
+            "SetPrevAction": {
+                "description": "Define a ação a ser executada ao voltar para o passo anterior",
+                "parameters": ["previousAction"]
+            },
+            "SetCancelAction": {
+                "description": "Define a ação a ser executada ao cancelar o assistente",
+                "parameters": ["cancelAction"]
+            }
+        }
     }
+    
 }

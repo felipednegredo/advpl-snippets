@@ -113,43 +113,42 @@
     "DbSelectArea" : {
         "prefix": "DbSelectArea",
         "body": [
-            "DbSelectArea( ${alias} )"
+            "DbSelectArea(${alias})"
         ],
         "description": "Estrutura de Seleção de Área de Banco de Dados em ADVPL"
     },
     "DbUseArea" : {
         "prefix": "DbUseArea",
         "body": [
-            "DbUseArea( ${alias} )"
+            "DbUseArea(${alias})"
         ],
         "description": "Estrutura de Uso de Área de Banco de Dados em ADVPL"
     },
     "DbSeek" : {
         "prefix": "DbSeek",
         "body": [
-            "DbSeek( ${alias}, ${key} )"
+            "DbSeek(${alias},${key})"
         ],
         "description": "Estrutura de Busca de Registro em Área de Banco de Dados em ADVPL"
     },
     "DbGoTop" : {
         "prefix": "DbGoTop",
         "body": [
-            "DbGoTop( ${alias} )",
-            "\t${cursor}"
+            "DbGoTop(${alias})"
         ],
         "description": "Estrutura de Posicionamento no Início da Tabela em Área de Banco de Dados em ADVPL"
     },
     "DbGoBottom" : {
         "prefix": "DbGoBottom",
         "body": [
-            "DbGoBottom( ${alias} )"
+            "DbGoBottom(${alias})"
         ],
         "description": "Estrutura de Posicionamento no Fim da Tabela em Área de Banco de Dados em ADVPL"
     },
     "DbSkip" : {
         "prefix": "DbSkip",
         "body": [
-            "DbSkip( ${alias} )"
+            "DbSkip(${alias})"
 
         ],
         "description": "Estrutura de Avanço de Registro em Área de Banco de Dados em ADVPL"
@@ -157,42 +156,42 @@
     "FWNoAccent" : {
         "prefix": "FWNoAccent",
         "body": [
-            "FWNoAccent( ${string} )"
+            "FWNoAccent(${string})"
         ],
         "description": "Função para Remover Acentos de uma String em ADVPL"
     },
     "FWUpper" : {
         "prefix": "FWUpper",
         "body": [
-            "FWUpper( ${string} )"
+            "FWUpper(${string})"
         ],
         "description": "Função para Converter uma String para Maiúsculas em ADVPL"
     },
     "FWLower" : {
         "prefix": "FWLower",
         "body": [
-            "FWLower( ${string} )"
+            "FWLower(${string})"
         ],
         "description": "Função para Converter uma String para Minúsculas em ADVPL"
     },
     "FWTrim" : {
         "prefix": "FWTrim",
         "body": [
-            "FWTrim( ${string} )"
+            "FWTrim(${string})"
         ],
         "description": "Função para Remover Espaços em Branco de uma String em ADVPL"
     },
     "StrTran" : {
         "prefix": "StrTran",
         "body": [
-            "StrTran( ${string}, ${old}, ${new} )"
+            "StrTran(${string},${old},${new})"
         ],
         "description": "Função para Substituir uma String por outra em ADVPL"
     },
     "Len" : {
         "prefix": "Len",
         "body": [
-            "Len( ${string} )"
+            "Len(${string})"
         ],
         "description": "Função para Obter o Tamanho de uma String em ADVPL"
     },
