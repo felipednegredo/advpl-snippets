@@ -56,23 +56,26 @@ function activate(context) {
                 // Captura o texto do documento atual
                 const text = document.getText();
 
-                const variableRegex = /\b(?:LOCAL|Local|STATIC|Static|PUBLIC|Public|Private|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)/gi;
                 const variables = new Set();
+                
+                const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*:=\s*(.+))?/gi;
 
                 let match;
                 while ((match = variableRegex.exec(text)) !== null) {
-                    const variableName = match[1]; // Captura o nome completo da variável
-                    variables.add(variableName);
+                    const variableName = match[1]; // Captura o nome da variável
+                    const initialValue = match[2] ? match[2].trim() : null; // Captura o valor inicial, se existir
+                    const declarationType = match[0].split(/\s+/)[0].toUpperCase(); // Captura o tipo de declaração (LOCAL, STATIC, etc.)
+                    variables.add({ variableName, initialValue, declarationType });
                 }
-                
+
                 // Log para verificar as variáveis capturadas (para debugging)
                 console.log("Variáveis capturadas:", Array.from(variables));
-                
+
                 // Adiciona variáveis ao IntelliSense
-                variables.forEach(variableName => {
+                variables.forEach(({ variableName, initialValue, declarationType }) => {
                     const firstChar = variableName.charAt(0).toUpperCase();
                     let variableType = 'Variável';
-                
+
                     // Determina o tipo da variável com base no primeiro caractere
                     switch (firstChar) {
                         case 'O':
@@ -103,9 +106,10 @@ function activate(context) {
                             variableType = 'Tipo desconhecido';
                             break;
                     }
-                
+
                     const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
-                    variableItem.detail = `${variableType} - Declarada no arquivo`;
+                    variableItem.detail = `${variableType} - ${declarationType} - ${initialValue ? `Valor inicial: ${initialValue}` : 'Sem valor inicial'}`;
+                    variableItem.documentation = new vscode.MarkdownString(`**Tipo:** ${variableType}\n**Escopo:** ${declarationType}\n${initialValue ? `**Valor inicial:** \`${initialValue}\`` : ''}`);
                     completionItems.push(variableItem);
                 });
 
