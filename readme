@@ -1,28 +1,38 @@
 # ADVPL Snippets Extension
 
-Esta extensão fornece snippets úteis para a linguagem ADVPL, facilitando o desenvolvimento e aumentando a produtividade.
+Uma extensão para o Visual Studio Code que fornece snippets úteis para a linguagem ADVPL, facilitando o desenvolvimento e aumentando a produtividade.
 
-## Instalação
+## 🚀 Funcionalidades
+
+- 📌 **Snippets prontos para uso** com estruturas comuns da linguagem ADVPL.
+- ⚡ **Aumento da produtividade** ao escrever código ADVPL.
+- 📂 **Suporte para arquivos** `.prw` e `.prx`.
+
+## 📦 Instalação
 
 1. Baixe e instale a extensão a partir do [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/).
-2. Reinicie o Visual Studio Code.
+2. Reinicie o Visual Studio Code para ativar a extensão.
 
-## Uso
+## 🛠️ Como Usar
 
 1. Abra um arquivo `.prw` ou `.prx` no Visual Studio Code.
-2. Digite o prefixo do snippet desejado e pressione `Tab` para expandi-lo.
+2. Pressione `Ctrl+Space` para visualizar as sugestões de snippets.
+3. Digite o prefixo do snippet desejado e pressione `Tab` para expandi-lo.
 
-## Snippets Disponíveis
+## 🤝 Contribuição
 
-- `func`: Cria uma função básica.
-- `if`: Estrutura condicional `if`.
-- `for`: Estrutura de loop `for`.
-- `while`: Estrutura de loop `while`.
+Contribuições são bem-vindas! Se você encontrou um problema ou tem uma ideia para melhorar a extensão, siga os passos abaixo:
 
-## Contribuição
+1. Faça um fork do repositório.
+2. Crie uma branch para sua feature ou correção: `git checkout -b minha-feature`.
+3. Envie suas alterações: `git commit -m "Descrição da alteração"`.
+4. Faça um push para a branch: `git push origin minha-feature`.
+5. Abra um pull request no [repositório GitHub](https://github.com/felipe_dnegredo/advpl-snippets).
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests no [repositório GitHub](https://github.com/seu-usuario/advpl-snippets).
+## 📄 Licença
 
-## Licença
+Este projeto está licenciado sob a licença AGPL-3.0. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-Este projeto está licenciado sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+---
+
+💡 **Dica:** Não se esqueça de verificar regularmente as atualizações da extensão para aproveitar novos snippets e melhorias!
