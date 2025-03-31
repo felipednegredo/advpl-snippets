@@ -44,12 +44,63 @@ function activate(context) {
         }
     });
 
-    // Registra o CompletionItemProvider para classes e métodos
+    // ...código existente...
+
+    // Registra o CompletionItemProvider para classes, métodos e variáveis
     const completionProvider = vscode.languages.registerCompletionItemProvider(
         { language: 'advpl', scheme: 'file' },
         {
             provideCompletionItems(document, position) {
                 const completionItems = [];
+
+                // Adiciona variáveis declaradas no arquivo atual como sugestões
+                const text = document.getText();
+                const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g; // Regex para capturar variáveis declaradas
+                const variables = new Set();
+
+                let match;
+                while ((match = variableRegex.exec(text)) !== null) {
+                    const variableName = match[1].substring(0, 10); // Considera apenas os primeiros 10 caracteres
+                    variables.add(variableName);
+                }
+
+                // Adiciona variáveis baseadas no primeiro caractere do nome
+                variables.forEach(variableName => {
+                    const firstChar = variableName.charAt(0).toUpperCase();
+                    let variableType = 'Variável';
+
+                    // Determina o tipo da variável com base no primeiro caractere
+                    switch (firstChar) {
+                        case 'A':
+                            variableType = 'Array (Matriz)';
+                            break;
+                        case 'B':
+                            variableType = 'Code Block (Bloco de Código)';
+                            break;
+                        case 'C':
+                            variableType = 'Character (Caractere)';
+                            break;
+                        case 'D':
+                            variableType = 'Date (Data)';
+                            break;
+                        case 'F':
+                            variableType = 'Fixed Size Decimal (Decimal de Tamanho Fixo)';
+                            break;
+                        case 'L':
+                            variableType = 'Logical (Lógico)';
+                            break;
+                        case 'N':
+                            variableType = 'Numeric (Numérico)';
+                            break;
+                        default:
+                            variableType = 'Tipo desconhecido';
+                            break;
+                    }
+
+                    const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
+                    variableItem.detail = `${variableType} - Declarada no arquivo`;
+                    completionItems.push(variableItem);
+                });
 
                 // Itera sobre as classes no arquivo JSON
                 for (const className in classesData) {
@@ -86,6 +137,7 @@ function activate(context) {
         },
         '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
     );
+
 
     context.subscriptions.push(hoverProvider);
     context.subscriptions.push(completionProvider);
