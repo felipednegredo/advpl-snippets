@@ -56,28 +56,27 @@ function activate(context) {
                 // Captura o texto do documento atual
                 const text = document.getText();
 
-                // Regex para capturar variáveis declaradas no padrão AdvPL
-                const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g;
+                const variableRegex = /\b(?:LOCAL|Local|STATIC|Static|PUBLIC|Public|Private|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)/gi;
                 const variables = new Set();
 
                 let match;
                 while ((match = variableRegex.exec(text)) !== null) {
-                    const variableName = match[1].substring(0, 10); // Considera apenas os primeiros 10 caracteres
+                    const variableName = match[1]; // Captura o nome completo da variável
                     variables.add(variableName);
                 }
-
+                
                 // Log para verificar as variáveis capturadas (para debugging)
                 console.log("Variáveis capturadas:", Array.from(variables));
-
+                
                 // Adiciona variáveis ao IntelliSense
                 variables.forEach(variableName => {
                     const firstChar = variableName.charAt(0).toUpperCase();
                     let variableType = 'Variável';
-
+                
                     // Determina o tipo da variável com base no primeiro caractere
-                    switch (firstChar.toUpperCase()) {
+                    switch (firstChar) {
                         case 'O':
-                            variableType = 'Object (Objeto)'; // Variável que começa com 'O' é considerada um objeto
+                            variableType = 'Object (Objeto)';
                             break;
                         case 'A':
                             variableType = 'Array (Matriz)';
@@ -104,7 +103,7 @@ function activate(context) {
                             variableType = 'Tipo desconhecido';
                             break;
                     }
-
+                
                     const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
                     variableItem.detail = `${variableType} - Declarada no arquivo`;
                     completionItems.push(variableItem);
