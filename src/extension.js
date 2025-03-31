@@ -59,23 +59,35 @@ function activate(context) {
                 const variables = new Set();
                 
                 const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*:=\s*(.+))?/gi;
-
+                const defineRegex = /#DEFINE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/gi;
+                
                 let match;
+                
+                // Captura variáveis
                 while ((match = variableRegex.exec(text)) !== null) {
                     const variableName = match[1]; // Captura o nome da variável
                     const initialValue = match[2] ? match[2].trim() : null; // Captura o valor inicial, se existir
                     const declarationType = match[0].split(/\s+/)[0].toUpperCase(); // Captura o tipo de declaração (LOCAL, STATIC, etc.)
                     variables.add({ variableName, initialValue, declarationType });
                 }
-
-                // Log para verificar as variáveis capturadas (para debugging)
+                
+                // Captura defines
+                const defines = new Set();
+                while ((match = defineRegex.exec(text)) !== null) {
+                    const defineName = match[1]; // Captura o nome do define
+                    const defineValue = match[2].trim(); // Captura o valor do define
+                    defines.add({ defineName, defineValue });
+                }
+                
+                // Log para verificar as variáveis e defines capturados (para debugging)
                 console.log("Variáveis capturadas:", Array.from(variables));
-
+                console.log("Defines capturados:", Array.from(defines));
+                
                 // Adiciona variáveis ao IntelliSense
                 variables.forEach(({ variableName, initialValue, declarationType }) => {
                     const firstChar = variableName.charAt(0).toUpperCase();
                     let variableType = 'Variável';
-
+                
                     // Determina o tipo da variável com base no primeiro caractere
                     switch (firstChar) {
                         case 'O':
@@ -106,13 +118,20 @@ function activate(context) {
                             variableType = 'Tipo desconhecido';
                             break;
                     }
-
+                
                     const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
                     variableItem.detail = `${variableType} - ${declarationType} - ${initialValue ? `Valor inicial: ${initialValue}` : 'Sem valor inicial'}`;
                     variableItem.documentation = new vscode.MarkdownString(`**Tipo:** ${variableType}\n**Escopo:** ${declarationType}\n${initialValue ? `**Valor inicial:** \`${initialValue}\`` : ''}`);
                     completionItems.push(variableItem);
                 });
-
+                
+                // Adiciona defines ao IntelliSense
+                defines.forEach(({ defineName, defineValue }) => {
+                    const defineItem = new vscode.CompletionItem(defineName, vscode.CompletionItemKind.Constant);
+                    defineItem.detail = `Define - Valor: ${defineValue}`;
+                    defineItem.documentation = new vscode.MarkdownString(`**Define:** ${defineName}\n**Valor:** \`${defineValue}\``);
+                    completionItems.push(defineItem);
+                });
                 // Itera sobre as classes no arquivo JSON
                 for (const className in classesData) {
                     const classInfo = classesData[className];
