@@ -82,12 +82,17 @@ function activate(context) {
                 // Log para verificar as variáveis e defines capturados (para debugging)
                 console.log("Variáveis capturadas:", Array.from(variables));
                 console.log("Defines capturados:", Array.from(defines));
-                
-                // Adiciona variáveis ao IntelliSense
-                variables.forEach(({ variableName, initialValue, declarationType }) => {
+
+                // Filtra variáveis para remover aquelas que contenham "function" ou "Function" no nome
+                const filteredVariables = Array.from(variables).filter(({ variableName }) => {
+                    return !/function/i.test(variableName); // Verifica se "function" (case insensitive) está no nome
+                });
+
+                // Adiciona variáveis filtradas ao IntelliSense
+                filteredVariables.forEach(({ variableName, initialValue, declarationType }) => {
                     const firstChar = variableName.charAt(0).toUpperCase();
                     let variableType = 'Variável';
-                
+
                     // Determina o tipo da variável com base no primeiro caractere
                     switch (firstChar) {
                         case 'O':
@@ -118,13 +123,13 @@ function activate(context) {
                             variableType = 'Tipo desconhecido';
                             break;
                     }
-                
+
                     const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
                     variableItem.detail = `${variableType} - ${declarationType} - ${initialValue ? `Valor inicial: ${initialValue}` : 'Sem valor inicial'}`;
-                    variableItem.documentation = new vscode.MarkdownString(`**Tipo:** ${variableType}\n**Escopo:** ${declarationType}\n${initialValue ? `**Valor inicial:** \`${initialValue}\`` : ''}`);
+                    variableItem.documentation = new vscode.MarkdownString(`**Escopo:** ${declarationType}\n${initialValue ? `**Valor inicial:** \`${initialValue}\`` : ''}`);
                     completionItems.push(variableItem);
                 });
-                
+
                 // Adiciona defines ao IntelliSense
                 defines.forEach(({ defineName, defineValue }) => {
                     const defineItem = new vscode.CompletionItem(defineName, vscode.CompletionItemKind.Constant);
