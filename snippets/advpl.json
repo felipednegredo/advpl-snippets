@@ -313,5 +313,47 @@
             "ValType(${value})"
         ],
         "description": "Função para Obter o Tipo de Valor em ADVPL"
+    },
+    "Empty" : {
+        "prefix": "Empty",
+        "body": [
+            "Empty(${value})"
+        ],
+        "description": "Função para Verificar se um Valor está Vazio em ADVPL"
+    },
+    "Aadd" : {
+        "prefix": "Add",
+        "body": [
+            "Add(${array}, ${value})"
+        ],
+        "description": "Função para Adicionar um Valor a um Array em ADVPL"
+    },
+    "FreeObject" : {
+        "prefix": "FreeObject",
+        "body": [
+            "FreeObject(${object})"
+        ],
+        "description": "Função para Liberar um Objeto em ADVPL"
+    },
+    "HttpGet" : {
+        "prefix": "HttpGet",
+        "body": [
+            "HttpGet(${url})"
+        ],
+        "description": "Função para Fazer uma Requisição HTTP GET em ADVPL"
+    },
+    "#DEFINE" : {
+        "prefix": "#DEFINE",
+        "body": [
+            "#DEFINE ${name} ${value}"
+        ],
+        "description": "Diretiva de Pré-processador para Definir uma Constante em ADVPL"
+    },
+    "FWMsgRun" : {
+        "prefix": "FWMsgRun",
+        "body": [
+            "FWMsgRun(,{ ${mensagem} {funcao}) }, {$titulo}, {$mensagem})"
+        ],
+        "description": "Função para Exibir uma Mensagem de Execução em ADVPL"
     }
 }

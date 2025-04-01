@@ -83,9 +83,9 @@ function activate(context) {
                 console.log("Variáveis capturadas:", Array.from(variables));
                 console.log("Defines capturados:", Array.from(defines));
 
-                // Filtra variáveis para remover aquelas que contenham "function" ou "Function" no nome
+                // Filtra variáveis para remover aquelas que contenham "function" em qualquer case no nome
                 const filteredVariables = Array.from(variables).filter(({ variableName }) => {
-                    return !/function/i.test(variableName); // Verifica se "function" (case insensitive) está no nome
+                    return !variableName.toLowerCase().includes('function'); // Converte para lowercase e verifica
                 });
 
                 // Adiciona variáveis filtradas ao IntelliSense
