@@ -60,8 +60,36 @@ function activate(context) {
                 
                 const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*:=\s*(.+))?/gi;
                 const defineRegex = /#DEFINE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/gi;
-                
+                // Expressão regular para capturar funções (STATIC FUNCTION e USER FUNCTION)
+                const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z][a-zA-Z0-9_]{0,9})\s*\((.*?)\)/gi;
+
                 let match;
+
+                // Captura funções
+                while ((match = functionRegex.exec(text)) !== null) {
+                    const functionType = match[1]; // Tipo da função (STATIC FUNCTION ou USER FUNCTION)
+                    const functionName = match[2]; // Nome da função (até 10 caracteres)
+                    const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : []; // Parâmetros da função
+            
+                    // Cria um CompletionItem para a função
+                    const functionItem = new vscode.CompletionItem(functionName, vscode.CompletionItemKind.Function);
+                    functionItem.detail = `${functionType} definida pelo usuário`;
+                    functionItem.documentation = new vscode.MarkdownString(
+                        `**Tipo:** ${functionType}\n**Parâmetros:** ${parameters.length > 0 ? parameters.join(', ') : 'Nenhum'}`
+                    );
+            
+                    // Adiciona os parâmetros como snippet para facilitar a inserção
+                    if (parameters.length > 0) {
+                        functionItem.insertText = new vscode.SnippetString(
+                            `${functionName}(${parameters.map((param, index) => `\${${index + 1}:${param}}`).join(', ')})`
+                        );
+                    } else {
+                        functionItem.insertText = `${functionName}()`;
+                    }
+            
+                    completionItems.push(functionItem);
+                }
+
                 
                 // Captura variáveis
                 while ((match = variableRegex.exec(text)) !== null) {
@@ -137,6 +165,8 @@ function activate(context) {
                     defineItem.documentation = new vscode.MarkdownString(`**Define:** ${defineName}\n**Valor:** \`${defineValue}\``);
                     completionItems.push(defineItem);
                 });
+
+
                 // Itera sobre as classes no arquivo JSON
                 for (const className in classesData) {
                     const classInfo = classesData[className];

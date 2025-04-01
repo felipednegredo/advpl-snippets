@@ -86,7 +86,9 @@
             "(examples)",
             "@see (links_or_references)",
             "/*/",
-            "User Function ${cursor}()"
+            "User Function ${cursor}()",
+            "",
+            "Return"
         ],
         "description": "Estrutura de Função de Usuário em ADVPL"
 
@@ -106,7 +108,9 @@
             "(examples)",
             "@see (links_or_references)",
             "/*/",
-            "Static Function ${cursor}()"
+            "Static Function ${cursor}()",
+            "",
+            "Return"
         ],
         "description": "Estrutura de Função Estática em ADVPL"
     },
@@ -352,7 +356,7 @@
     "FWMsgRun" : {
         "prefix": "FWMsgRun",
         "body": [
-            "FWMsgRun(,{ ${mensagem} {funcao}) }, {$titulo}, {$mensagem})"
+            "FWMsgRun(,{ ${mensagem} {$funcao}) }, {$titulo}, {$mensagem})"
         ],
         "description": "Função para Exibir uma Mensagem de Execução em ADVPL"
     }
