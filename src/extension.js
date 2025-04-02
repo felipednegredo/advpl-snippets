@@ -7,14 +7,14 @@ function activate(context) {
     let descriptions = {};
     let classesData = {};
 
-    // Tenta carregar o arquivo functionDescriptions.json
+    // Tenta carregar o arquivo functionsDescriptions.json
     try {
-        const descriptionsPath = path.join(__dirname, 'functionDescriptions.json');
-        console.log('Caminho do arquivo functionDescriptions.json:', descriptionsPath);
+        const descriptionsPath = path.join(__dirname, 'functionsDescriptions.json');
+        console.log('Caminho do arquivo functionsDescriptions.json:', descriptionsPath);
         descriptions = JSON.parse(fs.readFileSync(descriptionsPath, 'utf8'));
-        console.log('Conteúdo carregado de functionDescriptions.json:', descriptions);
+        console.log('Conteúdo carregado de functionsDescriptions.json:', descriptions);
     } catch (error) {
-        console.error('Erro ao carregar functionDescriptions.json:', error.message);
+        console.error('Erro ao carregar functionsDescriptions.json:', error.message);
     }
 
     // Tenta carregar o arquivo classesMethods.json
