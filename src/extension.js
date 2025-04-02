@@ -10,7 +10,9 @@ function activate(context) {
     // Tenta carregar o arquivo functionDescriptions.json
     try {
         const descriptionsPath = path.join(__dirname, 'functionDescriptions.json');
+        console.log('Caminho do arquivo functionDescriptions.json:', descriptionsPath);
         descriptions = JSON.parse(fs.readFileSync(descriptionsPath, 'utf8'));
+        console.log('Conteúdo carregado de functionDescriptions.json:', descriptions);
     } catch (error) {
         console.error('Erro ao carregar functionDescriptions.json:', error.message);
     }
@@ -44,8 +46,6 @@ function activate(context) {
             return null; // Retorna null se não houver correspondência
         }
     });
-
-    // ...código existente...
 
     // Registra o CompletionItemProvider para classes, métodos e variáveis
     const completionProvider = vscode.languages.registerCompletionItemProvider(

@@ -22,6 +22,66 @@
     "FWNoAccent": {
         "description": "Função para Remover Acentos de uma String em ADVPL.",
         "documentation": "https://tdn.totvs.com/display/public/framework/FWNoAccent",
-        "example": "FWNoAccent('ação')"
+        "example": "FWNoAccent('ação')",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String que terá sua acentuação removida. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "String sem acentuação."
+        }
+    },
+    "FWMsgRun": {
+        "description": "Função para Exibir Mensagem de Execução em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/FWMsgRun",
+        "example": "FWMsgRun([oComponent], <bAction>, [cHeader], [cText])",
+        "parameters": {
+            "oComponent": {
+                "type": "object",
+                "description": "Componente que será sobreposto com o painel."
+            },
+            "bAction": {
+                "type": "code-block",
+                "description": "Bloco de código a ser executado (o Bloco de código receberá o objeto TSay para atualizações)."
+            },
+            "cHeader": {
+                "type": "string",
+                "description": "Texto do Header. Valor padrão: \"\"."
+            },
+            "cText": {
+                "type": "string",
+                "description": "Texto do Corpo. Valor padrão: \"\"."
+            }
+        }
+    },
+    "HttpGet": {
+        "description": "Função para Realizar Requisição GET em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/tec/HTTPGet",
+        "example": "HttpGet('http://example.com', '', 120, {'Content-Type|application/json'}, @cHeaderGet)",
+        "parameters": {
+            "cUrl": {
+                "type": "caractere",
+                "description": "Indica o endereço HTTP com a pasta e o documento solicitado."
+            },
+            "cGetParms": {
+                "type": "caractere",
+                "description": "Indica a lista de strings de parâmetros que serão enviadas ao servidor HTTP, através da URI. Caso este parâmetro não seja especificado, o mesmo será considerado vazio ('')."
+            },
+            "nTimeOut": {
+                "type": "numérico",
+                "description": "Indica o tempo, em segundos, máximo de inatividade permitido durante a recepção do documento. Caso este parâmetro não seja especificado, o valor padrão assumido será de 120 segundos (2 minutos)."
+            },
+            "aHeadStr": {
+                "type": "vetor",
+                "description": "Indica o array que contêm as strings que serão acrescentadas ao header da requisição que será realizada. Utilizar '|' (pipes) para separação entre parâmetro e valor."
+            },
+            "cHeaderGet": {
+                "type": "caractere",
+                "description": "Indica o retorno, através de referência, da header de resposta HTTP enviada pelo servidor requisitado. Observação: A variável deve ser declarada antes da chamada da função."
+            }
+        }
     }
 }
