@@ -2,22 +2,32 @@
     "DbSelectArea": {
         "description": "Estrutura de Seleção de Área de Banco de Dados em ADVPL.",
         "documentation": "https://tdn.totvs.com/display/public/framework/DbSelectArea",
-        "example": "DbSelectArea('1')"
-    },
-    "DbUseArea": {
-        "description": "Estrutura de Uso de Área de Banco de Dados em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/DbUseArea",
-        "example": "DbUseArea('ALIAS', 'DBF', 'INDEX')"
+        "example": "DbSelectArea('1')",
+        "parameters": {
+            "cArea": {
+                "type": "caractere",
+                "description": "Nome da área de banco de dados a ser selecionada. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se a área foi selecionada com sucesso, caso contrário, falso (.F.)."
+        }
     },
     "DbSeek": {
-        "description": "Estrutura de Busca de Registro em Área de Banco de Dados em ADVPL.",
+        "description": "Função para Posicionar o Cursor em um Registro de Banco de Dados em ADVPL.",
         "documentation": "https://tdn.totvs.com/display/public/framework/DbSeek",
-        "example": "DbSeek('KEY')"
-    },
-    "DbGoTop": {
-        "description": "Estrutura de Posicionamento no Início da Tabela em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/DbGoTop",
-        "example": "DbGoTop()"
+        "example": "DbSeek('12345')",
+        "parameters": {
+            "cKey": {
+                "type": "caractere",
+                "description": "Chave a ser buscada no banco de dados. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se a chave foi encontrada, caso contrário, falso (.F.)."
+        }
     },
     "FWNoAccent": {
         "description": "Função para Remover Acentos de uma String em ADVPL.",

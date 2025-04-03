@@ -33,12 +33,31 @@ function activate(context) {
             const word = document.getText(range);
 
             if (descriptions[word]) {
-                const { description, documentation } = descriptions[word];
+                const { description, documentation, parameters, returns } = descriptions[word];
                 const markdown = new vscode.MarkdownString();
+
+                // Adiciona a descrição da função
                 markdown.appendText(description);
+
+                // Adiciona os parâmetros, se existirem
+                if (parameters) {
+                    markdown.appendMarkdown('\n\n**Parâmetros:**\n');
+                    for (const paramName in parameters) {
+                        const param = parameters[paramName];
+                        markdown.appendMarkdown(`- \`${paramName}\` (${param.type}): ${param.description}\n`);
+                    }
+                }
+
+                // Adiciona o tipo de retorno, se existir
+                if (returns) {
+                    markdown.appendMarkdown(`\n**Retorno:**\n- (${returns.type}): ${returns.description}`);
+                }
+
+                // Adiciona o link para a documentação, se existir
                 if (documentation) {
                     markdown.appendMarkdown(`\n\n[Documentação oficial](${documentation})`);
                 }
+
                 markdown.isTrusted = true; // Permite links clicáveis
                 return new vscode.Hover(markdown);
             }
@@ -46,7 +65,6 @@ function activate(context) {
             return null; // Retorna null se não houver correspondência
         }
     });
-
     // Registra o CompletionItemProvider para classes, métodos e variáveis
     const completionProvider = vscode.languages.registerCompletionItemProvider(
         { language: 'advpl', scheme: 'file' },

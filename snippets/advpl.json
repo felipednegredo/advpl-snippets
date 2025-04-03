@@ -326,9 +326,9 @@
         "description": "Função para Verificar se um Valor está Vazio em ADVPL"
     },
     "Aadd" : {
-        "prefix": "Add",
+        "prefix": "aAdd",
         "body": [
-            "Add(${array}, ${value})"
+            "aAdd(${array}, ${value})"
         ],
         "description": "Função para Adicionar um Valor a um Array em ADVPL"
     },
@@ -359,5 +359,26 @@
             "FWMsgRun(,{ ${mensagem} {$funcao}) }, {$titulo}, {$mensagem})"
         ],
         "description": "Função para Exibir uma Mensagem de Execução em ADVPL"
+    },
+    "EncodeUTF8" : {
+        "prefix": "EncodeUTF8",
+        "body": [
+            "EncodeUTF8(${string})"
+        ],
+        "description": "Função para Codificar uma String em UTF-8 em ADVPL"
+    },
+    "DecodeUTF8" : {
+        "prefix": "DecodeUTF8",
+        "body": [
+            "DecodeUTF8(${string})"
+        ],
+        "description": "Função para Decodificar uma String em UTF-8 em ADVPL"
+    },
+    "aSort" : {
+        "prefix": "aSort",
+        "body": [
+            "aSort(${array},,, ${blockCode})"
+        ],
+        "description": "Função para Ordenar um Array em ADVPL"
     }
 }
