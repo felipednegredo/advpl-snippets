@@ -27,59 +27,45 @@ function activate(context) {
 
     // Registra o provedor de hover para a linguagem ADVPL
     const hoverProvider = vscode.languages.registerHoverProvider('advpl', {
-        provideHover(document, position) {
-            // Obtém o intervalo e a palavra na posição atual
-            const range = document.getWordRangeAtPosition(position, /\b\w+\b/);
-            if (!range) {
-                return null; // Retorna null se o intervalo não for válido
-            }
+        provideHover(document, position, token) {
+            const range = document.getWordRangeAtPosition(position);
+            const word = document.getText(range);
 
-            const word = document.getText(range).trim();
-            if (!word) {
-                return null; // Retorna null se a palavra estiver vazia
-            }
-
-            // Normaliza a palavra para corresponder às chaves do objeto descriptions
-            const normalizedWord = word.toLowerCase();
-
-            // Verifica se a palavra existe no objeto descriptions
-            if (descriptions[normalizedWord]) {
-                const { description, documentation, parameters, returns } = descriptions[normalizedWord];
+            if (descriptions[word]) {
+                const { description, documentation, parameters, returns } = descriptions[word];
                 const markdown = new vscode.MarkdownString();
 
                 // Adiciona a descrição da função
-                markdown.appendMarkdown(`### ${word}\n`);
-                markdown.appendMarkdown(`${description}\n\n`);
+                markdown.appendText(description);
 
                 // Adiciona os parâmetros, se existirem
-                if (parameters && Object.keys(parameters).length > 0) {
-                    markdown.appendMarkdown('#### Parâmetros:\n');
+                if (parameters) {
+                    markdown.appendMarkdown('\n\n**Parâmetros:**\n');
                     for (const paramName in parameters) {
                         const param = parameters[paramName];
-                        markdown.appendMarkdown(`- \`${paramName}\` (${param.type || 'Desconhecido'}): ${param.description || 'Sem descrição'}\n`);
+                        markdown.appendMarkdown(`- \`${paramName}\` (${param.type}): ${param.description}\n`);
                     }
-                    markdown.appendMarkdown('\n');
                 }
 
                 // Adiciona o tipo de retorno, se existir
                 if (returns) {
-                    markdown.appendMarkdown('#### Retorno:\n');
-                    markdown.appendMarkdown(`- (${returns.type || 'Desconhecido'}): ${returns.description || 'Sem descrição'}\n\n`);
+                    markdown.appendMarkdown(`\n**Retorno:**\n- (${returns.type}): ${returns.description}`);
                 }
 
                 // Adiciona o link para a documentação, se existir
                 if (documentation) {
-                    markdown.appendMarkdown(`[📖 Documentação oficial](${documentation})\n`);
+                    markdown.appendMarkdown(`\n\n[Documentação oficial](${documentation})`);
                 }
 
                 markdown.isTrusted = true; // Permite links clicáveis
                 return new vscode.Hover(markdown);
             }
 
-            // Retorna null se a palavra não for encontrada no objeto descriptions
-            return null;
+            return null; // Retorna null se não houver correspondência
         }
     });
+
+
     // Registra o CompletionItemProvider para classes, métodos e variáveis
     const completionProvider = vscode.languages.registerCompletionItemProvider(
         { language: 'advpl', scheme: 'file' },
