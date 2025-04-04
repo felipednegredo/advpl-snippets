@@ -28,40 +28,70 @@ function activate(context) {
     // Registra o provedor de hover para a linguagem ADVPL
     const hoverProvider = vscode.languages.registerHoverProvider('advpl', {
         provideHover(document, position, token) {
-            const range = document.getWordRangeAtPosition(position);
-            const word = document.getText(range);
-
-            if (descriptions[word]) {
-                const { description, documentation, parameters, returns } = descriptions[word];
-                const markdown = new vscode.MarkdownString();
-
-                // Adiciona a descrição da função
-                markdown.appendText(description);
-
-                // Adiciona os parâmetros, se existirem
-                if (parameters) {
-                    markdown.appendMarkdown('\n\n**Parâmetros:**\n');
-                    for (const paramName in parameters) {
-                        const param = parameters[paramName];
-                        markdown.appendMarkdown(`- \`${paramName}\` (${param.type}): ${param.description}\n`);
+            try {
+                const range = document.getWordRangeAtPosition(position, /\b\w+\b/);
+                if (!range) {
+                    return null;
+                }
+        
+                const word = document.getText(range).trim();
+                if (!word) {
+                    return null;
+                }
+        
+                // Captura o texto do documento
+                const text = document.getText();
+        
+                // Expressão regular para capturar os comentários no formato Protheus.doc
+                const docRegex = /\/\*\/\s*\{Protheus\.doc\}([\s\S]*?)\/\*\//gi;
+                const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z][a-zA-Z0-9_]{0,9})\s*\((.*?)\)/gi;
+        
+                let match;
+                let docMatch;
+        
+                // Procura pela função correspondente
+                while ((match = functionRegex.exec(text)) !== null) {
+                    const functionName = match[2]; // Nome da função
+                    const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : []; // Parâmetros da função
+        
+                    if (functionName === word) {
+                        // Procura pelo comentário imediatamente antes da função
+                        const functionStart = match.index;
+                        const precedingText = text.substring(0, functionStart);
+        
+                        docMatch = [...precedingText.matchAll(docRegex)].pop(); // Captura o último comentário antes da função
+        
+                        const markdown = new vscode.MarkdownString();
+                        markdown.appendMarkdown(`### ${functionName}\n`);
+                        markdown.appendMarkdown(`Função definida pelo usuário.\n\n`);
+        
+                        if (docMatch) {
+                            const docContent = docMatch[1].trim();
+        
+                            // Adiciona o conteúdo do comentário ao hover
+                            markdown.appendMarkdown('#### Documentação:\n');
+                            markdown.appendMarkdown(`${docContent.replace(/@(\w+)/g, '**@$1**')}\n\n`);
+                        }
+        
+                        if (parameters.length > 0) {
+                            markdown.appendMarkdown('#### Parâmetros:\n');
+                            parameters.forEach(param => {
+                                markdown.appendMarkdown(`- \`${param}\`: Descrição do parâmetro\n`);
+                            });
+                        } else {
+                            markdown.appendMarkdown('Sem parâmetros.\n');
+                        }
+        
+                        markdown.isTrusted = true;
+                        return new vscode.Hover(markdown);
                     }
                 }
-
-                // Adiciona o tipo de retorno, se existir
-                if (returns) {
-                    markdown.appendMarkdown(`\n**Retorno:**\n- (${returns.type}): ${returns.description}`);
-                }
-
-                // Adiciona o link para a documentação, se existir
-                if (documentation) {
-                    markdown.appendMarkdown(`\n\n[Documentação oficial](${documentation})`);
-                }
-
-                markdown.isTrusted = true; // Permite links clicáveis
-                return new vscode.Hover(markdown);
+        
+                return null;
+            } catch (error) {
+                console.error('Erro no HoverProvider:', error);
+                return null;
             }
-
-            return null; // Retorna null se não houver correspondência
         }
     });
 

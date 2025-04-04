@@ -179,5 +179,20 @@
             "type": "caractere",
             "description": "Retorna a substring especificada."
         }
+    },
+    "Empty": {
+        "description": "Função para Verificar se uma Variável é Vazia em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/Empty",
+        "example": "Empty('')",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String a ser verificada. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se a string estiver vazia, caso contrário, falso (.F.)."
+        }
     }
 }
