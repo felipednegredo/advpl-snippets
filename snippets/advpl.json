@@ -1,4 +1,43 @@
 {
+    "If": {
+        "prefix": "If ADVPL",
+        "body": [
+            "\tIf ${condicao}",
+            "\t\t${processamento}",
+            "\tEndIf",
+            "\t${cursor}"
+        ],
+        "description": "Estrutura de decisão IF em ADVPL",
+        "documentation": "https://tdn.totvs.com/display/public/framework/IF+...+ENDIF"
+    },
+    "IfElse": {
+        "prefix": "IfElse ADVPL",
+        "body": [
+            "\tIf ${condicao}",
+            "\t\t${processamento}",
+            "\tElse",
+            "\t\t${processamentoAlternativo}",
+            "\tEndIf",
+            "\t${cursor}"
+        ],
+        "description": "Estrutura de decisão IF-ELSE em ADVPL",
+        "documentation": "https://tdn.totvs.com/display/public/framework/IF+...+ENDIF"
+    },
+    "IfElseIf": {
+        "prefix": "IfElseIf ADVPL",
+        "body": [
+            "\tIf ${condicao1}",
+            "\t\t${processamento1}",
+            "\tElseIf ${condicao2}",
+            "\t\t${processamento2}",
+            "\tElse",
+            "\t\t${processamentoAlternativo}",
+            "\tEndIf",
+            "\t${cursor}"
+        ],
+        "description": "Estrutura de decisão IF-ELSEIF-ELSE em ADVPL",
+        "documentation": "https://tdn.totvs.com/display/public/framework/IF+...+ENDIF"
+    },
     "While": {
         "prefix": "While ADVPL",
         "body": [
@@ -26,9 +65,8 @@
         "prefix": "For ADVPL",
         "body": [
             "\tFor ${var} := 1 to Len(${array})",
-            "\t\t${processamento}",
-            "\tNext ${var}",
-            "\t${cursor}"
+            "\t\t${$cursor}",
+            "\tNext ${var}"
         ],
         "description": "Estrutura de loop FOR para percorrer um array em ADVPL",
         "documentation": "https://tdn.totvs.com/display/public/framework/FOR+...+NEXT"
@@ -43,8 +81,6 @@
             "\t\t\t${acao2}",
             "\t\tCase ${condicao3}",
             "\t\t\t${acao3}",
-            "\t\tCase ${condicao4}",
-            "\t\t\t${acao4}",
             "\t\tOtherWise",
             "\t\t\t${acaoDefault}",
             "\tEndCase",

@@ -93,5 +93,91 @@
                 "description": "Indica o retorno, através de referência, da header de resposta HTTP enviada pelo servidor requisitado. Observação: A variável deve ser declarada antes da chamada da função."
             }
         }
+    },
+    "Len": {
+        "description": "Função para Retornar o Comprimento de uma String em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/Len",
+        "example": "Len('exemplo')",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String a ser medida. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "numérico",
+            "description": "Retorna o comprimento da string."
+        }
+    },
+    "Time": {
+        "description": "Função para Retornar o Horário Atual em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/tec/Time",
+        "example": "Time()",
+        "parameters": {},
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna o horário atual no formato HH:MM:SS."
+        }
+    },
+    "Val": {
+        "description": "Função para Converter String em Número em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/Val",
+        "example": "Val('123.45')",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String a ser convertida. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "numérico",
+            "description": "Retorna o valor numérico da string."
+        }
+    },
+    "SubStr": {
+        "description": "Função para Retornar Substring em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/SubStr",
+        "example": "SubStr('exemplo', 1, 3)",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String a ser manipulada. Valor padrão: \"\"."
+            },
+            "nStart": {
+                "type": "numérico",
+                "description": "Posição inicial da substring. Valor padrão: 1."
+            },
+            "nLength": {
+                "type": "numérico",
+                "description": "Comprimento da substring. Valor padrão: 0."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna a substring especificada."
+        }
+    },
+    "SubString": {
+        "description": "Função para Retornar Substring em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/SubString",
+        "example": "SubString('exemplo', 1, 3)",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String a ser manipulada. Valor padrão: \"\"."
+            },
+            "nStart": {
+                "type": "numérico",
+                "description": "Posição inicial da substring. Valor padrão: 1."
+            },
+            "nLength": {
+                "type": "numérico",
+                "description": "Comprimento da substring. Valor padrão: 0."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna a substring especificada."
+        }
     }
 }
