@@ -423,5 +423,54 @@
             "Posicione(${alias}, ${ordem}, ${seek},${field})"
         ],
         "description": "Função para Posicionar um Registro em ADVPL"
+    },
+    "Abs" : {
+        "prefix": "Abs",
+        "body": [
+            "Abs(${value})"
+        ],
+        "description": "Função para Obter o Valor Absoluto de um Número em ADVPL"
+    },
+    "ASize" : {
+        "prefix": "ASize",
+        "body": [
+            "ASize(${array},${dimension})"
+        ],
+        "description": "Função para Obter o Tamanho de um Array em ADVPL"
+    },
+    "Lower": {
+        "prefix": "Lower",
+        "body": [
+            "Lower(${string})"
+        ],
+        "description": "Função para Converter uma String para Minúsculas em ADVPL"
+    },
+    "PadL": {
+        "prefix": "PadL",
+        "body": [
+            "PadL(${string}, ${size}, ${char})"
+        ],
+        "description": "Função para Preencher uma String à Esquerda com um Caracter em ADVPL"
+    },
+    "SubStr": {
+        "prefix": "SubStr",
+        "body": [
+            "SubStr(${string}, ${start}, ${length})"
+        ],
+        "description": "Função para Extrair uma Parte de uma String em ADVPL"
+    },
+    "PadR": {
+        "prefix": "PadR",
+        "body": [
+            "PadR(${string}, ${size}, ${char})"
+        ],
+        "description": "Função para Preencher uma String à Direita com um Caracter em ADVPL"
+    },
+    "Upper": {
+        "prefix": "Upper",
+        "body": [
+            "Upper(${string})"
+        ],
+        "description": "Função para Converter uma String para Maiúsculas em ADVPL"
     }
 }
