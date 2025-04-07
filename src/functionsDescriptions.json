@@ -194,5 +194,49 @@
             "type": "lógico",
             "description": "Retorna verdadeiro (.T.) se a string estiver vazia, caso contrário, falso (.F.)."
         }
+    },
+    "Str": {
+        "description": "Função para Converter Número em String em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/Str",
+        "example": "Str(123.45)",
+        "parameters": {
+            "nNumber": {
+                "type": "numérico",
+                "description": "Número a ser convertido. Valor padrão: 0."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna o número convertido em string."
+        }
+    },
+    "aAdd": {
+        "description": "Função para Adicionar Elementos a um Vetor em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/aAdd",
+        "example": "aAdd(aArray, 'novo elemento')",
+        "parameters": {
+            "aArray": {
+                "type": "vetor",
+                "description": "Vetor ao qual o elemento será adicionado."
+            },
+            "cElement": {
+                "type": "caractere",
+                "description": "Elemento a ser adicionado ao vetor."
+            }
+        },
+        "returns": {
+            "type": "numérico",
+            "description": "Retorna o número de elementos no vetor após a adição."
+        }
+    },
+    "DbGoTop": {
+        "description": "Função para Posicionar o Cursor no Início de um Banco de Dados em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbGoTop",
+        "example": "DbGoTop()",
+        "parameters": {},
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se o cursor foi posicionado no início com sucesso, caso contrário, falso (.F.)."
+        }
     }
 }

@@ -10,7 +10,10 @@ function activate(context) {
     // Tenta carregar o arquivo functionsDescriptions.json
     try {
         const descriptionsPath = path.join(__dirname, 'functionsDescriptions.json');
-        descriptions = JSON.parse(fs.readFileSync(descriptionsPath, 'utf8'));
+        const rawDescriptions = JSON.parse(fs.readFileSync(descriptionsPath, 'utf8'));
+        descriptions = Object.fromEntries(
+            Object.entries(rawDescriptions).map(([key, value]) => [key.toLowerCase(), value])
+        );
     } catch (error) {
         console.error('Erro ao carregar functionsDescriptions.json:', error.message);
     }
@@ -23,7 +26,7 @@ function activate(context) {
         console.error('Erro ao carregar classesMethods.json:', error.message);
     }
 
-    // Registra o provedor de hover para a linguagem ADVPL
+
     const hoverProvider = vscode.languages.registerHoverProvider('advpl', {
         provideHover(document, position, token) {
             try {
@@ -32,14 +35,14 @@ function activate(context) {
                     return null;
                 }
     
-                const word = document.getText(range).trim();
+                const word = document.getText(range).trim().toLowerCase(); // Converte a palavra para minúsculas
                 if (!word) {
                     return null;
                 }
     
-                // Verifica se a função está no arquivo functionsDescriptions.json
-                if (descriptions[word]) {
-                    const funcInfo = descriptions[word];
+                // Verifica se a função está no arquivo functionsDescriptions.json (ignora case)
+                const funcInfo = descriptions[word];
+                if (funcInfo) {
                     const markdown = new vscode.MarkdownString();
                     markdown.appendMarkdown(`### ${word}\n`);
                     markdown.appendMarkdown(`${funcInfo.description}\n\n`);
@@ -74,56 +77,14 @@ function activate(context) {
                 // Caso não seja uma função padrão, verifica no código atual
                 const text = document.getText();
                 const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
-                const docRegex = /\/\*\/\s*\{Protheus\.doc\}([\s\S]*?)\/\*\//gi;
-
                 let match;
-                let docMatch;
-
     
                 while ((match = functionRegex.exec(text)) !== null) {
                     const functionName = match[2];
-                    if (functionName === word) {
-                        const functionStart = match.index;
-                        const precedingText = text.substring(0, functionStart).trimEnd();
-    
-                        docMatch = [...precedingText.matchAll(docRegex)].pop();
-                        const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : [];
+                    if (functionName.toLowerCase() === word) { // Ignora case na comparação
                         const markdown = new vscode.MarkdownString();
                         markdown.appendMarkdown(`### ${functionName}\n`);
                         markdown.appendMarkdown(`Função definida pelo usuário.\n\n`);
-    
-                        if (docMatch) {
-                            const docContent = docMatch[1].trim();
-                            markdown.appendMarkdown('#### Documentação:\n');
-                            markdown.appendMarkdown(`${docContent.replace(/@(\w+)/g, '**@$1**')}\n\n`);
-    
-                            // Extraindo informações de parâmetros da documentação
-                            const paramRegex = /@param\s+(\w+),\s*([^,]+),\s*(.+)/g;
-                            const paramDetails = [];
-                            let paramMatch;
-                            while ((paramMatch = paramRegex.exec(docContent)) !== null) {
-                                paramDetails.push({
-                                    name: paramMatch[1],
-                                    type: paramMatch[2],
-                                    description: paramMatch[3]
-                                });
-                            }
-    
-                            if (parameters.length > 0) {
-                                markdown.appendMarkdown('#### Parâmetros:\n');
-                                parameters.forEach(param => {
-                                    const paramInfo = paramDetails.find(p => p.name === param);
-                                    if (paramInfo) {
-                                        markdown.appendMarkdown(`- \`${param}\` (${paramInfo.type}): ${paramInfo.description}\n`);
-                                    } else {
-                                        markdown.appendMarkdown(`- \`${param}\`: Descrição do parâmetro não encontrada.\n`);
-                                    }
-                                });
-                            } else {
-                                markdown.appendMarkdown('Sem parâmetros.\n');
-                            }
-                        }
-    
                         markdown.isTrusted = true;
                         return new vscode.Hover(markdown);
                     }
@@ -136,6 +97,7 @@ function activate(context) {
             }
         }
     });
+
     // Registra o CompletionItemProvider para classes, métodos e variáveis
     const completionProvider = vscode.languages.registerCompletionItemProvider(
         { language: 'advpl', scheme: 'file' },
