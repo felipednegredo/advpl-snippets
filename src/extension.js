@@ -1,4 +1,3 @@
-
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
@@ -6,13 +5,12 @@ const fs = require('fs');
 function activate(context) {
     let descriptions = {};
     let classesData = {};
+    let cache = null; // Cache para melhorar a performance
 
     // Tenta carregar o arquivo functionsDescriptions.json
     try {
         const descriptionsPath = path.join(__dirname, 'functionsDescriptions.json');
-        console.log('Caminho do arquivo functionsDescriptions.json:', descriptionsPath);
         descriptions = JSON.parse(fs.readFileSync(descriptionsPath, 'utf8'));
-        console.log('Conteúdo carregado de functionsDescriptions.json:', descriptions);
     } catch (error) {
         console.error('Erro ao carregar functionsDescriptions.json:', error.message);
     }
@@ -33,60 +31,74 @@ function activate(context) {
                 if (!range) {
                     return null;
                 }
-        
+    
                 const word = document.getText(range).trim();
                 if (!word) {
                     return null;
                 }
-        
-                // Captura o texto do documento
+    
                 const text = document.getText();
-        
-                // Expressão regular para capturar os comentários no formato Protheus.doc
                 const docRegex = /\/\*\/\s*\{Protheus\.doc\}([\s\S]*?)\/\*\//gi;
-                const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z][a-zA-Z0-9_]{0,9})\s*\((.*?)\)/gi;
-        
+                const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
+    
                 let match;
                 let docMatch;
-        
-                // Procura pela função correspondente
+    
                 while ((match = functionRegex.exec(text)) !== null) {
-                    const functionName = match[2]; // Nome da função
-                    const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : []; // Parâmetros da função
-        
+                    const functionName = match[2];
+                    const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : [];
+    
                     if (functionName === word) {
-                        // Procura pelo comentário imediatamente antes da função
                         const functionStart = match.index;
-                        const precedingText = text.substring(0, functionStart);
-        
-                        docMatch = [...precedingText.matchAll(docRegex)].pop(); // Captura o último comentário antes da função
-        
+                        const precedingText = text.substring(0, functionStart).trimEnd();
+    
+                        docMatch = [...precedingText.matchAll(docRegex)].pop();
+    
                         const markdown = new vscode.MarkdownString();
                         markdown.appendMarkdown(`### ${functionName}\n`);
                         markdown.appendMarkdown(`Função definida pelo usuário.\n\n`);
-        
+    
                         if (docMatch) {
                             const docContent = docMatch[1].trim();
-        
-                            // Adiciona o conteúdo do comentário ao hover
                             markdown.appendMarkdown('#### Documentação:\n');
                             markdown.appendMarkdown(`${docContent.replace(/@(\w+)/g, '**@$1**')}\n\n`);
+    
+                            // Extraindo informações de parâmetros da documentação
+                            const paramRegex = /@param\s+(\w+),\s*([^,]+),\s*(.+)/g;
+                            const paramDetails = [];
+                            let paramMatch;
+                            while ((paramMatch = paramRegex.exec(docContent)) !== null) {
+                                paramDetails.push({
+                                    name: paramMatch[1],
+                                    type: paramMatch[2],
+                                    description: paramMatch[3]
+                                });
+                            }
+    
+                            if (parameters.length > 0) {
+                                markdown.appendMarkdown('#### Parâmetros:\n');
+                                parameters.forEach(param => {
+                                    const paramInfo = paramDetails.find(p => p.name === param);
+                                    if (paramInfo) {
+                                        markdown.appendMarkdown(`- \`${param}\` (${paramInfo.type}): ${paramInfo.description}\n`);
+                                    } else {
+                                        markdown.appendMarkdown(`- \`${param}\`: Descrição do parâmetro não encontrada.\n`);
+                                    }
+                                });
+                            } else {
+                                markdown.appendMarkdown('Sem parâmetros.\n');
+                            }
                         }
-        
-                        if (parameters.length > 0) {
-                            markdown.appendMarkdown('#### Parâmetros:\n');
-                            parameters.forEach(param => {
-                                markdown.appendMarkdown(`- \`${param}\`: Descrição do parâmetro\n`);
-                            });
-                        } else {
-                            markdown.appendMarkdown('Sem parâmetros.\n');
-                        }
-        
+    
                         markdown.isTrusted = true;
                         return new vscode.Hover(markdown);
                     }
                 }
-        
+    
+                if (token.isCancellationRequested) {
+                    return null;
+                }
+    
                 return null;
             } catch (error) {
                 console.error('Erro no HoverProvider:', error);
@@ -95,159 +107,69 @@ function activate(context) {
         }
     });
 
-
     // Registra o CompletionItemProvider para classes, métodos e variáveis
     const completionProvider = vscode.languages.registerCompletionItemProvider(
         { language: 'advpl', scheme: 'file' },
         {
             provideCompletionItems(document, position) {
-                const completionItems = [];
+                if (!cache) {
+                    cache = { functions: [], variables: [], defines: [] };
 
-                // Captura o texto do documento atual
-                const text = document.getText();
+                    const text = document.getText();
+                    const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*:=\s*(.+))?/gi;
+                    const defineRegex = /#DEFINE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/gi;
+                    const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
 
-                const variables = new Set();
-                
-                const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*:=\s*(.+))?/gi;
-                const defineRegex = /#DEFINE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/gi;
-                // Expressão regular para capturar funções (STATIC FUNCTION e USER FUNCTION)
-                const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z][a-zA-Z0-9_]{0,9})\s*\((.*?)\)/gi;
+                    let match;
 
-                let match;
+                    // Captura funções
+                    while ((match = functionRegex.exec(text)) !== null) {
+                        const functionType = match[1];
+                        const functionName = match[2];
+                        const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : [];
 
-                // Captura funções
-                while ((match = functionRegex.exec(text)) !== null) {
-                    const functionType = match[1]; // Tipo da função (STATIC FUNCTION ou USER FUNCTION)
-                    const functionName = match[2]; // Nome da função (até 10 caracteres)
-                    const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : []; // Parâmetros da função
-            
-                    // Cria um CompletionItem para a função
-                    const functionItem = new vscode.CompletionItem(functionName, vscode.CompletionItemKind.Function);
-                    functionItem.detail = `${functionType} definida pelo usuário`;
-                    functionItem.documentation = new vscode.MarkdownString(
-                        `**Tipo:** ${functionType}\n**Parâmetros:** ${parameters.length > 0 ? parameters.join(', ') : 'Nenhum'}`
-                    );
-            
-                    // Adiciona os parâmetros como snippet para facilitar a inserção
-                    if (parameters.length > 0) {
-                        functionItem.insertText = new vscode.SnippetString(
-                            `${functionName}(${parameters.map((param, index) => `\${${index + 1}:${param}}`).join(', ')})`
+                        const functionItem = new vscode.CompletionItem(functionName, vscode.CompletionItemKind.Function);
+                        functionItem.detail = `${functionType} definida pelo usuário`;
+                        functionItem.documentation = new vscode.MarkdownString(
+                            `**Tipo:** ${functionType}\n**Parâmetros:** ${parameters.length > 0 ? parameters.join(', ') : 'Nenhum'}`
                         );
-                    } else {
-                        functionItem.insertText = `${functionName}()`;
-                    }
-            
-                    completionItems.push(functionItem);
-                }
 
-                
-                // Captura variáveis
-                while ((match = variableRegex.exec(text)) !== null) {
-                    const variableName = match[1]; // Captura o nome da variável
-                    const initialValue = match[2] ? match[2].trim() : null; // Captura o valor inicial, se existir
-                    const declarationType = match[0].split(/\s+/)[0].toUpperCase(); // Captura o tipo de declaração (LOCAL, STATIC, etc.)
-                    variables.add({ variableName, initialValue, declarationType });
-                }
-                
-                // Captura defines
-                const defines = new Set();
-                while ((match = defineRegex.exec(text)) !== null) {
-                    const defineName = match[1]; // Captura o nome do define
-                    const defineValue = match[2].trim(); // Captura o valor do define
-                    defines.add({ defineName, defineValue });
-                }
-                
-                // Log para verificar as variáveis e defines capturados (para debugging)
-                console.log("Variáveis capturadas:", Array.from(variables));
-                console.log("Defines capturados:", Array.from(defines));
-
-                // Filtra variáveis para remover aquelas que contenham "function" em qualquer case no nome
-                const filteredVariables = Array.from(variables).filter(({ variableName }) => {
-                    return !variableName.toLowerCase().includes('function'); // Converte para lowercase e verifica
-                });
-
-                // Adiciona variáveis filtradas ao IntelliSense
-                filteredVariables.forEach(({ variableName, initialValue, declarationType }) => {
-                    const firstChar = variableName.charAt(0).toUpperCase();
-                    let variableType = 'Variável';
-
-                    // Determina o tipo da variável com base no primeiro caractere
-                    switch (firstChar) {
-                        case 'O':
-                            variableType = 'Object (Objeto)';
-                            break;
-                        case 'A':
-                            variableType = 'Array (Matriz)';
-                            break;
-                        case 'B':
-                            variableType = 'Code Block (Bloco de Código)';
-                            break;
-                        case 'C':
-                            variableType = 'Character (Caractere)';
-                            break;
-                        case 'D':
-                            variableType = 'Date (Data)';
-                            break;
-                        case 'F':
-                            variableType = 'Fixed Size Decimal (Decimal de Tamanho Fixo)';
-                            break;
-                        case 'L':
-                            variableType = 'Logical (Lógico)';
-                            break;
-                        case 'N':
-                            variableType = 'Numeric (Numérico)';
-                            break;
-                        default:
-                            variableType = 'Tipo desconhecido';
-                            break;
-                    }
-
-                    const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
-                    variableItem.detail = `${variableType} - ${declarationType} - ${initialValue ? `Valor inicial: ${initialValue}` : 'Sem valor inicial'}`;
-                    variableItem.documentation = new vscode.MarkdownString(`**Escopo:** ${declarationType}\n${initialValue ? `**Valor inicial:** \`${initialValue}\`` : ''}`);
-                    completionItems.push(variableItem);
-                });
-
-                // Adiciona defines ao IntelliSense
-                defines.forEach(({ defineName, defineValue }) => {
-                    const defineItem = new vscode.CompletionItem(defineName, vscode.CompletionItemKind.Constant);
-                    defineItem.detail = `Define - Valor: ${defineValue}`;
-                    defineItem.documentation = new vscode.MarkdownString(`**Define:** ${defineName}\n**Valor:** \`${defineValue}\``);
-                    completionItems.push(defineItem);
-                });
-
-
-                // Itera sobre as classes no arquivo JSON
-                for (const className in classesData) {
-                    const classInfo = classesData[className];
-
-                    // Adiciona a classe como sugestão
-                    const classItem = new vscode.CompletionItem(className, vscode.CompletionItemKind.Class);
-                    classItem.detail = classInfo.description;
-                    completionItems.push(classItem);
-
-                    // Adiciona métodos da classe como sugestões
-                    if (classInfo.methods) {
-                        for (const methodName in classInfo.methods) {
-                            const methodInfo = classInfo.methods[methodName];
-                            const methodItem = new vscode.CompletionItem(`${className}:${methodName}()`, vscode.CompletionItemKind.Method);
-                            methodItem.detail = methodInfo.description;
-
-                            // Adiciona parâmetros ao método, se existirem
-                            if (methodInfo.parameters) {
-                                methodItem.insertText = new vscode.SnippetString(
-                                    `${className}:${methodName}(${methodInfo.parameters.map((param, index) => `\${${index + 1}:${param}}`).join(', ')})`
-                                );
-                            } else {
-                                methodItem.insertText = `${className}:${methodName}()`;
-                            }
-
-                            completionItems.push(methodItem);
+                        if (parameters.length > 0) {
+                            functionItem.insertText = new vscode.SnippetString(
+                                `${functionName}(${parameters.map((param, index) => `\${${index + 1}:${param}}`).join(', ')})`
+                            );
+                        } else {
+                            functionItem.insertText = `${functionName}()`;
                         }
+
+                        cache.functions.push(functionItem);
+                    }
+
+                    // Captura variáveis
+                    while ((match = variableRegex.exec(text)) !== null) {
+                        const variableName = match[1];
+                        const initialValue = match[2] ? match[2].trim() : null;
+                        const declarationType = match[0].split(/\s+/)[0].toUpperCase();
+
+                        const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
+                        variableItem.detail = `${declarationType} - ${initialValue ? `Valor inicial: ${initialValue}` : 'Sem valor inicial'}`;
+                        variableItem.documentation = new vscode.MarkdownString(`**Escopo:** ${declarationType}\n${initialValue ? `**Valor inicial:** \`${initialValue}\`` : ''}`);
+                        cache.variables.push(variableItem);
+                    }
+
+                    // Captura defines
+                    while ((match = defineRegex.exec(text)) !== null) {
+                        const defineName = match[1];
+                        const defineValue = match[2].trim();
+
+                        const defineItem = new vscode.CompletionItem(defineName, vscode.CompletionItemKind.Constant);
+                        defineItem.detail = `Define - Valor: ${defineValue}`;
+                        defineItem.documentation = new vscode.MarkdownString(`**Define:** ${defineName}\n**Valor:** \`${defineValue}\``);
+                        cache.defines.push(defineItem);
                     }
                 }
 
-                return completionItems;
+                return [...cache.functions, ...cache.variables, ...cache.defines];
             }
         },
         '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
@@ -265,27 +187,41 @@ function activate(context) {
         const document = editor.document;
         const selection = editor.selection;
 
-        // Obtém a linha selecionada ou a linha atual
-        const line = document.lineAt(selection.active.line).text;
+        // Captura todo o texto do documento
+        const text = document.getText();
 
-        // Expressão regular para capturar funções
-        const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z][a-zA-Z0-9_]{0,9})\s*\((.*?)\)/;
-        const match = functionRegex.exec(line);
+        // Calcula a posição atual do cursor
+        const position = selection.active;
 
-        if (!match) {
-            vscode.window.showErrorMessage('Nenhuma função encontrada na linha atual.');
+        // Localiza a linha atual e as linhas anteriores para encontrar a função
+        const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
+        let match;
+        let functionMatch = null;
+
+        while ((match = functionRegex.exec(text)) !== null) {
+            const start = document.positionAt(match.index);
+            const end = document.positionAt(match.index + match[0].length);
+
+            // Verifica se o cursor está dentro da função encontrada
+            if (position.isAfterOrEqual(start) && position.isBeforeOrEqual(end)) {
+                functionMatch = match;
+                break;
+            }
+        }
+
+        if (!functionMatch) {
+            vscode.window.showErrorMessage('Nenhuma função encontrada na posição atual.');
             return;
         }
 
-        const functionType = match[1]; // STATIC FUNCTION ou USER FUNCTION
-        const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : []; // Parâmetros
+        const functionType = functionMatch[1];
+        const functionName = functionMatch[2];
+        const parameters = functionMatch[3] ? functionMatch[3].split(',').map(param => param.trim()) : [];
 
-        // Gera o cabeçalho de documentação
         const documentation = [
             `/*/ {Protheus.doc}`,
             `Descrição: Descreva aqui o propósito da função.`,
             `@type ${functionType.toLowerCase()}`,
-            `@author ${process.env.USER}`,
             `@since ${new Date().toLocaleDateString()}`,
             `@version 1.0`,
             ...parameters.map(param => `@param ${param}, Tipo desconhecido, Descrição`),
@@ -296,15 +232,14 @@ function activate(context) {
             `/*/`
         ].join('\n');
 
-        // Insere a documentação acima da função
         editor.edit(editBuilder => {
-            const position = new vscode.Position(selection.active.line, 0);
-            editBuilder.insert(position, documentation + '\n');
+            // Insere a documentação acima da função encontrada
+            const insertPosition = document.positionAt(functionMatch.index);
+            editBuilder.insert(insertPosition, documentation + '\n');
         });
 
-        vscode.window.showInformationMessage('Documentação gerada com sucesso!');
+        vscode.window.showInformationMessage(`Documentação gerada para a função "${functionName}".`);
     });
-
 
     context.subscriptions.push(generateDocumentationCommand);
     context.subscriptions.push(hoverProvider);

@@ -2,7 +2,7 @@
   "name": "advpl-devtools",
   "displayName": "advpl-devtools",
   "description": "Uma extensão para facilitar o desenvolvimento em ADVPL",
-  "version": "0.0.48",
+  "version": "0.0.49",
   "publisher": "felipednegredo",
   "icon": "img/logo.png",
   "engines": {
@@ -62,8 +62,8 @@
   "keybindings": [
     {
       "command": "advplSnippets.generateDocumentation",
-      "key": "ctrl+alt+d",
-      "mac": "cmd+alt+d",
+      "key": "alt+d",
+      "mac": "alt+d",
       "when": "editorTextFocus && editorHasDocumentSymbolProvider && editorHasCodeActionsProvider"
     }
   ],

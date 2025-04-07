@@ -416,5 +416,12 @@
             "aSort(${array},,, ${blockCode})"
         ],
         "description": "Função para Ordenar um Array em ADVPL"
+    },
+    "Posicione" : {
+        "prefix": "Posicione",
+        "body": [
+            "Posicione(${alias}, ${ordem}, ${seek},${field})"
+        ],
+        "description": "Função para Posicionar um Registro em ADVPL"
     }
 }
