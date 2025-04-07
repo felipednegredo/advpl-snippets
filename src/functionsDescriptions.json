@@ -134,6 +134,21 @@
             "description": "Retorna o valor numérico da string."
         }
     },
+    "AllTrim": {
+        "description": "Função para Remover Espaços em Branco à Direita de uma String em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/AllTrim",
+        "example": "AllTrim('   exemplo   ')",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String a ser manipulada. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna a string sem espaços à direita."
+        }
+    },
     "SubStr": {
         "description": "Função para Retornar Substring em ADVPL.",
         "documentation": "https://tdn.totvs.com/display/public/framework/SubStr",
@@ -180,6 +195,21 @@
             "description": "Retorna a substring especificada."
         }
     },
+    "Space" : {
+        "description": "Função para Criar Espaços em Branco em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/Space",
+        "example": "Space(5)",
+        "parameters": {
+            "nLength": {
+                "type": "numérico",
+                "description": "Número de espaços a serem criados. Valor padrão: 0."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna uma string composta por espaços em branco."
+        }
+    },
     "Empty": {
         "description": "Função para Verificar se uma Variável é Vazia em ADVPL.",
         "documentation": "https://tdn.totvs.com/display/public/framework/Empty",
@@ -219,15 +249,141 @@
                 "type": "vetor",
                 "description": "Vetor ao qual o elemento será adicionado."
             },
-            "cElement": {
-                "type": "caractere",
-                "description": "Elemento a ser adicionado ao vetor."
+            "xExpr": {
+                "type": "qualquer",
+                "description": "Expressão válida que será o valor do novo elemento."
             }
         },
         "returns": {
-            "type": "numérico",
-            "description": "Retorna o número de elementos no vetor após a adição."
+            "type": "qualquer",
+            "description": "Retorna o valor especificado em <xExpr>."
+        },
+        "observations": [
+            "Caso seja especificado em <xExpr> um outro array, o novo elemento no array destino terá uma referência ao array especificado.",
+            "Essa função é útil na construção de filas ou listas dinâmicas. Utilize para aumentar o tamanho de um array dinamicamente.",
+            "Essa função é semelhante à função ASize, mas adiciona apenas um elemento por vez. Já ASize permite aumentar ou diminuir um array a um tamanho especificado.",
+            "AAdd também possui a vantagem de poder atribuir um valor ao novo elemento, enquanto que ASize não pode.",
+            "Além disso, AAdd pode parecer igual à função AIns, mas não é, pois AIns move os elementos dentro de um array, mas não modifica seu tamanho."
+        ]
+    },
+    "AClone": {
+        "description": "Função para Clonar um Vetor em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/AClone",
+        "example": "AClone(aArray)",
+        "parameters": {
+            "aArray": {
+                "type": "vetor",
+                "description": "Vetor a ser clonado."
+            }
+        },
+        "returns": {
+            "type": "vetor",
+            "description": "Retorna uma cópia do vetor especificado."
         }
+    },
+    "ACopy": {
+        "description": "Copia elementos de um vetor de origem para um vetor de destino em ADVPL.",
+        "syntax": "ACopy( < aOrigem >, < aDestino >, [ nInicio ], [ nCont ], [ nPosDestino ] )",
+        "parameters": {
+            "aOrigem": {
+                "type": "vetor",
+                "description": "Indica o array em que serão copiados os elementos."
+            },
+            "aDestino": {
+                "type": "vetor",
+                "description": "Indica o array de destino em que os elementos serão copiados."
+            },
+            "nInicio": {
+                "type": "numérico",
+                "description": "Indica o elemento inicial do array aOrigem a partir do qual os conteúdos serão copiados. Caso não seja especificado, o valor padrão será 1."
+            },
+            "nCont": {
+                "type": "numérico",
+                "description": "Indica a quantidade de elementos que serão copiados do array. Caso não seja especificado, o array de origem será considerado até o último elemento."
+            },
+            "nPosDestino": {
+                "type": "numérico",
+                "description": "Indica a partir de qual posição do array de destino os elementos serão copiados. Caso não seja especificado, o valor padrão é 1."
+            }
+        },
+        "returns": {
+            "type": "vetor",
+            "description": "Retorna uma referência ao array de destino <aDestino>."
+        }
+    },
+    "ADel" : {
+        "description": "Remove um elemento de um vetor em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/aDel",
+        "example": "ADel(aArray, 1)",
+        "parameters": {
+            "aArray": {
+                "type": "vetor",
+                "description": "Vetor do qual o elemento será removido."
+            },
+            "nIndex": {
+                "type": "numérico",
+                "description": "Índice do elemento a ser removido."
+            }
+        },
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se o elemento foi removido com sucesso, caso contrário, falso (.F.)."
+        }
+    },
+    "AIns": {
+        "description": "Insere um elemento nulo em um vetor em ADVPL, deslocando os elementos existentes.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/aIns",
+        "example": "AIns(aArray, 1)",
+        "parameters": {
+            "aDest": {
+                "type": "vetor",
+                "description": "Vetor que será manipulado."
+            },
+            "nPos": {
+                "type": "numérico",
+                "description": "Posição onde o elemento nulo será inserido. Valor padrão: 1."
+            }
+        },
+        "returns": {
+            "type": "vetor",
+            "description": "Retorna uma cópia do vetor indicado por aDest após a operação."
+        },
+        "observations": [
+            "Essa função não altera a quantidade de elementos do vetor.",
+            "Após inserir um elemento nulo na posição definida, os demais elementos são deslocados uma posição para frente e o último elemento é descartado.",
+            "Se precisar adicionar um elemento sem perder o último, utilize a função AAdd."
+        ]
+    },
+    "AFill": {
+        "description": "Preenche um vetor com um valor específico em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/aFill",
+        "example": "AFill(aArray, 'valor', 1, 5)",
+        "parameters": {
+            "aDest": {
+                "type": "vetor",
+                "description": "Vetor que será preenchido."
+            },
+            "xValue": {
+                "type": "qualquer",
+                "description": "Valor a ser alocado em cada elemento do vetor. Pode ser de qualquer tipo de dado válido."
+            },
+            "nStart": {
+                "type": "numérico",
+                "description": "Posição do primeiro elemento que será preenchido. Valor padrão: 1."
+            },
+            "nCount": {
+                "type": "numérico",
+                "description": "Quantidade de elementos a serem preenchidos a partir da posição inicial. Valor padrão: até o final do vetor."
+            }
+        },
+        "returns": {
+            "type": "vetor",
+            "description": "Retorna uma cópia do vetor indicado por aDest após a operação."
+        },
+        "observations": [
+            "Caso nStart não seja especificado, é considerado o valor 1.",
+            "Caso nCount não seja especificado, os elementos são preenchidos a partir da posição inicial até o final do vetor."
+        ]
     },
     "DbGoTop": {
         "description": "Função para Posicionar o Cursor no Início de um Banco de Dados em ADVPL.",
@@ -237,6 +393,66 @@
         "returns": {
             "type": "lógico",
             "description": "Retorna verdadeiro (.T.) se o cursor foi posicionado no início com sucesso, caso contrário, falso (.F.)."
+        }
+    },
+    "DbSetOrder": {
+        "description": "Função para Definir a Ordem de um Banco de Dados em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbSetOrder",
+        "example": "DbSetOrder('cCampo')",
+        "parameters": {
+            "cOrder": {
+                "type": "caractere",
+                "description": "Nome do campo ou expressão que define a ordem. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se a ordem foi definida com sucesso, caso contrário, falso (.F.)."
+        }
+    },
+    "DbSkip": {
+        "description": "Função para Avançar o Cursor em um Banco de Dados em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbSkip",
+        "example": "DbSkip(1)",
+        "parameters": {
+            "nCount": {
+                "type": "numérico",
+                "description": "Número de registros a serem pulados. Valor padrão: 1."
+            }
+        },
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se o cursor foi movido com sucesso, caso contrário, falso (.F.)."
+        }
+    },
+    "DbCloseArea": {
+        "description": "Função para Fechar uma Área de Banco de Dados em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/DbCloseArea",
+        "example": "DbCloseArea()",
+        "parameters": {},
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se a área foi fechada com sucesso, caso contrário, falso (.F.)."
+        }
+    },
+    "EoF": {
+        "description": "Função para Verificar se o Cursor Está no Fim de um Banco de Dados em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/EoF",
+        "example": "EoF()",
+        "parameters": {},
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna verdadeiro (.T.) se o cursor estiver no fim, caso contrário, falso (.F.)."
+        }
+    },
+    "GetNextAlias": {
+        "description": "Função para Obter o Próximo Alias de Banco de Dados em ADVPL.",
+        "documentation": "https://terminaldeinformacao.com/knowledgebase/getnextalias/",
+        "example": "GetNextAlias()",
+        "parameters": {},
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna o próximo alias disponível."
         }
     }
 }

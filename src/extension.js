@@ -99,72 +99,112 @@ function activate(context) {
     });
 
     // Registra o CompletionItemProvider para classes, métodos e variáveis
-    const completionProvider = vscode.languages.registerCompletionItemProvider(
-        { language: 'advpl', scheme: 'file' },
-        {
-            provideCompletionItems(document, position) {
-                if (!cache) {
-                    cache = { functions: [], variables: [], defines: [] };
+// ...existing code...
 
-                    const text = document.getText();
-                    const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*:=\s*(.+))?/gi;
-                    const defineRegex = /#DEFINE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/gi;
-                    const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
+// Registra o CompletionItemProvider para classes, métodos e variáveis
+const completionProvider = vscode.languages.registerCompletionItemProvider(
+    { language: 'advpl', scheme: 'file' },
+    {
+        provideCompletionItems(document) {
+            if (!cache) {
+                cache = { functions: [], variables: [], defines: [], classes: [] };
 
-                    let match;
+                const text = document.getText();
+                const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*:=\s*(.+))?/gi;
+                const defineRegex = /#DEFINE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/gi;
+                const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
 
-                    // Captura funções
-                    while ((match = functionRegex.exec(text)) !== null) {
-                        const functionType = match[1];
-                        const functionName = match[2];
-                        const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : [];
+                let match;
 
-                        const functionItem = new vscode.CompletionItem(functionName, vscode.CompletionItemKind.Function);
-                        functionItem.detail = `${functionType} definida pelo usuário`;
-                        functionItem.documentation = new vscode.MarkdownString(
-                            `**Tipo:** ${functionType}\n**Parâmetros:** ${parameters.length > 0 ? parameters.join(', ') : 'Nenhum'}`
+                // Captura funções
+                while ((match = functionRegex.exec(text)) !== null) {
+                    const functionType = match[1];
+                    const functionName = match[2];
+                    const parameters = match[3] ? match[3].split(',').map(param => param.trim()) : [];
+
+                    const functionItem = new vscode.CompletionItem(functionName, vscode.CompletionItemKind.Function);
+                    functionItem.detail = `${functionType} definida pelo usuário`;
+                    functionItem.documentation = new vscode.MarkdownString(
+                        `**Tipo:** ${functionType}\n**Parâmetros:** ${parameters.length > 0 ? parameters.join(', ') : 'Nenhum'}`
+                    );
+
+                    if (parameters.length > 0) {
+                        functionItem.insertText = new vscode.SnippetString(
+                            `${functionName}(${parameters.map((param, index) => `\${${index + 1}:${param}}`).join(', ')})`
                         );
-
-                        if (parameters.length > 0) {
-                            functionItem.insertText = new vscode.SnippetString(
-                                `${functionName}(${parameters.map((param, index) => `\${${index + 1}:${param}}`).join(', ')})`
-                            );
-                        } else {
-                            functionItem.insertText = `${functionName}()`;
-                        }
-
-                        cache.functions.push(functionItem);
+                    } else {
+                        functionItem.insertText = `${functionName}()`;
                     }
 
-                    // Captura variáveis
-                    while ((match = variableRegex.exec(text)) !== null) {
-                        const variableName = match[1];
-                        const initialValue = match[2] ? match[2].trim() : null;
-                        const declarationType = match[0].split(/\s+/)[0].toUpperCase();
-
-                        const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
-                        variableItem.detail = `${declarationType} - ${initialValue ? `Valor inicial: ${initialValue}` : 'Sem valor inicial'}`;
-                        variableItem.documentation = new vscode.MarkdownString(`**Escopo:** ${declarationType}\n${initialValue ? `**Valor inicial:** \`${initialValue}\`` : ''}`);
-                        cache.variables.push(variableItem);
-                    }
-
-                    // Captura defines
-                    while ((match = defineRegex.exec(text)) !== null) {
-                        const defineName = match[1];
-                        const defineValue = match[2].trim();
-
-                        const defineItem = new vscode.CompletionItem(defineName, vscode.CompletionItemKind.Constant);
-                        defineItem.detail = `Define - Valor: ${defineValue}`;
-                        defineItem.documentation = new vscode.MarkdownString(`**Define:** ${defineName}\n**Valor:** \`${defineValue}\``);
-                        cache.defines.push(defineItem);
-                    }
+                    cache.functions.push(functionItem);
                 }
 
-                return [...cache.functions, ...cache.variables, ...cache.defines];
+                // Captura variáveis
+                while ((match = variableRegex.exec(text)) !== null) {
+                    const variableName = match[1];
+                    const initialValue = match[2] ? match[2].trim() : null;
+                    const declarationType = match[0].split(/\s+/)[0].toUpperCase();
+
+                    const variableItem = new vscode.CompletionItem(variableName, vscode.CompletionItemKind.Variable);
+                    variableItem.detail = `${declarationType} - ${initialValue ? `Valor inicial: ${initialValue}` : 'Sem valor inicial'}`;
+                    variableItem.documentation = new vscode.MarkdownString(`**Escopo:** ${declarationType}\n${initialValue ? `**Valor inicial:** \`${initialValue}\`` : ''}`);
+                    cache.variables.push(variableItem);
+                }
+
+                // Captura defines
+                while ((match = defineRegex.exec(text)) !== null) {
+                    const defineName = match[1];
+                    const defineValue = match[2].trim();
+
+                    const defineItem = new vscode.CompletionItem(defineName, vscode.CompletionItemKind.Constant);
+                    defineItem.detail = `Define - Valor: ${defineValue}`;
+                    defineItem.documentation = new vscode.MarkdownString(`**Define:** ${defineName}\n**Valor:** \`${defineValue}\``);
+                    cache.defines.push(defineItem);
+                }
+
+                // Captura classes e seus métodos
+                const loadedClassesData = JSON.parse(fs.readFileSync(path.join(__dirname, 'classesMethods.json'), 'utf8'));
+                for (const [className, classInfo] of Object.entries(loadedClassesData)) {
+                    const classItem = new vscode.CompletionItem(className, vscode.CompletionItemKind.Class);
+                    classItem.detail = `Classe: ${classInfo.description}`;
+                    classItem.documentation = new vscode.MarkdownString(`**Descrição:** ${classInfo.description}`);
+                    cache.classes.push(classItem);
+                }
             }
+
+            return [...cache.functions, ...cache.variables, ...cache.defines, ...cache.classes];
         },
-        '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
-    );
+
+        resolveCompletionItem(item, token) {
+            // Verifica se o item é uma classe e sugere métodos ao digitar "."
+            if (item.kind === vscode.CompletionItemKind.Class) {
+                const className = item.label.toString(); // Ensure label is treated as a string
+
+                if (classesData[className]) {
+                    const methods = classesData[className].methods;
+                    const methodName = Object.keys(methods)[0]; // Retorna o primeiro método como exemplo
+                    const methodInfo = methods[methodName];
+
+                    const methodItem = new vscode.CompletionItem(methodName, vscode.CompletionItemKind.Method);
+                    methodItem.detail = `Método: ${methodInfo.description}`;
+                    methodItem.documentation = new vscode.MarkdownString(`**Descrição:** ${methodInfo.description}`);
+                    if (methodInfo.parameters) {
+                        methodItem.insertText = new vscode.SnippetString(
+                            `${methodName}(${methodInfo.parameters.map((param, index) => `\${${index + 1}:${param}}`).join(', ')})`
+                        );
+                    } else {
+                        methodItem.insertText = `${methodName}()`;
+                    }
+                    return methodItem;
+                }
+            }
+
+            return null;
+        }
+    },
+    '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
+);
+
 
     // Comando para gerar documentação automática
     const generateDocumentationCommand = vscode.commands.registerCommand('advplSnippets.generateDocumentation', () => {
