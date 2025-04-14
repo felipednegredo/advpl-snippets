@@ -454,5 +454,20 @@
             "type": "caractere",
             "description": "Retorna o próximo alias disponível."
         }
+    },
+    "ValType" : {
+        "description": "Função para Retornar o Tipo de Dado de uma Variável em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/ValType",
+        "example": "ValType('exemplo')",
+        "parameters": {
+            "xValue": {
+                "type": "qualquer",
+                "description": "Valor a ser verificado. Valor padrão: \"\"."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna o tipo de dado da variável."
+        }
     }
 }

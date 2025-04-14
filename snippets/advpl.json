@@ -2,38 +2,35 @@
     "If": {
         "prefix": "If ADVPL",
         "body": [
-            "\tIf ${condicao}",
-            "\t\t${processamento}",
-            "\tEndIf",
-            "\t${cursor}"
+            "\tIf ${cursor}",
+            "\t\t",
+            "\tEndIf"
         ],
         "description": "Estrutura de decisão IF em ADVPL",
         "documentation": "https://tdn.totvs.com/display/public/framework/IF+...+ENDIF"
     },
-    "IfElse": {
+    "If Else": {
         "prefix": "IfElse ADVPL",
         "body": [
-            "\tIf ${condicao}",
-            "\t\t${processamento}",
+            "\tIf ${cursor}",
+            "\t\t",
             "\tElse",
-            "\t\t${processamentoAlternativo}",
-            "\tEndIf",
-            "\t${cursor}"
+            "\t\t",
+            "\tEndIf"
         ],
         "description": "Estrutura de decisão IF-ELSE em ADVPL",
         "documentation": "https://tdn.totvs.com/display/public/framework/IF+...+ENDIF"
     },
     "IfElseIf": {
-        "prefix": "IfElseIf ADVPL",
+        "prefix": "If ElseIf ADVPL",
         "body": [
-            "\tIf ${condicao1}",
-            "\t\t${processamento1}",
-            "\tElseIf ${condicao2}",
-            "\t\t${processamento2}",
+            "\tIf $${cursor}",
+            "\t\t",
+            "\tElseIf ",
+            "\t\t",
             "\tElse",
-            "\t\t${processamentoAlternativo}",
-            "\tEndIf",
-            "\t${cursor}"
+            "\t\t",
+            "\tEndIf"
         ],
         "description": "Estrutura de decisão IF-ELSEIF-ELSE em ADVPL",
         "documentation": "https://tdn.totvs.com/display/public/framework/IF+...+ENDIF"
@@ -41,10 +38,9 @@
     "While": {
         "prefix": "While ADVPL",
         "body": [
-            "\tWhile ${condicao}",
+            "\tWhile ${cursor}",
             "\t\t${processamento}",
-            "\tEndDo",
-            "\t${cursor}"
+            "\tEndDo"
         ],
         "description": "Estrutura de loop WHILE em ADVPL",
         "documentation": "https://tdn.totvs.com/display/public/framework/WHILE+...+ENDDO"
@@ -52,11 +48,10 @@
     "WhileTb": {
         "prefix": "While em Tabela ADVPL",
         "body": [
-            "\tWhile ${tabela}->(! Eof())",
-            "\t\t${processamento}",
+            "\tWhile ${cursor}->(! Eof())",
+            "\t\t",
             "\t\t${tabela}->(DbSkip())",
-            "\tEndDo",
-            "\t${cursor}"
+            "\tEndDo"
         ],
         "description": "Estrutura de loop WHILE para percorrer uma tabela em ADVPL",
         "documentation": "https://tdn.totvs.com/display/public/framework/WHILE+...+ENDDO"
@@ -64,9 +59,9 @@
     "For": {
         "prefix": "For ADVPL",
         "body": [
-            "\tFor ${var} := 1 to Len(${array})",
-            "\t\t${$cursor}",
-            "\tNext ${var}"
+            "\tFor ${cursor} := 1 to Len(${array})",
+            "\t\t",
+            "\tNext ${cursor}"
         ],
         "description": "Estrutura de loop FOR para percorrer um array em ADVPL",
         "documentation": "https://tdn.totvs.com/display/public/framework/FOR+...+NEXT"

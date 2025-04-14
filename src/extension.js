@@ -44,7 +44,7 @@ function activate(context) {
                 const funcInfo = descriptions[word];
                 if (funcInfo) {
                     const markdown = new vscode.MarkdownString();
-                    markdown.appendMarkdown(`### ${word}\n`);
+                    markdown.appendMarkdown(`## ${word.replace(/\b\w/g, char => char.toUpperCase())}\n`);
                     markdown.appendMarkdown(`${funcInfo.description}\n\n`);
     
                     if (funcInfo.parameters && Object.keys(funcInfo.parameters).length > 0) {
