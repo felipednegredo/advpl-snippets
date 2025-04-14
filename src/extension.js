@@ -26,6 +26,44 @@ function activate(context) {
         console.error('Erro ao carregar classesMethods.json:', error.message);
     }
 
+    // Função para exibir o conteúdo do arquivo servers.json em um WebView
+    let disposable = vscode.commands.registerCommand('extension.showServers', () => {
+        const panel = vscode.window.createWebviewPanel(
+            'serverView',
+            'Servers View',
+            vscode.ViewColumn.One,
+            { enableScripts: true }
+        );
+
+        const filePath = path.join(vscode.workspace.rootPath || '', 'servers.json');
+        const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '{}';
+
+        panel.webview.html = getWebviewContent(data);
+    });
+    context.subscriptions.push(disposable);
+
+    function getWebviewContent(jsonData) {
+        return `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Servers</title>
+            <script>
+                const data = ${jsonData};
+                window.onload = () => {
+                    document.getElementById('content').innerText = JSON.stringify(data, null, 2);
+                };
+            </script>
+        </head>
+        <body>
+            <h1>Servers</h1>
+            <pre id="content"></pre>
+        </body>
+        </html>`;
+    }
+
 
     const hoverProvider = vscode.languages.registerHoverProvider('advpl', {
         provideHover(document, position, token) {
@@ -59,6 +97,8 @@ function activate(context) {
                     if (funcInfo.returns) {
                         markdown.appendMarkdown('\n#### Retorno:\n');
                         markdown.appendMarkdown(`- (${funcInfo.returns.type}): ${funcInfo.returns.description}\n`);
+                    } else {
+                        markdown.appendMarkdown('Sem retorno.\n');
                     }
     
                     if (funcInfo.example) {

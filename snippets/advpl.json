@@ -467,5 +467,26 @@
             "Upper(${string})"
         ],
         "description": "Função para Converter uma String para Maiúsculas em ADVPL"
+    },
+    "FwJSONDeserialize": {
+        "prefix": "FwJSONDeserialize",
+        "body": [
+            "FwJSONDeserialize(cJson,oJson)"
+        ],
+        "description": "Função para Desserializar uma String JSON em um Objeto ADVPL"
+    },
+    "Stuff" : {
+        "prefix": "Stuff",
+        "body": [
+            "Stuff(${string}, ${start}, ${length}, ${newString})"
+        ],
+        "description": "Função para Substituir Parte de uma String em ADVPL"
+    },
+    "At" : {
+        "prefix": "At",
+        "body": [
+            "At(${substring}, ${string}, ${start})"
+        ],
+        "description": "Função para Encontrar a Posição de uma Substring em uma String em ADVPL"
     }
 }
