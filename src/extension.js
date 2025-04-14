@@ -35,19 +35,24 @@ function activate(context) {
             { enableScripts: true }
         );
 
-        const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+        const activeEditor = vscode.window.activeTextEditor;
+        let data = '{}';
 
-        const filePath = path.join(workspaceFolder, 'servers.json');
-        console.log('Caminho do arquivo:', filePath);
-
-        if (fs.existsSync(filePath)) {
-            const data = fs.readFileSync(filePath, 'utf-8');
-            console.log('Conteúdo do arquivo:', data);
+        if (activeEditor && activeEditor.document.fileName.endsWith('servers.json')) {
+            console.log('Arquivo servers.json está aberto no editor ativo.');
+            data = activeEditor.document.getText();
         } else {
-            console.error('Arquivo servers.json não encontrado.');
-        }
+            const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+            const filePath = path.join(workspaceFolder, 'servers.json');
+            console.log('Caminho do arquivo:', filePath);
 
-        const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '{}';
+            if (fs.existsSync(filePath)) {
+            data = fs.readFileSync(filePath, 'utf-8');
+            console.log('Conteúdo do arquivo:', data);
+            } else {
+            console.error('Arquivo servers.json não encontrado.');
+            }
+        }
 
         panel.webview.html = getWebviewContent(data);
     });
