@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Servers</title>
     <script>
-        const data = ${JSON.stringify(jsonData)};
+        const data = JSON.parse('<%= JSON.stringify(jsonData) %>');
         window.onload = () => {
             const content = document.getElementById('content');
             const table = document.createElement('table');
             table.border = '1';
-
+    
             // Create table headers
             const headers = Object.keys(data[0]);
             const thead = document.createElement('thead');
@@ -22,7 +22,7 @@
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
-
+    
             // Create table rows
             const tbody = document.createElement('tbody');
             data.forEach(item => {
@@ -40,7 +40,7 @@
                 tbody.appendChild(row);
             });
             table.appendChild(tbody);
-
+    
             content.appendChild(table);
         };
     </script>
