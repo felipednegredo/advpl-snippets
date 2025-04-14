@@ -1,3 +1,5 @@
+import { json } from 'stream/consumers';
+
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
@@ -46,24 +48,24 @@ function activate(context) {
             const filePath = path.join(workspaceFolder, 'servers.json');
             console.log('Caminho do arquivo:', filePath);
 
-            if (fs.existsSync(filePath)) {
-            data = fs.readFileSync(filePath, 'utf-8');
-            console.log('Conteúdo do arquivo:', data);
-            } else {
-            console.error('Arquivo servers.json não encontrado.');
-            }
+          // Carregar o HTML do arquivo
+          const htmlPath = path.join(context.extensionPath, 'src', 'webview.html');
+          let htmlContent = fs.readFileSync(htmlPath, 'utf8');
+
+          // Ler o arquivo servers.json
+            const jsonData = fs.readFileSync(filePath, 'utf8');
+
+          // Substituir o placeholder pelos dados dinâmicos
+          htmlContent = htmlContent.replace(
+              '<!-- DATA_PLACEHOLDER -->',
+              `<script>const data = ${JSON.stringify(jsonData)};</script>`
+          );
+          panel.webview.html = htmlContent;
+
         }
 
-        panel.webview.html = getWebviewContent(data);
     });
     context.subscriptions.push(disposable);
-
-    function getWebviewContent(jsonData) {
-        const htmlPath = path.join(__dirname, 'webview.html');
-        let htmlContent = fs.readFileSync(htmlPath, 'utf8');
-        htmlContent = htmlContent.replace('{{data}}', JSON.stringify(jsonData));
-        return htmlContent;
-    }
 
 
     const hoverProvider = vscode.languages.registerHoverProvider('advpl', {
