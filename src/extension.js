@@ -47,21 +47,24 @@ function activate(context) {
             const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
             const filePath = path.join(workspaceFolder, 'servers.json');
             console.log('Caminho do arquivo:', filePath);
-
-          // Carregar o HTML do arquivo
-          const htmlPath = path.join(context.extensionPath, 'src', 'webview.html');
-          let htmlContent = fs.readFileSync(htmlPath, 'utf8');
-
-          // Ler o arquivo servers.json
-            const jsonData = fs.readFileSync(filePath, 'utf8');
-
-          // Substituir o placeholder pelos dados dinâmicos
-          htmlContent = htmlContent.replace(
-              '<!-- DATA_PLACEHOLDER -->',
-              `<script>const data = ${JSON.stringify(jsonData)};</script>`
-          );
-          panel.webview.html = htmlContent;
-
+    
+            try {
+                const jsonData = fs.readFileSync(filePath, 'utf8');
+                console.log('Conteúdo do arquivo servers.json:', jsonData);
+    
+                const htmlPath = path.join(context.extensionPath, 'src', 'webview.html');
+                let htmlContent = fs.readFileSync(htmlPath, 'utf8');
+    
+                htmlContent = htmlContent.replace(
+                    '<!-- DATA_PLACEHOLDER -->',
+                    `<script>const data = ${JSON.stringify(jsonData)};</script>`
+                );
+    
+                panel.webview.html = htmlContent;
+            } catch (error) {
+                console.error('Erro ao ler o arquivo servers.json:', error.message);
+                vscode.window.showErrorMessage('Erro ao carregar o arquivo servers.json.');
+            }
         }
 
     });
