@@ -36,7 +36,17 @@ function activate(context) {
         );
 
         const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+
         const filePath = path.join(workspaceFolder, 'servers.json');
+        console.log('Caminho do arquivo:', filePath);
+
+        if (fs.existsSync(filePath)) {
+            const data = fs.readFileSync(filePath, 'utf-8');
+            console.log('Conteúdo do arquivo:', data);
+        } else {
+            console.error('Arquivo servers.json não encontrado.');
+        }
+
         const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '{}';
 
         panel.webview.html = getWebviewContent(data);
@@ -52,7 +62,7 @@ function activate(context) {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Servers</title>
             <script>
-                const data = ${jsonData};
+                const data = ${JSON.stringify(jsonData)};
                 window.onload = () => {
                     document.getElementById('content').innerText = JSON.stringify(data, null, 2);
                 };
