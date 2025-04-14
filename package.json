@@ -2,7 +2,7 @@
   "name": "advpl-devtools",
   "displayName": "advpl-devtools",
   "description": "Uma extensão para facilitar o desenvolvimento em ADVPL",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "publisher": "felipednegredo",
   "icon": "img/logo.png",
   "engines": {
@@ -57,6 +57,10 @@
     {
       "command": "advplSnippets.generateDocumentation",
       "title": "Gerar Documentação para Função"
+    },
+    {
+      "command": "advplSnippets.showServers",
+      "title": "Mostrar Servidores"
     }
   ],
   "keybindings": [

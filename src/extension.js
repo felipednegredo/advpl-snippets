@@ -27,7 +27,7 @@ function activate(context) {
     }
 
     // Função para exibir o conteúdo do arquivo servers.json em um WebView
-    let disposable = vscode.commands.registerCommand('extension.showServers', () => {
+    let disposable = vscode.commands.registerCommand('advplSnippets.showServers', () => {
         const panel = vscode.window.createWebviewPanel(
             'serverView',
             'Servers View',
@@ -35,7 +35,8 @@ function activate(context) {
             { enableScripts: true }
         );
 
-        const filePath = path.join(vscode.workspace.rootPath || '', 'servers.json');
+        const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+        const filePath = path.join(workspaceFolder, 'servers.json');
         const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '{}';
 
         panel.webview.html = getWebviewContent(data);
