@@ -59,25 +59,10 @@ function activate(context) {
     context.subscriptions.push(disposable);
 
     function getWebviewContent(jsonData) {
-        return `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Servers</title>
-            <script>
-                const data = ${JSON.stringify(jsonData)};
-                window.onload = () => {
-                    document.getElementById('content').innerText = JSON.stringify(data, null, 2);
-                };
-            </script>
-        </head>
-        <body>
-            <h1>Servers</h1>
-            <pre id="content"></pre>
-        </body>
-        </html>`;
+        const htmlPath = path.join(__dirname, 'webview.html');
+        let htmlContent = fs.readFileSync(htmlPath, 'utf8');
+        htmlContent = htmlContent.replace('{{data}}', JSON.stringify(jsonData));
+        return htmlContent;
     }
 
 
