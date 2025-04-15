@@ -207,18 +207,9 @@ const completionProvider = vscode.languages.registerCompletionItemProvider(
                     defineItem.documentation = new vscode.MarkdownString(`**Define:** ${defineName}\n**Valor:** \`${defineValue}\``);
                     cache.defines.push(defineItem);
                 }
-
-                // Captura classes e seus métodos
-                const loadedClassesData = JSON.parse(fs.readFileSync(path.join(__dirname, 'classesMethods.json'), 'utf8'));
-                for (const [className, classInfo] of Object.entries(loadedClassesData)) {
-                    const classItem = new vscode.CompletionItem(className, vscode.CompletionItemKind.Class);
-                    classItem.detail = `Classe: ${classInfo.description}`;
-                    classItem.documentation = new vscode.MarkdownString(`**Descrição:** ${classInfo.description}`);
-                    cache.classes.push(classItem);
-                }
             }
 
-            return [...cache.functions, ...cache.variables, ...cache.defines, ...cache.classes];
+            return [...cache.functions, ...cache.variables, ...cache.defines];
         },
 
         resolveCompletionItem(item, token) {
@@ -250,7 +241,6 @@ const completionProvider = vscode.languages.registerCompletionItemProvider(
     },
     '.', ':' // Ativa o IntelliSense após digitar "." ou ":"
 );
-
 
     // Comando para gerar documentação automática
     const generateDocumentationCommand = vscode.commands.registerCommand('advplSnippets.generateDocumentation', () => {
@@ -318,6 +308,101 @@ const completionProvider = vscode.languages.registerCompletionItemProvider(
         vscode.window.showInformationMessage(`Documentação gerada para a função "${functionName}".`);
     });
 
+
+    const classMethodCompletion = vscode.languages.registerCompletionItemProvider('advpl', {
+        provideCompletionItems(document, position) {
+            const line = document.lineAt(position).text;
+            const wordRange = document.getWordRangeAtPosition(position);
+            const word = wordRange ? document.getText(wordRange) : null;
+
+            const objMatch = line.slice(0, position.character).match(/([a-z]\w*)[:\.][a-zA-Z_]*/);
+            if (!objMatch) return;
+
+            const objName = objMatch[1];
+
+            const fullText = document.getText();
+            const objRegex = new RegExp(`${objName}\\s*:=\\s*(?:([a-zA-Z_][a-zA-Z0-9_]*)\\(.*?\\)|([a-zA-Z_][a-zA-Z0-9_]*)::New\\(.*?\\))`, 'gi');
+
+            let match;
+            let className = null;
+            while ((match = objRegex.exec(fullText)) !== null) {
+                className = match[1] || match[2];
+            }
+
+            if (!className || !classesData[className]) return;
+
+            const methodItems = []; // Initialize an array to store method completion items
+            const methods = classesData[className].methods || {};
+
+            for (const [methodName, methodInfo] of Object.entries(methods)) {
+                const item = new vscode.CompletionItem(methodName, vscode.CompletionItemKind.Method);
+                item.detail = `Classe ${className}`;
+                if (methodInfo.description) {
+                    item.documentation = new vscode.MarkdownString(`**${methodInfo.description}**`);
+                }
+                if (methodInfo.parameters && methodInfo.parameters.length > 0) {
+                    item.insertText = new vscode.SnippetString(
+                        `${methodName}(${methodInfo.parameters.map((param, i) => `\${${i + 1}:${param}}`).join(', ')})`
+                    );
+                } else {
+                    item.insertText = new vscode.SnippetString(`${methodName}()`);
+                }
+                methodItems.push(item);
+            }
+
+            return methodItems;
+        }
+    }, ':', '.');
+
+    const classMethodHover = vscode.languages.registerHoverProvider('advpl', {
+        provideHover(document, position) {
+            const line = document.lineAt(position).text;
+            const wordRange = document.getWordRangeAtPosition(position);
+            if (!wordRange) return;
+
+            const word = document.getText(wordRange);
+            const linePrefix = line.slice(0, position.character);
+            const objMatch = linePrefix.match(/([a-z]\w*)[:\.](\w*)$/);
+            if (!objMatch) return;
+
+            const objName = objMatch[1];
+            const methodName = objMatch[2];
+
+            const fullText = document.getText();
+            const objRegex = new RegExp(`${objName}\s*:=\s*(?:([a-zA-Z_][a-zA-Z0-9_]*)\(.*?\)|([a-zA-Z_][a-zA-Z0-9_]*)\:\:New\(.*?\))`, 'gi');
+
+            let match;
+            let className = null;
+            while ((match = objRegex.exec(fullText)) !== null) {
+                className = match[1] || match[2];
+            }
+
+            if (!className || !classesData[className]) return;
+
+            const methods = classesData[className].methods || {};
+            const methodInfo = methods[methodName];
+
+            if (!methodInfo) return;
+
+            const markdown = new vscode.MarkdownString();
+            markdown.appendMarkdown(`### ${className}:${methodName}\n`);
+            if (methodInfo.description) markdown.appendMarkdown(`**Descrição:** ${methodInfo.description}\n`);
+            if (methodInfo.parameters?.length) {
+                markdown.appendMarkdown(`\n**Parâmetros:**\n`);
+                for (const param of methodInfo.parameters) {
+                    markdown.appendMarkdown(`- \`${param}\`\n`);
+                }
+            }
+            if (methodInfo.returns) {
+                markdown.appendMarkdown(`\n**Retorno:** ${methodInfo.returns}\n`);
+            }
+
+            return new vscode.Hover(markdown);
+        }
+    });
+
+    context.subscriptions.push(classMethodCompletion);
+    context.subscriptions.push(classMethodHover);
     context.subscriptions.push(generateDocumentationCommand);
     context.subscriptions.push(hoverProvider);
     context.subscriptions.push(completionProvider);
