@@ -1,310 +1,281 @@
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 
+let descriptions = {};
+let classesData = {};
+let cache = null;
 
-// === Utils ===
-
-function loadJSONFile(filePath, defaultValue = {}) {
-    try {
-        const content = fs.readFileSync(filePath, 'utf8');
-        return JSON.parse(content);
-    } catch (error) {
-        console.error(`Erro ao carregar ${filePath}:`, error.message);
-        return defaultValue;
-    }
-}
-
-function buildMarkdownFromFunction(word, funcInfo) {
-    const md = new vscode.MarkdownString();
-    const title = word.replace(/\b\w/g, char => char.toUpperCase());
-
-    md.appendMarkdown(`## ${title}\n`);
-    md.appendMarkdown(`${funcInfo.description}\n\n`);
-
-    if (funcInfo.parameters && Object.keys(funcInfo.parameters).length > 0) {
-        md.appendMarkdown('#### Parâmetros\n');
-        for (const [name, info] of Object.entries(funcInfo.parameters)) {
-            md.appendMarkdown(`- \`${name}\` (${info.type}): ${info.description}\n`);
-        }
-        md.appendMarkdown('\n');
-    } else {
-        md.appendMarkdown('_Sem parâmetros._\n\n');
-    }
-
-    if (funcInfo.returns) {
-        md.appendMarkdown('#### Retorno\n');
-        md.appendMarkdown(`- (${funcInfo.returns.type}): ${funcInfo.returns.description}\n\n`);
-    } else {
-        md.appendMarkdown('_Sem retorno._\n\n');
-    }
-
-    if (funcInfo.example) {
-        md.appendMarkdown('#### Exemplo\n');
-        md.appendCodeblock(funcInfo.example, 'advpl');
-    }
-
-    if (funcInfo.documentation) {
-        md.appendMarkdown(`\n[🔗 Documentação completa](${funcInfo.documentation})\n`);
-    }
-
-    md.isTrusted = true;
-    return md;
-}
-
-function extractFunctionBlock(document, position) {
-    const text = document.getText();
-    const regex = /\b(?:STATIC |USER )?FUNCTION\s+([a-zA-Z_]\w*)\s*\(([^)]*)\)\s*\n([\s\S]*?)(?=\n\b(?:STATIC |USER )?FUNCTION|\Z)/gi;
-    let match;
-
-    while ((match = regex.exec(text)) !== null) {
-        const start = document.positionAt(match.index);
-        const end = document.positionAt(match.index + match[0].length);
-        if (position.isAfterOrEqual(start) && position.isBeforeOrEqual(end)) {
-            return {
-                name: match[1],
-                params: match[2].split(',').map(p => p.trim()).filter(Boolean),
-                body: match[3].trim(),
-                range: new vscode.Range(start, end)
-            };
-        }
-    }
-
-    return null;
-}
-
-function buildFunctionDocumentationBlock(func) {
-    const lines = [
-        `/*/ {Protheus.doc}`,
-        `Descrição: Descreva aqui o propósito da função.`,
-        `@type user`,
-        `@since ${new Date().toLocaleDateString()}`,
-        `@version 1.0`,
-        ...func.params.map(p => `@param ${p}, Tipo desconhecido, Descrição`),
-        `@return Tipo, Descrição`,
-        `@example`,
-        `Exemplo de uso da função.`,
-        `@see Referências adicionais.`,
-        `/*/`
-    ];
-    return lines.join('\n');
-}
-
-function insertDocumentationBlock(editor, func) {
-    const docBlock = buildFunctionDocumentationBlock(func);
-    editor.edit(builder => {
-        builder.insert(func.range.start, docBlock + '\n');
-    });
-}
-
-
-// === Server Utils ===
-
-function getServerConfigFile() {
-    return path.join(getServerConfigPath(), "servers.json");
-}
-
-function getServerConfigPath() {
-    return isWorkspaceServerConfig() ? getVSCodePath() : path.join(os.homedir(), ".totvsls");
-}
-
-function isWorkspaceServerConfig() {
-    return false;
-}
-
-function getVSCodePath() {
-    const folder = vscode.workspace.workspaceFolders?.[0];
-    return folder ? path.join(folder.uri.fsPath, ".vscode") : "";
-}
-
-function getServers() {
-    const servers = loadJSONFile(getServerConfigFile(), { configurations: [], savedTokens: {} });
-    return servers.configurations;
-}
-
-function lastConnectedServer() {
-    const servers = loadJSONFile(getServerConfigFile(), {});
-    if (servers?.lastConnectedServer) {
-        return getServerById(servers.lastConnectedServer);
-    }
-    return undefined;
-}
-
-function getServerById(id) {
-    const servers = loadJSONFile(getServerConfigFile(), {});
-    return servers.configurations.find(server => server.id === id);
-}
-
-function getSavedTokens(id, environment) {
-    const servers = loadJSONFile(getServerConfigFile(), {});
-    if (servers.savedTokens) {
-        const filtered = servers.savedTokens.filter(element => element[0] === `${id}:${environment}`);
-        if (filtered.length) {
-            return filtered[0][1].token;
-        }
-    }
-    return null;
-}
-
-function updateSavedToken(id, environment, token) {
-    const servers = loadJSONFile(getServerConfigFile(), {});
-    const key = `${id}:${environment}`;
-    const data = { id, environment, token };
-    servers.savedTokens[key] = data;
-    fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
-}
-
-function saveSelectServer(id, token, environment, username) {
-    const servers = loadJSONFile(getServerConfigFile(), {});
-    servers.configurations.forEach(element => {
-        if (element.id === id) {
-            if (!element.environments) {
-                element.environments = [environment];
-            } else if (!element.environments.includes(environment)) {
-                element.environments.push(environment);
-            }
-            element.username = username;
-            element.environment = environment;
-            element.token = token;
-            servers.connectedServer = element;
-            servers.lastConnectedServer = element.id;
-        }
-    });
-    fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
-}
-
-function saveServerEnvironmentUsername(id, environment, username) {
-    const servers = loadJSONFile(getServerConfigFile(), {});
-    let updated = false;
-    servers.configurations.forEach(element => {
-        if (element.id === id) {
-            if (!element.environments) {
-                element.environments = [environment];
-            } else if (!element.environments.includes(environment)) {
-                element.environments.push(environment);
-            }
-            element.environment = environment;
-            element.username = username;
-            updated = true;
-        }
-    });
-    if (updated) {
-        fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
-    } else {
-        vscode.window.showWarningMessage("Nenhum servidor encontrado com o ID informado.");
-    }
-}
-
-function saveConnectionToken(id, token, environment) {
-    const servers = loadJSONFile(getServerConfigFile(), {});
-    const key = `${id}:${environment}`;
-    if (!servers.savedTokens) {
-        servers.savedTokens = [];
-    }
-    let found = false;
-    servers.savedTokens.forEach((element, index) => {
-        if (element[0] === key) {
-            servers.savedTokens[index][1] = { id, token };
-            found = true;
-        }
-    });
-    if (!found) {
-        servers.savedTokens.push([key, { id, token }]);
-    }
-    fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
-}
-
-
-// === Webview: Mostrar Servidores ===
-
-export function registerShowServersCommand(context) {
-    const disposable = vscode.commands.registerCommand("advplSnippets.showServers", () => {
-        const panel = vscode.window.createWebviewPanel(
-            "serverView",
-            "Servidores Configurados",
-            vscode.ViewColumn.One,
-            { enableScripts: true }
-        );
-
-        try {
-            const servers = getServers();
-            const jsonData = JSON.stringify(servers, null, 2);
-
-            const htmlPath = path.join(context.extensionPath, "src", "webview.html");
-            let htmlContent = fs.readFileSync(htmlPath, "utf8");
-
-            htmlContent = htmlContent.replace("const servers = [];", `const servers = ${jsonData};`);
-            panel.webview.html = htmlContent;
-        } catch (error) {
-            console.error("Erro ao carregar os servidores:", error);
-            vscode.window.showErrorMessage("Erro ao carregar os servidores configurados.");
-        }
-    });
-
-    context.subscriptions.push(disposable);
-}
-
-// === Ativação da Extensão ===
-
-/** @param {vscode.ExtensionContext} context */
 function activate(context) {
-    const docsPath =  path.join(__dirname, 'functionsDescriptions.json');
-    const advplDocs = loadJSONFile(docsPath);
+    descriptions = loadJson('functionsDescriptions.json', true);
+    classesData = loadJson('classesMethods.json');
 
-    // Hover Provider
-    const hoverProvider = vscode.languages.registerHoverProvider('advpl', {
-        provideHover(document, position) {
-            const range = document.getWordRangeAtPosition(position);
-            const word = document.getText(range);
-            const funcInfo = advplDocs[word.toLowerCase()];
-            if (funcInfo) {
-                return new vscode.Hover(buildMarkdownFromFunction(word, funcInfo));
-            }
-            return null;
-        }
-    });
-
-    // Comando para adicionar documentação Protheus
-    const docCommand = vscode.commands.registerCommand('advplSnippets.addDocumentation', () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showInformationMessage('Nenhum editor ativo.');
-            return;
-        }
-
-        const func = extractFunctionBlock(editor.document, editor.selection.active);
-        if (!func) {
-            vscode.window.showWarningMessage('Nenhuma função encontrada na posição atual.');
-            return;
-        }
-
-        const existingDocRange = new vscode.Range(
-            func.range.start.translate(-8), // procura linhas acima da função
-            func.range.start
-        );
-        const existingText = editor.document.getText(existingDocRange);
-
-        if (existingText.includes('/*/ {Protheus.doc}')) {
-            vscode.window.showWarningMessage('A função já possui um bloco de documentação.');
-            return;
-        }
-
-        insertDocumentationBlock(editor, func);
-        vscode.window.showInformationMessage('Bloco de documentação adicionado!');
-    });
-
-    // Comando para mostrar os servidores configurados
-    registerShowServersCommand(context);
-
-    context.subscriptions.push(hoverProvider, docCommand);
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.showServers', showServersWebView),
+        vscode.commands.registerCommand('advplSnippets.generateDocumentation', generateDocumentation),
+        registerHoverProvider(),
+        registerCompletionProvider()
+    );
 }
-
-// === Desativação da Extensão ===
 
 function deactivate() {}
 
-module.exports = {
-    activate,
-    deactivate
-};
+function loadJson(fileName, toLowerCaseKeys = false) {
+    try {
+        const filePath = path.join(__dirname, fileName);
+        const content = fs.readFileSync(filePath, 'utf8');
+        const parsed = JSON.parse(content);
+        return toLowerCaseKeys
+            ? Object.fromEntries(Object.entries(parsed).map(([k, v]) => [k.toLowerCase(), v]))
+            : parsed;
+    } catch (error) {
+        console.error(`Erro ao carregar ${fileName}:`, error.message);
+        return {};
+    }
+}
+
+function showServersWebView() {
+    const panel = vscode.window.createWebviewPanel(
+        'serverView',
+        'Servers View',
+        vscode.ViewColumn.One,
+        { enableScripts: true }
+    );
+
+    const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+    const filePath = path.join(workspacePath, 'servers.json');
+    const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
+
+    panel.webview.html = getWebviewContent(data);
+}
+
+function getWebviewContent(jsonData) {
+    return `
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Servers</title>
+        <style>
+            body { font-family: sans-serif; padding: 1rem; }
+            pre { background: #f5f5f5; padding: 1rem; border-radius: 8px; }
+        </style>
+        <script>
+            const data = ${jsonData};
+            window.onload = () => {
+                document.getElementById('content').innerText = JSON.stringify(data, null, 2);
+            };
+        </script>
+    </head>
+    <body>
+        <h1>Servidores Configurados</h1>
+        <pre id="content"></pre>
+    </body>
+    </html>`;
+}
+
+function registerHoverProvider() {
+    return vscode.languages.registerHoverProvider('advpl', {
+        provideHover(document, position) {
+            try {
+                const range = document.getWordRangeAtPosition(position, /\b\w+\b/);
+                const word = document.getText(range)?.toLowerCase();
+
+                if (!word) return null;
+
+                const funcInfo = descriptions[word];
+                if (funcInfo) return createHoverFromDescription(word, funcInfo);
+
+                const text = document.getText();
+                const userFuncRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/gi;
+                let match;
+
+                while ((match = userFuncRegex.exec(text)) !== null) {
+                    if (match[2].toLowerCase() === word) {
+                        const markdown = new vscode.MarkdownString(`### ${match[2]}\nFunção definida pelo usuário.`);
+                        markdown.isTrusted = true;
+                        return new vscode.Hover(markdown);
+                    }
+                }
+
+                return null;
+            } catch (err) {
+                console.error('Erro no HoverProvider:', err);
+                return null;
+            }
+        }
+    });
+}
+
+function createHoverFromDescription(word, info) {
+    const markdown = new vscode.MarkdownString();
+    const title = word.replace(/\b\w/g, char => char.toUpperCase());
+
+    markdown.appendMarkdown(`## ${title}\n${info.description || ''}\n\n`);
+
+    if (info.parameters && Object.keys(info.parameters).length > 0) {
+        markdown.appendMarkdown('#### Parâmetros:\n');
+        for (const [param, meta] of Object.entries(info.parameters)) {
+            markdown.appendMarkdown(`- \`${param}\` (${meta.type}): ${meta.description}\n`);
+        }
+    }
+
+    markdown.appendMarkdown(info.returns
+        ? `\n#### Retorno:\n- (${info.returns.type}): ${info.returns.description}\n`
+        : '\nSem retorno.\n'
+    );
+
+    if (info.example) {
+        markdown.appendMarkdown('\n#### Exemplo:\n');
+        markdown.appendCodeblock(info.example, 'advpl');
+    }
+
+    if (info.documentation) {
+        markdown.appendMarkdown(`\n[Documentação completa](${info.documentation})\n`);
+    }
+
+    markdown.isTrusted = true;
+    return new vscode.Hover(markdown);
+}
+
+function registerCompletionProvider() {
+    return vscode.languages.registerCompletionItemProvider(
+        { language: 'advpl', scheme: 'file' },
+        {
+            provideCompletionItems(document) {
+                if (cache) return getCachedItems();
+
+                cache = { functions: [], variables: [], defines: [], classes: [] };
+                const text = document.getText();
+
+                collectFunctions(text);
+                collectVariables(text);
+                collectDefines(text);
+                collectClasses();
+
+                return getCachedItems();
+            },
+
+            resolveCompletionItem(item) {
+                if (item.kind === vscode.CompletionItemKind.Class) {
+                    const classInfo = classesData[item.label];
+                    if (classInfo && classInfo.methods) {
+                        const [methodName] = Object.keys(classInfo.methods);
+                        const methodInfo = classInfo.methods[methodName];
+
+                        const methodItem = new vscode.CompletionItem(methodName, vscode.CompletionItemKind.Method);
+                        methodItem.detail = `Método: ${methodInfo.description}`;
+                        methodItem.documentation = new vscode.MarkdownString(`**Descrição:** ${methodInfo.description}`);
+                        methodItem.insertText = methodInfo.parameters
+                            ? new vscode.SnippetString(`${methodName}(${methodInfo.parameters.map((p, i) => `\${${i + 1}:${p}}`).join(', ')})`)
+                            : `${methodName}()`;
+
+                        return methodItem;
+                    }
+                }
+                return null;
+            }
+        },
+        '.', ':'
+    );
+}
+
+function getCachedItems() {
+    return [...cache.functions, ...cache.variables, ...cache.defines, ...cache.classes];
+}
+
+function collectFunctions(text) {
+    const regex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
+    let match;
+    while ((match = regex.exec(text))) {
+        const [type, name, params] = [match[1], match[2], match[3]];
+        const paramList = params ? params.split(',').map(p => p.trim()) : [];
+
+        const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Function);
+        item.detail = `${type} definida pelo usuário`;
+        item.documentation = new vscode.MarkdownString(`**Tipo:** ${type}\n**Parâmetros:** ${paramList.join(', ') || 'Nenhum'}`);
+        item.insertText = paramList.length
+            ? new vscode.SnippetString(`${name}(${paramList.map((p, i) => `\${${i + 1}:${p}}`).join(', ')})`)
+            : `${name}()`;
+
+        cache.functions.push(item);
+    }
+}
+
+function collectVariables(text) {
+    const regex = /\b(LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*:=\s*(.+))?/gi;
+    let match;
+    while ((match = regex.exec(text))) {
+        const [type, name, value] = [match[1].toUpperCase(), match[2], match[3]];
+        const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
+        item.detail = `${type} - ${value ? `Valor inicial: ${value}` : 'Sem valor inicial'}`;
+        item.documentation = new vscode.MarkdownString(`**Escopo:** ${type}\n${value ? `**Valor inicial:** \`${value.trim()}\`` : ''}`);
+        cache.variables.push(item);
+    }
+}
+
+function collectDefines(text) {
+    const regex = /#DEFINE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/gi;
+    let match;
+    while ((match = regex.exec(text))) {
+        const [name, value] = [match[1], match[2]];
+        const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Constant);
+        item.detail = `Define - Valor: ${value}`;
+        item.documentation = new vscode.MarkdownString(`**Define:** ${name}\n**Valor:** \`${value}\``);
+        cache.defines.push(item);
+    }
+}
+
+function collectClasses() {
+    for (const [className, classInfo] of Object.entries(classesData)) {
+        const item = new vscode.CompletionItem(className, vscode.CompletionItemKind.Class);
+        item.detail = `Classe: ${classInfo.description}`;
+        item.documentation = new vscode.MarkdownString(`**Descrição:** ${classInfo.description}`);
+        cache.classes.push(item);
+    }
+}
+
+function generateDocumentation() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) return vscode.window.showErrorMessage('Nenhum editor ativo encontrado.');
+
+    const text = editor.document.getText();
+    const cursor = editor.selection.active;
+    const regex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
+
+    let match;
+    while ((match = regex.exec(text))) {
+        const start = editor.document.positionAt(match.index);
+        const end = editor.document.positionAt(match.index + match[0].length);
+        if (cursor.isAfterOrEqual(start) && cursor.isBeforeOrEqual(end)) {
+            const [type, name, params] = [match[1], match[2], match[3]];
+            const paramList = params ? params.split(',').map(p => p.trim()) : [];
+
+            const docLines = [
+                '/*/ {Protheus.doc}',
+                `Descrição: Descreva aqui o propósito da função.`,
+                `@type ${type.toLowerCase()}`,
+                `@since ${new Date().toLocaleDateString()}`,
+                `@version 1.0`,
+                ...paramList.map(p => `@param ${p}, Tipo desconhecido, Descrição`),
+                `@return Tipo, Descrição`,
+                `@example`,
+                `Exemplo de uso da função.`,
+                `@see Referências adicionais.`,
+                '/*/'
+            ];
+
+            editor.edit(builder => {
+                builder.insert(start, docLines.join('\n') + '\n');
+            });
+
+            vscode.window.showInformationMessage(`Documentação gerada para a função "${name}".`);
+            return;
+        }
+    }
+
+    vscode.window.showErrorMessage('Nenhuma função encontrada na posição atual.');
+}
+
+module.exports = { activate, deactivate };
