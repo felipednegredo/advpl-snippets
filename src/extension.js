@@ -1,6 +1,8 @@
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+
 
 // === Utils ===
 
@@ -50,6 +52,202 @@ function buildMarkdownFromFunction(word, funcInfo) {
     md.isTrusted = true;
     return md;
 }
+
+function extractFunctionBlock(document, position) {
+    const text = document.getText();
+    const regex = /\b(?:STATIC |USER )?FUNCTION\s+([a-zA-Z_]\w*)\s*\(([^)]*)\)\s*\n([\s\S]*?)(?=\n\b(?:STATIC |USER )?FUNCTION|\Z)/gi;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+        const start = document.positionAt(match.index);
+        const end = document.positionAt(match.index + match[0].length);
+        if (position.isAfterOrEqual(start) && position.isBeforeOrEqual(end)) {
+            return {
+                name: match[1],
+                params: match[2].split(',').map(p => p.trim()).filter(Boolean),
+                body: match[3].trim(),
+                range: new vscode.Range(start, end)
+            };
+        }
+    }
+
+    return null;
+}
+
+function buildFunctionDocumentationBlock(func) {
+    const lines = [
+        `/*/ {Protheus.doc}`,
+        `Descrição: Descreva aqui o propósito da função.`,
+        `@type user`,
+        `@since ${new Date().toLocaleDateString()}`,
+        `@version 1.0`,
+        ...func.params.map(p => `@param ${p}, Tipo desconhecido, Descrição`),
+        `@return Tipo, Descrição`,
+        `@example`,
+        `Exemplo de uso da função.`,
+        `@see Referências adicionais.`,
+        `/*/`
+    ];
+
+    return lines.join('\n');
+}
+
+function insertDocumentationBlock(editor, func) {
+    const docBlock = buildFunctionDocumentationBlock(func);
+    editor.edit(builder => {
+        builder.insert(func.range.start, docBlock + '\n');
+    });
+}
+
+
+// === Server Utils ===
+
+function getServerConfigFile() {
+    return path.join(getServerConfigPath(), "servers.json");
+}
+
+function getServerConfigPath() {
+    return isWorkspaceServerConfig() ? getVSCodePath() : path.join(os.homedir(), ".totvsls");
+}
+
+function isWorkspaceServerConfig() {
+    return false;
+}
+
+function getVSCodePath() {
+    const folder = vscode.workspace.workspaceFolders?.[0];
+    return folder ? path.join(folder.uri.fsPath, ".vscode") : "";
+}
+
+function getServers() {
+    const servers = loadJSONFile(getServerConfigFile(), { configurations: [], savedTokens: {} });
+    return servers.configurations;
+}
+
+function lastConnectedServer() {
+    const servers = loadJSONFile(getServerConfigFile(), {});
+    if (servers?.lastConnectedServer) {
+        return getServerById(servers.lastConnectedServer);
+    }
+    return undefined;
+}
+
+function getServerById(id) {
+    const servers = loadJSONFile(getServerConfigFile(), {});
+    return servers.configurations.find(server => server.id === id);
+}
+
+function getSavedTokens(id, environment) {
+    const servers = loadJSONFile(getServerConfigFile(), {});
+    let token;
+    if (servers.savedTokens) {
+        const filtered = servers.savedTokens.filter(element => element[0] === `${id}:${environment}`);
+        if (filtered.length) {
+            token = filtered[0][1].token;
+        }
+    }
+    return token;
+}
+
+function updateSavedToken(id, environment, token) {
+    const servers = loadJSONFile(getServerConfigFile(), {});
+    const key = `${id}:${environment}`;
+    const data = { id, environment, token };
+    servers.savedTokens[key] = data;
+    fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
+}
+
+function saveSelectServer(id, token, environment, username) {
+    const servers = loadJSONFile(getServerConfigFile(), {});
+    servers.configurations.forEach(element => {
+        if (element.id === id) {
+            if (!element.environments) {
+                element.environments = [environment];
+            } else if (!element.environments.includes(environment)) {
+                element.environments.push(environment);
+            }
+            element.username = username;
+            element.environment = environment;
+            element.token = token;
+            servers.connectedServer = element;
+            servers.lastConnectedServer = element.id;
+        }
+    });
+    fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
+}
+
+function saveServerEnvironmentUsername(id, environment, username) {
+    const servers = loadJSONFile(getServerConfigFile(), {});
+    let updated = false;
+    servers.configurations.forEach(element => {
+        if (element.id === id) {
+            if (!element.environments) {
+                element.environments = [environment];
+            } else if (!element.environments.includes(environment)) {
+                element.environments.push(environment);
+            }
+            element.environment = environment;
+            element.username = username;
+            updated = true;
+        }
+    });
+    if (updated) {
+        fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
+    } else {
+        vscode.window.showWarningMessage("Nenhum servidor encontrado com o ID informado.");
+    }
+}
+
+function saveConnectionToken(id, token, environment) {
+    const servers = loadJSONFile(getServerConfigFile(), {});
+    const key = `${id}:${environment}`;
+    if (!servers.savedTokens) {
+        servers.savedTokens = [];
+    }
+    let found = false;
+    servers.savedTokens.forEach((element, index) => {
+        if (element[0] === key) {
+            servers.savedTokens[index][1] = { id, token };
+            found = true;
+        }
+    });
+    if (!found) {
+        servers.savedTokens.push([key, { id, token }]);
+    }
+    fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
+}
+
+export function registerShowServersCommand(context) {
+    const disposable = vscode.commands.registerCommand("advplSnippets.showServers", () => {
+      const panel = vscode.window.createWebviewPanel(
+        "serverView",
+        "Servidores Configurados",
+        vscode.ViewColumn.One,
+        { enableScripts: true }
+      );
+  
+      try {
+        const servers = getServers();
+        const jsonData = JSON.stringify(servers, null, 2);
+  
+        const htmlPath = path.join(context.extensionPath, "src", "webview.html");
+        let htmlContent = fs.readFileSync(htmlPath, "utf8");
+  
+        // Injeta os dados direto no HTML
+        htmlContent = htmlContent.replace(
+          "const servers = [];",
+          `const servers = ${jsonData};`
+        );
+  
+        panel.webview.html = htmlContent;
+      } catch (error) {
+        console.error("Erro ao carregar os servidores:", error);
+        vscode.window.showErrorMessage("Erro ao carregar os servidores configurados.");
+      }
+    });
+  
+    context.subscriptions.push(disposable);
+  }
 
 // === Main Extension Activation ===
 

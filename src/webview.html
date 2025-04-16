@@ -1,52 +1,28 @@
+<!-- src/webview.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servers</title>
-    <!-- DATA_PLACEHOLDER -->
-    <script>
-        window.onload = () => {
-            const content = document.getElementById('content');
-            const table = document.createElement('table');
-            table.border = '1';
-    
-            // Create table headers
-            const headers = Object.keys(data[0]);
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
-            headers.forEach(header => {
-                const th = document.createElement('th');
-                th.innerText = header;
-                headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-    
-            // Create table rows
-            const tbody = document.createElement('tbody');
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                headers.forEach(header => {
-                    const td = document.createElement('td');
-                    if (header === 'configurations' && Array.isArray(item[header])) {
-                        // Handle configurations property
-                        td.innerText = item[header].map(config => JSON.stringify(config)).join(', ');
-                    } else {
-                        td.innerText = item[header];
-                    }
-                    row.appendChild(td);
-                });
-                tbody.appendChild(row);
-            });
-            table.appendChild(tbody);
-    
-            content.appendChild(table);
-        };
-    </script>
+  <meta charset="UTF-8">
+  <title>Servidores</title>
+  <style>
+    body { font-family: sans-serif; padding: 16px; }
+    .server { border: 1px solid #ccc; padding: 8px; margin-bottom: 8px; border-radius: 4px; }
+  </style>
 </head>
 <body>
-    <h1>Servers</h1>
-    <div id="content"></div>
+  <h1>Servidores Configurados</h1>
+  <div id="servers"></div>
+
+  <script>
+    const servers = []; // será substituído no runtime
+    const container = document.getElementById('servers');
+
+    servers.forEach(server => {
+      const div = document.createElement('div');
+      div.className = 'server';
+      div.innerHTML = `<strong>${server.name}</strong><br>ID: ${server.id}<br>Ambiente: ${server.environment || 'N/A'}`;
+      container.appendChild(div);
+    });
+  </script>
 </body>
 </html>
