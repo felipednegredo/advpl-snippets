@@ -88,7 +88,6 @@ function buildFunctionDocumentationBlock(func) {
         `@see Referências adicionais.`,
         `/*/`
     ];
-
     return lines.join('\n');
 }
 
@@ -139,14 +138,13 @@ function getServerById(id) {
 
 function getSavedTokens(id, environment) {
     const servers = loadJSONFile(getServerConfigFile(), {});
-    let token;
     if (servers.savedTokens) {
         const filtered = servers.savedTokens.filter(element => element[0] === `${id}:${environment}`);
         if (filtered.length) {
-            token = filtered[0][1].token;
+            return filtered[0][1].token;
         }
     }
-    return token;
+    return null;
 }
 
 function updateSavedToken(id, environment, token) {
@@ -217,232 +215,92 @@ function saveConnectionToken(id, token, environment) {
     fs.writeFileSync(getServerConfigFile(), JSON.stringify(servers, null, 2), 'utf8');
 }
 
+
+// === Webview: Mostrar Servidores ===
+
 export function registerShowServersCommand(context) {
     const disposable = vscode.commands.registerCommand("advplSnippets.showServers", () => {
-      const panel = vscode.window.createWebviewPanel(
-        "serverView",
-        "Servidores Configurados",
-        vscode.ViewColumn.One,
-        { enableScripts: true }
-      );
-  
-      try {
-        const servers = getServers();
-        const jsonData = JSON.stringify(servers, null, 2);
-  
-        const htmlPath = path.join(context.extensionPath, "src", "webview.html");
-        let htmlContent = fs.readFileSync(htmlPath, "utf8");
-  
-        // Injeta os dados direto no HTML
-        htmlContent = htmlContent.replace(
-          "const servers = [];",
-          `const servers = ${jsonData};`
+        const panel = vscode.window.createWebviewPanel(
+            "serverView",
+            "Servidores Configurados",
+            vscode.ViewColumn.One,
+            { enableScripts: true }
         );
-  
-        panel.webview.html = htmlContent;
-      } catch (error) {
-        console.error("Erro ao carregar os servidores:", error);
-        vscode.window.showErrorMessage("Erro ao carregar os servidores configurados.");
-      }
+
+        try {
+            const servers = getServers();
+            const jsonData = JSON.stringify(servers, null, 2);
+
+            const htmlPath = path.join(context.extensionPath, "src", "webview.html");
+            let htmlContent = fs.readFileSync(htmlPath, "utf8");
+
+            htmlContent = htmlContent.replace("const servers = [];", `const servers = ${jsonData};`);
+            panel.webview.html = htmlContent;
+        } catch (error) {
+            console.error("Erro ao carregar os servidores:", error);
+            vscode.window.showErrorMessage("Erro ao carregar os servidores configurados.");
+        }
     });
-  
+
     context.subscriptions.push(disposable);
-  }
+}
 
-// === Main Extension Activation ===
+// === Ativação da Extensão ===
 
+/** @param {vscode.ExtensionContext} context */
 function activate(context) {
-    let cache = null;
-    const descriptions = loadJSONFile(path.join(__dirname, 'functionsDescriptions.json'));
-    const classesData = loadJSONFile(path.join(__dirname, 'classesMethods.json'));
+    const docsPath =  path.join(__dirname, 'functionsDescriptions.json');
+    const advplDocs = loadJSONFile(docsPath);
 
-    // === Hover Provider ===
-
+    // Hover Provider
     const hoverProvider = vscode.languages.registerHoverProvider('advpl', {
         provideHover(document, position) {
-            try {
-                const range = document.getWordRangeAtPosition(position, /\b\w+\b/);
-                if (!range) return null;
-
-                const word = document.getText(range).trim().toLowerCase();
-                if (!word) return null;
-
-                const funcInfo = descriptions[word];
-                if (funcInfo) return new vscode.Hover(buildMarkdownFromFunction(word, funcInfo));
-
-                // Busca por definição local da função
-                const text = document.getText();
-                const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][\w]*)\s*\(/gi;
-                let match;
-                while ((match = functionRegex.exec(text)) !== null) {
-                    if (match[2].toLowerCase() === word) {
-                        const md = new vscode.MarkdownString();
-                        md.appendMarkdown(`### ${match[2]}\n_Função definida no próprio código._`);
-                        md.isTrusted = true;
-                        return new vscode.Hover(md);
-                    }
-                }
-
-                return null;
-            } catch (error) {
-                console.error('Erro no HoverProvider:', error);
-                return null;
+            const range = document.getWordRangeAtPosition(position);
+            const word = document.getText(range);
+            const funcInfo = advplDocs[word.toLowerCase()];
+            if (funcInfo) {
+                return new vscode.Hover(buildMarkdownFromFunction(word, funcInfo));
             }
+            return null;
         }
     });
 
-    context.subscriptions.push(hoverProvider);
-
-    // === Completion Provider ===
-
-    const completionProvider = vscode.languages.registerCompletionItemProvider(
-        { language: 'advpl', scheme: 'file' },
-        {
-            provideCompletionItems(document) {
-                if (cache) return [...cache.functions, ...cache.variables, ...cache.defines];
-                cache = { functions: [], variables: [], defines: [] };
-
-                const text = document.getText();
-
-                const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][\w]*)\s*\((.*?)\)/gi;
-                const variableRegex = /\b(?:LOCAL|STATIC|PUBLIC|PRIVATE)\s+([a-zA-Z_][\w]*)\s*(?:[:=])?/gi;
-                const defineRegex = /#DEFINE\s+([a-zA-Z_][\w]*)\s+(.+)/gi;
-
-                let match;
-
-                while ((match = functionRegex.exec(text)) !== null) {
-                    const [type, name, paramsRaw] = [match[1], match[2], match[3]];
-                    const params = paramsRaw.split(',').map(p => p.trim()).filter(Boolean);
-                    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Function);
-
-                    item.detail = `${type} definida pelo usuário`;
-                    item.documentation = new vscode.MarkdownString(`**Tipo:** ${type}\n**Parâmetros:** ${params.join(', ') || 'Nenhum'}`);
-                    item.insertText = params.length
-                        ? new vscode.SnippetString(`${name}(${params.map((p, i) => `\${${i + 1}:${p}}`).join(', ')})`)
-                        : `${name}()`;
-
-                    cache.functions.push(item);
-                }
-
-                while ((match = variableRegex.exec(text)) !== null) {
-                    const name = match[1];
-                    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
-                    item.detail = `Variável`;
-                    item.documentation = new vscode.MarkdownString(`**Nome:** ${name}`);
-                    cache.variables.push(item);
-                }
-
-                while ((match = defineRegex.exec(text)) !== null) {
-                    const [name, value] = [match[1], match[2].trim()];
-                    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Constant);
-                    item.detail = `Define`;
-                    item.documentation = new vscode.MarkdownString(`**Valor:** \`${value}\``);
-                    cache.defines.push(item);
-                }
-
-                return [...cache.functions, ...cache.variables, ...cache.defines];
-            },
-
-            resolveCompletionItem(item) {
-                if (item.kind === vscode.CompletionItemKind.Class) {
-                    const className = item.label.toString();
-                    const methods = classesData[className]?.methods;
-                    if (!methods) return null;
-
-                    const [name, info] = Object.entries(methods)[0];
-                    const methodItem = new vscode.CompletionItem(name, vscode.CompletionItemKind.Method);
-                    methodItem.detail = `Método: ${info.description}`;
-                    methodItem.documentation = new vscode.MarkdownString(`**Descrição:** ${info.description}`);
-                    methodItem.insertText = info.parameters?.length
-                        ? new vscode.SnippetString(`${name}(${info.parameters.map((p, i) => `\${${i + 1}:${p}}`).join(', ')})`)
-                        : `${name}()`;
-
-                    return methodItem;
-                }
-
-                return null;
-            }
-        },
-        '.', ':'
-    );
-
-    context.subscriptions.push(completionProvider);
-
-    // === Classe: IntelliSense de Métodos ===
-
-    const classMethodCompletion = vscode.languages.registerCompletionItemProvider('advpl', {
-        provideCompletionItems(document, position) {
-            const line = document.lineAt(position).text.slice(0, position.character);
-            const match = line.match(/([a-z]\w*)[:\.][a-zA-Z_]*/);
-            if (!match) return;
-
-            const objName = match[1];
-            const fullText = document.getText();
-            const classMatch = new RegExp(`${objName}\\s*:=\\s*(?:([\\w]+)\\(|([\\w]+)::New\\()`, 'i').exec(fullText);
-            const className = classMatch?.[1] || classMatch?.[2];
-            if (!className || !classesData[className]) return;
-
-            return Object.entries(classesData[className].methods || {}).map(([name, info]) => {
-                const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Method);
-                item.detail = `Classe ${className}`;
-                item.documentation = new vscode.MarkdownString(`**${info.description || ''}**`);
-                item.insertText = info.parameters?.length
-                    ? new vscode.SnippetString(`${name}(${info.parameters.map((p, i) => `\${${i + 1}:${p}}`).join(', ')})`)
-                    : new vscode.SnippetString(`${name}()`);
-
-                return item;
-            });
-        }
-    }, ':', '.');
-
-    context.subscriptions.push(classMethodCompletion);
-
-    // === Comando: Gerar Documentação ===
-
-    const generateDocCmd = vscode.commands.registerCommand('advplSnippets.generateDocumentation', () => {
+    // Comando para adicionar documentação Protheus
+    const docCommand = vscode.commands.registerCommand('advplSnippets.addDocumentation', () => {
         const editor = vscode.window.activeTextEditor;
-        if (!editor) return vscode.window.showErrorMessage('Nenhum editor ativo.');
-
-        const text = editor.document.getText();
-        const position = editor.selection.active;
-
-        const regex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][\w]*)\s*\((.*?)\)/gi;
-        let match;
-        while ((match = regex.exec(text)) !== null) {
-            const start = editor.document.positionAt(match.index);
-            const end = editor.document.positionAt(match.index + match[0].length);
-            if (position.isAfterOrEqual(start) && position.isBeforeOrEqual(end)) {
-                const [, type, name, rawParams] = match;
-                const params = rawParams.split(',').map(p => p.trim()).filter(Boolean);
-
-                const doc = [
-                    `/*/ {Protheus.doc}`,
-                    `Descrição: Descreva aqui o propósito da função.`,
-                    `@type ${type.toLowerCase()}`,
-                    `@since ${new Date().toLocaleDateString()}`,
-                    `@version 1.0`,
-                    ...params.map(p => `@param ${p}, Tipo desconhecido, Descrição`),
-                    `@return Tipo, Descrição`,
-                    `@example`,
-                    `Exemplo de uso da função.`,
-                    `@see Referências adicionais.`,
-                    `/*/`
-                ].join('\n');
-
-                editor.edit(builder => {
-                    builder.insert(start, doc + '\n');
-                });
-
-                vscode.window.showInformationMessage(`Documentação gerada para a função "${name}".`);
-                return;
-            }
+        if (!editor) {
+            vscode.window.showInformationMessage('Nenhum editor ativo.');
+            return;
         }
 
-        vscode.window.showErrorMessage('Nenhuma função encontrada na posição atual.');
+        const func = extractFunctionBlock(editor.document, editor.selection.active);
+        if (!func) {
+            vscode.window.showWarningMessage('Nenhuma função encontrada na posição atual.');
+            return;
+        }
+
+        const existingDocRange = new vscode.Range(
+            func.range.start.translate(-8), // procura linhas acima da função
+            func.range.start
+        );
+        const existingText = editor.document.getText(existingDocRange);
+
+        if (existingText.includes('/*/ {Protheus.doc}')) {
+            vscode.window.showWarningMessage('A função já possui um bloco de documentação.');
+            return;
+        }
+
+        insertDocumentationBlock(editor, func);
+        vscode.window.showInformationMessage('Bloco de documentação adicionado!');
     });
 
-    context.subscriptions.push(generateDocCmd);
+    // Comando para mostrar os servidores configurados
+    registerShowServersCommand(context);
+
+    context.subscriptions.push(hoverProvider, docCommand);
 }
+
+// === Desativação da Extensão ===
 
 function deactivate() {}
 
