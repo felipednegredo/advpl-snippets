@@ -56,19 +56,52 @@ function showServersWebView(context) {
                 case 'delete':
                     data.configurations.splice(message.index, 1);
                     break;
+                case 'duplicate':
+                    const duplicateConfig = { ...data.configurations[message.index] };
+                    data.configurations.push(duplicateConfig);
+                    break;
                 case 'copy':
-                    const copiedConfig = { ...data.configurations[message.index] };
-                    data.configurations.push(copiedConfig);
+                    const copiedConfig = JSON.stringify(data.configurations[message.index], null, 4);
+                    vscode.env.clipboard.writeText(copiedConfig).then(() => {
+                        vscode.window.showInformationMessage('Configuração copiada para a área de transferência.');
+                    }, (err) => {
+                        vscode.window.showErrorMessage('Erro ao copiar para a área de transferência: ' + err.message);
+                    });
                     break;
                 case 'add':
-                    data.configurations.push({
-                        type: 'Novo Tipo',
-                        name: 'Novo Nome',
-                        address: 'Novo Endereço',
-                        port: 'Nova Porta',
-                        username: 'Novo Usuário',
-                        environments: [],
-                        environment: ''
+                    vscode.window.showInputBox({ prompt: 'Digite o tipo do servidor:' }).then((type) => {
+                        if (type) {
+                            vscode.window.showInputBox({ prompt: 'Digite o nome do servidor:' }).then((name) => {
+                                if (name) {
+                                    vscode.window.showInputBox({ prompt: 'Digite o endereço do servidor:' }).then((address) => {
+                                        if (address) {
+                                            vscode.window.showInputBox({ prompt: 'Digite a porta do servidor:' }).then((port) => {
+                                                if (port) {
+                                                    vscode.window.showInputBox({ prompt: 'Digite o nome de usuário:' }).then((username) => {
+                                                        if (username) {
+                                                            vscode.window.showInputBox({ prompt: 'Digite os ambientes separados por vírgula:' }).then((environments) => {
+                                                                const newConfig = {
+                                                                    type,
+                                                                    name,
+                                                                    address,
+                                                                    port,
+                                                                    username,
+                                                                    environments: environments ? environments.split(',').map(env => env.trim()) : [],
+                                                                    environment: ''
+                                                                };
+                                                                data.configurations.push(newConfig);
+                                                                fs.writeFileSync(filePath, JSON.stringify(data, null, 4));
+                                                                panel.webview.html = getWebviewContent(JSON.stringify(data));
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
                     });
                     break;
                 case 'import':
@@ -128,6 +161,7 @@ function getWebviewContent(jsonData) {
             <td>${config.environment || ''}</td>
             <td>
                 <button onclick="deleteConfig(${index})">Excluir</button>
+                <button onclick="duplicateConfig(${index})">Duplicar</button>
                 <button onclick="copyConfig(${index})">Copiar</button>
             </td>
         </tr>
@@ -176,8 +210,8 @@ function getWebviewContent(jsonData) {
                 vscode.postMessage({ command: 'delete', index });
             }
 
-            function copyConfig(index) {
-                vscode.postMessage({ command: 'copy', index });
+            function duplicateConfig(index) {
+                vscode.postMessage({ command: 'duplicate', index });
             }
 
             function addConfig() {
