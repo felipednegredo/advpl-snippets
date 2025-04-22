@@ -2,6 +2,8 @@ const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
 
+const homedir = require("os").homedir();
+
 let descriptions = {};
 let classesData = {};
 let cache = null;
@@ -110,11 +112,11 @@ function getServerConfigFile() {
 }
 
 function getServerConfigPath() {
-    const homeDir = process.env.HOME || process.env.USERPROFILE || require('os').homedir();
     return isWorkspaceServerConfig()
-        ? getVSCodePath()
-        : path.join(homeDir, ".totvsls");
-}
+      ? getVSCodePath()
+      : path.join(homedir, "/.totvsls");
+  }
+
 
 function isWorkspaceServerConfig() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
