@@ -1,7 +1,6 @@
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
-import { homedir } from 'os';
+const vscode = require('vscode');
+const path = require('path');
+const fs = require('fs');
 
 let descriptions = {};
 let classesData = {};
@@ -43,22 +42,20 @@ function showServersWebView() {
         { enableScripts: true }
     );
 
-    const filePath = ServerConfig.getServerConfigFile();
+    const filePath = getServerConfigFile();
     const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
 
     panel.webview.html = getWebviewContent(data);
 }
 
-class ServerConfig {
-    static getServerConfigFile() {
-        return path.join(this.getServerConfigPath(), "servers.json");
-    }
+function getServerConfigFile() {
+    return path.join(getServerConfigPath(), "servers.json");
+}
 
-    static getServerConfigPath() {
-        return isWorkspaceServerConfig()
-            ? getVSCodePath()
-            : path.join(homedir(), "/.totvsls");
-    }
+function getServerConfigPath() {
+    return isWorkspaceServerConfig()
+        ? getVSCodePath()
+        : path.join(require('os').homedir(), "/.totvsls");
 }
 
 function isWorkspaceServerConfig() {
@@ -120,19 +117,9 @@ function registerHoverProvider() {
 
                 while ((match = userFuncRegex.exec(text)) !== null) {
                     if (match[2].toLowerCase() === word) {
-                        const funcStart = text.lastIndexOf('/*/', match.index);
-                        const funcEnd = text.indexOf('/*/', funcStart + 1);
-
-                        if (funcStart !== -1 && funcEnd !== -1) {
-                            const commentBlock = text.substring(funcStart, funcEnd).trim();
-                            const markdown = new vscode.MarkdownString(`### ${match[2]}\nFunção definida pelo usuário.\n\n${commentBlock}`);
-                            markdown.isTrusted = true;
-                            return new vscode.Hover(markdown);
-                        } else {
-                            const markdown = new vscode.MarkdownString(`### ${match[2]}\nFunção definida pelo usuário.`);
-                            markdown.isTrusted = true;
-                            return new vscode.Hover(markdown);
-                        }
+                        const markdown = new vscode.MarkdownString(`### ${match[2]}\nFunção definida pelo usuário.`);
+                        markdown.isTrusted = true;
+                        return new vscode.Hover(markdown);
                     }
                 }
 
