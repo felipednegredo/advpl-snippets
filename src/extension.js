@@ -11,7 +11,7 @@ function activate(context) {
     classesData = loadJson('classesMethods.json');
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('advplSnippets.showServers', showServersWebView),
+        vscode.commands.registerCommand('advplSnippets.showServers', () => showServersWebView(context)),
         vscode.commands.registerCommand('advplSnippets.generateDocumentation', generateDocumentation),
         registerHoverProvider(),
         registerCompletionProvider()
@@ -34,7 +34,7 @@ function loadJson(fileName, toLowerCaseKeys = false) {
     }
 }
 
-function showServersWebView() {
+function showServersWebView(context) {
     const panel = vscode.window.createWebviewPanel(
         'serverView',
         'Servers View',
@@ -46,6 +46,47 @@ function showServersWebView() {
     const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
 
     panel.webview.html = getWebviewContent(data);
+
+    panel.webview.onDidReceiveMessage(
+        (message) => {
+            const filePath = getServerConfigFile();
+            const data = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : { configurations: [] };
+    
+            switch (message.command) {
+                case 'delete':
+                    data.configurations.splice(message.index, 1);
+                    break;
+                case 'copy':
+                    const copiedConfig = { ...data.configurations[message.index] };
+                    data.configurations.push(copiedConfig);
+                    break;
+                case 'add':
+                    data.configurations.push({
+                        type: 'Novo Tipo',
+                        name: 'Novo Nome',
+                        address: 'Novo Endereço',
+                        port: 'Nova Porta',
+                        username: 'Novo Usuário',
+                        environments: [],
+                        environment: ''
+                    });
+                    break;
+                case 'import':
+                    vscode.window.showOpenDialog({ filters: { 'JSON Files': ['json'] } }).then((files) => {
+                        if (files && files.length > 0) {
+                            const importedData = JSON.parse(fs.readFileSync(files[0].fsPath, 'utf8'));
+                            data.configurations = data.configurations.concat(importedData.configurations || []);
+                        }
+                    });
+                    break;
+            }
+    
+            fs.writeFileSync(filePath, JSON.stringify(data, null, 4));
+            panel.webview.html = getWebviewContent(JSON.stringify(data));
+        },
+        undefined,
+        context.subscriptions
+    );
 }
 
 function getServerConfigFile() {
@@ -72,6 +113,7 @@ function getVSCodePath() {
     
     return path.join(workspaceFolders[0].uri.fsPath, '.vscode');
 }
+
 
 function getWebviewContent(jsonData) {
     const configurations = JSON.parse(jsonData).configurations || [];
