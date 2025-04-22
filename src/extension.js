@@ -1,6 +1,7 @@
-const vscode = require('vscode');
-const path = require('path');
-const fs = require('fs');
+import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+import { homedir } from 'os';
 
 let descriptions = {};
 let classesData = {};
@@ -42,11 +43,37 @@ function showServersWebView() {
         { enableScripts: true }
     );
 
-    const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
-    const filePath = path.join(workspacePath, 'servers.json');
+    const filePath = ServerConfig.getServerConfigFile();
     const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
 
     panel.webview.html = getWebviewContent(data);
+}
+
+class ServerConfig {
+    static getServerConfigFile() {
+        return path.join(this.getServerConfigPath(), "servers.json");
+    }
+
+    static getServerConfigPath() {
+        return isWorkspaceServerConfig()
+            ? getVSCodePath()
+            : path.join(homedir(), "/.totvsls");
+    }
+}
+
+function isWorkspaceServerConfig() {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders.length === 0) return false;
+
+    const settingsPath = path.join(workspaceFolders[0].uri.fsPath, '.vscode', 'settings.json');
+    return fs.existsSync(settingsPath);
+}
+
+function getVSCodePath() {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders.length === 0) return '';
+    
+    return path.join(workspaceFolders[0].uri.fsPath, '.vscode');
 }
 
 function getWebviewContent(jsonData) {
@@ -93,9 +120,19 @@ function registerHoverProvider() {
 
                 while ((match = userFuncRegex.exec(text)) !== null) {
                     if (match[2].toLowerCase() === word) {
-                        const markdown = new vscode.MarkdownString(`### ${match[2]}\nFunção definida pelo usuário.`);
-                        markdown.isTrusted = true;
-                        return new vscode.Hover(markdown);
+                        const funcStart = text.lastIndexOf('/*/', match.index);
+                        const funcEnd = text.indexOf('/*/', funcStart + 1);
+
+                        if (funcStart !== -1 && funcEnd !== -1) {
+                            const commentBlock = text.substring(funcStart, funcEnd).trim();
+                            const markdown = new vscode.MarkdownString(`### ${match[2]}\nFunção definida pelo usuário.\n\n${commentBlock}`);
+                            markdown.isTrusted = true;
+                            return new vscode.Hover(markdown);
+                        } else {
+                            const markdown = new vscode.MarkdownString(`### ${match[2]}\nFunção definida pelo usuário.`);
+                            markdown.isTrusted = true;
+                            return new vscode.Hover(markdown);
+                        }
                     }
                 }
 
