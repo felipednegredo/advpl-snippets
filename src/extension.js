@@ -77,13 +77,13 @@ function getWebviewContent(jsonData) {
     const configurations = JSON.parse(jsonData).configurations || [];
     const tableRows = configurations.map((config, index) => `
         <tr>
-            <td>${config.type}</td>
-            <td>${config.name}</td>
-            <td>${config.address}</td>
-            <td>${config.port}</td>
-            <td>${config.username}</td>
-            <td>${config.environments.join(', ')}</td>
-            <td>${config.environment}</td>
+            <td>${config.type || ''}</td>
+            <td>${config.name || ''}</td>
+            <td>${config.address || ''}</td>
+            <td>${config.port || ''}</td>
+            <td>${config.username || ''}</td>
+            <td>${config.environments ? config.environments.join(', ') : ''}</td>
+            <td>${config.environment || ''}</td>
             <td>
                 <button onclick="deleteConfig(${index})">Excluir</button>
                 <button onclick="copyConfig(${index})">Copiar</button>
