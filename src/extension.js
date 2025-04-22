@@ -74,6 +74,20 @@ function getVSCodePath() {
 }
 
 function getWebviewContent(jsonData) {
+    const configurations = JSON.parse(jsonData).configurations || [];
+    const tableRows = configurations.map(config => `
+        <tr>
+            <td>${config.id}</td>
+            <td>${config.type}</td>
+            <td>${config.name}</td>
+            <td>${config.port}</td>
+            <td>${config.address}</td>
+            <td>${config.buildVersion}</td>
+            <td>${config.secure}</td>
+            <td>${config.username}</td>
+        </tr>
+    `).join('');
+
     return `
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -83,18 +97,30 @@ function getWebviewContent(jsonData) {
         <title>Servers</title>
         <style>
             body { font-family: sans-serif; padding: 1rem; }
-            pre { background: #f5f5f5; padding: 1rem; border-radius: 8px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f4f4f4; }
         </style>
-        <script>
-            const data = ${jsonData};
-            window.onload = () => {
-                document.getElementById('content').innerText = JSON.stringify(data, null, 2);
-            };
-        </script>
     </head>
     <body>
         <h1>Servidores Configurados</h1>
-        <pre id="content"></pre>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo</th>
+                    <th>Nome</th>
+                    <th>Porta</th>
+                    <th>Endereço</th>
+                    <th>Versão</th>
+                    <th>Seguro</th>
+                    <th>Usuário</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
     </body>
     </html>`;
 }
