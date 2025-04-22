@@ -62,45 +62,28 @@ function showServersWebView(context) {
                     break;
                 case 'copy':
                     const copiedConfig = JSON.stringify(data.configurations[message.index], null, 4);
-                    vscode.env.clipboard.writeText(copiedConfig).then(() => {
-                        vscode.window.showInformationMessage('Configuração copiada para a área de transferência.');
-                    }, (err) => {
-                        vscode.window.showErrorMessage('Erro ao copiar para a área de transferência: ' + err.message);
-                    });
+                    if (vscode.env.clipboard) {
+                        vscode.env.clipboard.writeText(copiedConfig).then(() => {
+                            vscode.window.showInformationMessage('Configuração copiada para a área de transferência.');
+                        }, (err) => {
+                            vscode.window.showErrorMessage('Erro ao copiar para a área de transferência: ' + err.message);
+                        });
+                    } else {
+                        vscode.window.showErrorMessage('Clipboard API não está disponível no ambiente atual.');
+                    }
                     break;
                 case 'add':
-                    vscode.window.showInputBox({ prompt: 'Digite o tipo do servidor:' }).then((type) => {
-                        if (type) {
-                            vscode.window.showInputBox({ prompt: 'Digite o nome do servidor:' }).then((name) => {
-                                if (name) {
-                                    vscode.window.showInputBox({ prompt: 'Digite o endereço do servidor:' }).then((address) => {
-                                        if (address) {
-                                            vscode.window.showInputBox({ prompt: 'Digite a porta do servidor:' }).then((port) => {
-                                                if (port) {
-                                                    vscode.window.showInputBox({ prompt: 'Digite o nome de usuário:' }).then((username) => {
-                                                        if (username) {
-                                                            vscode.window.showInputBox({ prompt: 'Digite os ambientes separados por vírgula:' }).then((environments) => {
-                                                                const newConfig = {
-                                                                    type,
-                                                                    name,
-                                                                    address,
-                                                                    port,
-                                                                    username,
-                                                                    environments: environments ? environments.split(',').map(env => env.trim()) : [],
-                                                                    environment: ''
-                                                                };
-                                                                data.configurations.push(newConfig);
-                                                                fs.writeFileSync(filePath, JSON.stringify(data, null, 4));
-                                                                panel.webview.html = getWebviewContent(JSON.stringify(data));
-                                                            });
-                                                        }
-                                                    });
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-                            });
+                    vscode.env.clipboard.readText().then((clipboardText) => {
+                        try {
+                            const newConfig = JSON.parse(clipboardText);
+                            if (newConfig && typeof newConfig === 'object') {
+                                data.configurations.push(newConfig);
+                                vscode.window.showInformationMessage('Configuração adicionada a partir da área de transferência.');
+                            } else {
+                                vscode.window.showErrorMessage('O conteúdo da área de transferência não é uma configuração válida.');
+                            }
+                        } catch (err) {
+                            vscode.window.showErrorMessage('Erro ao adicionar configuração: O conteúdo da área de transferência não é um JSON válido.');
                         }
                     });
                     break;
@@ -127,9 +110,10 @@ function getServerConfigFile() {
 }
 
 function getServerConfigPath() {
+    const homeDir = process.env.HOME || process.env.USERPROFILE || require('os').homedir();
     return isWorkspaceServerConfig()
         ? getVSCodePath()
-        : path.join(require('os').homedir(), "/.totvsls");
+        : path.join(homeDir, ".totvsls");
 }
 
 function isWorkspaceServerConfig() {
@@ -244,7 +228,58 @@ function registerHoverProvider() {
 
                 while ((match = userFuncRegex.exec(text)) !== null) {
                     if (match[2].toLowerCase() === word) {
-                        const markdown = new vscode.MarkdownString(`### ${match[2]}\nFunção definida pelo usuário.`);
+                        const funcStartIndex = match.index;
+                        const funcName = match[2];
+                        const markdown = new vscode.MarkdownString(`### ${funcName}\nFunção definida pelo usuário.`);
+
+                        // Extract comments above the function
+                        const lines = text.substring(0, funcStartIndex).split('\n').reverse();
+                        const commentLines = [];
+                        for (const line of lines) {
+                            if (line.trim().startsWith('/*') || line.trim().startsWith('//')) {
+                                commentLines.push(line.trim().replace(/^\/\*+|\/+|^\*+/g, '').trim());
+                            } else if (line.trim() === '' || line.trim().startsWith('*')) {
+                                commentLines.push(line.trim().replace(/^\*+/g, '').trim());
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (commentLines.length > 0) {
+                            markdown.appendMarkdown('\n#### Comentários:\n');
+                            markdown.appendMarkdown(commentLines.reverse().join('\n') + '\n');
+                        }
+
+                        // Extract parameters from comments
+                        const paramRegex = /@param\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*(.+)/gi;
+                        const params = [];
+                        for (const line of commentLines) {
+                            let paramMatch;
+                            while ((paramMatch = paramRegex.exec(line)) !== null) {
+                                params.push(`- \`${paramMatch[1]}\` (${paramMatch[2]}): ${paramMatch[3]}`);
+                            }
+                        }
+
+                        if (params.length > 0) {
+                            markdown.appendMarkdown('\n#### Parâmetros:\n');
+                            markdown.appendMarkdown(params.join('\n') + '\n');
+                        }
+
+                        // Extract return information from comments
+                        const returnRegex = /@return\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*(.+)/gi;
+                        const returnInfo = [];
+                        for (const line of commentLines) {
+                            let returnMatch;
+                            while ((returnMatch = returnRegex.exec(line)) !== null) {
+                                returnInfo.push(`- (${returnMatch[2]}): ${returnMatch[3]}`);
+                            }
+                        }
+
+                        if (returnInfo.length > 0) {
+                            markdown.appendMarkdown('\n#### Retorno:\n');
+                            markdown.appendMarkdown(returnInfo.join('\n') + '\n');
+                        }
+
                         markdown.isTrusted = true;
                         return new vscode.Hover(markdown);
                     }

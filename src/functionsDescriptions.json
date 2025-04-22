@@ -419,5 +419,72 @@
             "type": "lógico",
             "description": "Retorna .T. se o ambiente foi limpo corretamente. Caso contrário, retorna .F.."
         }
+    },
+    "AAdd": {
+        "description": "Função para Adicionar Elementos a um Array em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/AAdd",
+        "example": "AAdd(aArray, 'novo elemento') // Retorna: .T. ou .F.",
+        "parameters": {
+            "aArray": {
+                "type": "vetor",
+                "description": "Array ao qual o elemento será adicionado."
+            },
+            "vElement": {
+                "type": "variável",
+                "description": "Elemento a ser adicionado ao array."
+            }
+        },
+        "returns": {
+            "type": "lógico",
+            "description": "Retorna .T. se o elemento foi adicionado com sucesso. Caso contrário, retorna .F.."
+        }
+    },
+    "PadR": {
+        "description": "Função para Preencher String à Direita em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/PadR",
+        "example": "PadR('exemplo', 10) // Retorna: 'exemplo   '",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String a ser preenchida. Valor padrão: \"\"."
+            },
+            "nTamanho": {
+                "type": "numérico",
+                "description": "Tamanho total da string após o preenchimento."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna a string preenchida à direita."
+        }
+    },
+    "PadL": {
+        "description": "Função para Preencher String à Esquerda em ADVPL.",
+        "documentation": "https://tdn.totvs.com/display/public/framework/PadL",
+        "example": "PadL('exemplo', 10) // Retorna: '   exemplo'",
+        "parameters": {
+            "cString": {
+                "type": "caractere",
+                "description": "String a ser preenchida. Valor padrão: \"\"."
+            },
+            "nTamanho": {
+                "type": "numérico",
+                "description": "Tamanho total da string após o preenchimento."
+            }
+        },
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna a string preenchida à esquerda."
+        }
+    },
+    "GetNextAlias": {
+        "description": "Função para Obter o Próximo Alias em ADVPL.",
+        "documentation": "https://terminaldeinformacao.com/knowledgebase/getnextalias/",
+        "example": "GetNextAlias() // Retorna: 'ALIAS1'",
+        "parameters": {},
+        "returns": {
+            "type": "caractere",
+            "description": "Retorna o próximo alias disponível."
+        }
     }
 }

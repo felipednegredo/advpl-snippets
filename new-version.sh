@@ -9,12 +9,35 @@ CURRENT_VERSION=$(cat $VERSION_FILE)
 # Divida a versão em partes (assumindo formato MAJOR.MINOR.PATCH)
 IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
 
-# Incrementar a parte PATCH da versão
-PATCH=${VERSION_PARTS[2]}
-PATCH=$((PATCH + 1))
+# Solicitar ao usuário o formato do incremento
+echo "Escolha o formato do incremento:"
+echo "1) MAJOR"
+echo "2) MINOR"
+echo "3) PATCH"
+read -p "Digite o número correspondente (1/2/3): " CHOICE
+
+# Incrementar a parte escolhida
+case $CHOICE in
+    1)
+        VERSION_PARTS[0]=$((VERSION_PARTS[0] + 1))
+        VERSION_PARTS[1]=0
+        VERSION_PARTS[2]=0
+        ;;
+    2)
+        VERSION_PARTS[1]=$((VERSION_PARTS[1] + 1))
+        VERSION_PARTS[2]=0
+        ;;
+    3)
+        VERSION_PARTS[2]=$((VERSION_PARTS[2] + 1))
+        ;;
+    *)
+        echo "Opção inválida. Saindo."
+        exit 1
+        ;;
+esac
 
 # Atualizar a versão
-NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$PATCH"
+NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.${VERSION_PARTS[2]}"
 
 # Escrever a nova versão no arquivo
 echo $NEW_VERSION > $VERSION_FILE
