@@ -11,7 +11,7 @@ function activate(context) {
     classesData = loadJson('classesMethods.json');
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('extension.showServers', showServersWebView),
+        vscode.commands.registerCommand('advplSnippets.showServers', showServersWebView),
         vscode.commands.registerCommand('advplSnippets.generateDocumentation', generateDocumentation),
         registerHoverProvider(),
         registerCompletionProvider()
@@ -242,15 +242,27 @@ function generateDocumentation() {
 
     const text = editor.document.getText();
     const cursor = editor.selection.active;
-    const regex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gi;
+    const regex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)\s*.*?RETURN\s+([^\s;]+)/gis;
 
     let match;
     while ((match = regex.exec(text))) {
         const start = editor.document.positionAt(match.index);
         const end = editor.document.positionAt(match.index + match[0].length);
         if (cursor.isAfterOrEqual(start) && cursor.isBeforeOrEqual(end)) {
-            const [type, name, params] = [match[1], match[2], match[3]];
+            const [type, name, params, returnValue] = [match[1], match[2], match[3], match[4]];
             const paramList = params ? params.split(',').map(p => p.trim()) : [];
+
+            const inferType = (identifier) => {
+                const firstChar = identifier.charAt(0).toLowerCase();
+                switch (firstChar) {
+                    case 'c': return 'caractere';
+                    case 'n': return 'numérico';
+                    case 'a': return 'array';
+                    case 'o': return 'objeto';
+                    case 'l': return 'lógico';
+                    default: return 'tipo desconhecido';
+                }
+            };
 
             const docLines = [
                 '/*/ {Protheus.doc}',
@@ -258,8 +270,8 @@ function generateDocumentation() {
                 `@type ${type.toLowerCase()}`,
                 `@since ${new Date().toLocaleDateString()}`,
                 `@version 1.0`,
-                ...paramList.map(p => `@param ${p}, Tipo desconhecido, Descrição`),
-                `@return Tipo, Descrição`,
+                ...paramList.map(p => `@param ${p}, ${inferType(p)}, Descrição`),
+                `@return ${returnValue}, ${inferType(returnValue)}, Descrição`,
                 `@example`,
                 `Exemplo de uso da função.`,
                 `@see Referências adicionais.`,

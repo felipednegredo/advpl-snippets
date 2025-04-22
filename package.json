@@ -2,7 +2,7 @@
   "name": "advpl-devtools",
   "displayName": "advpl-devtools",
   "description": "Uma extensão para facilitar o desenvolvimento em ADVPL",
-  "version": "0.0.69",
+  "version": "0.0.70",
   "publisher": "felipednegredo",
   "icon": "img/logo.png",
   "engines": {
@@ -68,6 +68,12 @@
       "command": "advplSnippets.generateDocumentation",
       "key": "alt+d",
       "mac": "alt+d",
+      "when": "editorTextFocus && editorHasDocumentSymbolProvider && editorHasCodeActionsProvider"
+    },
+    {
+      "command": "advplSnippets.showServers",
+      "key": "alt+s",
+      "mac": "alt+s",
       "when": "editorTextFocus && editorHasDocumentSymbolProvider && editorHasCodeActionsProvider"
     }
   ],
