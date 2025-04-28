@@ -322,24 +322,21 @@
     "AllTrim": {
         "prefix": "AllTrim",
         "body": [
-            "AllTrim(${string})",
-            "AllTrim(${cText})"
+            "AllTrim(${string})"
         ],
         "description": "AllTrim-Removes blank spaces to the right and to the left of a string. AllTrim(<cText>)"
     },
     "Left": {
         "prefix": "Left",
         "body": [
-            "Left(${string}, ${length})",
-            "Left(${cText},${nCount})"
+            "Left(${string}, ${length})"
         ],
         "description": "Left-Returns a given number of characters to the left of a string. Left(<cText>,<nCount>)"
     },
     "Right": {
         "prefix": "Right",
         "body": [
-            "Right(${string}, ${length})",
-            "Right(${cText},${nCount})"
+            "Right(${string}, ${length})"
         ],
         "description": "Right-Returns a given number of trailing characters of a string. Right(<cText>,<nCount>)"
     },
@@ -367,25 +364,16 @@
     "ValType": {
         "prefix": "ValType",
         "body": [
-            "ValType(${value})",
-            "ValType( ${1:cVariavel})"
+            "ValType(${value})"
         ],
         "description": "Valtype() - Retorna o tipo de dado de uma expressao ou variavel."
     },
     "Empty": {
         "prefix": "Empty",
         "body": [
-            "Empty(${value})",
-            "Empty(${xExp})"
+            "Empty(${value})"
         ],
         "description": "Empty-Determines whether the result of an expression is empty Empty(<xExp>)"
-    },
-    "Aadd": {
-        "prefix": "aAdd",
-        "body": [
-            "aAdd(${array}, ${value})"
-        ],
-        "description": "Função para Adicionar um Valor a um Array em ADVPL"
     },
     "FreeObject": {
         "prefix": "FreeObject",

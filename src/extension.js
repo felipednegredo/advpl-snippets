@@ -221,9 +221,6 @@ function registerHoverProvider() {
 
                 if (!word) return null;
 
-                const funcInfo = descriptions[word];
-                if (funcInfo) return createHoverFromDescription(word, funcInfo);
-
                 const text = document.getText();
                 const userFuncRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/gi;
                 let match;
@@ -234,7 +231,7 @@ function registerHoverProvider() {
                         const funcName = match[2];
                         const markdown = new vscode.MarkdownString(`### ${funcName}\nFunção definida pelo usuário.`);
 
-                        // Extract comments above the function
+                        // Extrair comentários acima da função
                         const lines = text.substring(0, funcStartIndex).split('\n').reverse();
                         const commentLines = [];
                         for (const line of lines) {
@@ -252,7 +249,7 @@ function registerHoverProvider() {
                             markdown.appendMarkdown(commentLines.reverse().join('\n') + '\n');
                         }
 
-                        // Extract parameters from comments
+                        // Extrair parâmetros dos comentários
                         const paramRegex = /@param\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*(.+)/gi;
                         const params = [];
                         for (const line of commentLines) {
@@ -267,7 +264,7 @@ function registerHoverProvider() {
                             markdown.appendMarkdown(params.join('\n') + '\n');
                         }
 
-                        // Extract return information from comments
+                        // Extrair informações de retorno dos comentários
                         const returnRegex = /@return\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*(.+)/gi;
                         const returnInfo = [];
                         for (const line of commentLines) {
@@ -387,6 +384,9 @@ function collectFunctions(text) {
             ? new vscode.SnippetString(`${name}(${paramList.map((p, i) => `\${${i + 1}:${p}}`).join(', ')})`)
             : `${name}()`;
 
+        // Permitir sugestões parciais
+        item.filterText = name.toLowerCase();
+
         cache.functions.push(item);
     }
 }
@@ -399,7 +399,24 @@ function collectVariables(text) {
         const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
         item.detail = `${type} - ${value ? `Valor inicial: ${value}` : 'Sem valor inicial'}`;
         item.documentation = new vscode.MarkdownString(`**Escopo:** ${type}\n${value ? `**Valor inicial:** \`${value.trim()}\`` : ''}`);
+        
+        // Permitir sugestões parciais
+        item.filterText = name.toLowerCase();
+
         cache.variables.push(item);
+    }
+}
+
+function collectClasses() {
+    for (const [className, classInfo] of Object.entries(classesData)) {
+        const item = new vscode.CompletionItem(className, vscode.CompletionItemKind.Class);
+        item.detail = `Classe: ${classInfo.description}`;
+        item.documentation = new vscode.MarkdownString(`**Descrição:** ${classInfo.description}`);
+        
+        // Permitir sugestões parciais
+        item.filterText = className.toLowerCase();
+
+        cache.classes.push(item);
     }
 }
 
@@ -415,30 +432,34 @@ function collectDefines(text) {
     }
 }
 
-function collectClasses() {
-    for (const [className, classInfo] of Object.entries(classesData)) {
-        const item = new vscode.CompletionItem(className, vscode.CompletionItemKind.Class);
-        item.detail = `Classe: ${classInfo.description}`;
-        item.documentation = new vscode.MarkdownString(`**Descrição:** ${classInfo.description}`);
-        cache.classes.push(item);
-    }
-}
-
 function generateDocumentation() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return vscode.window.showErrorMessage('Nenhum editor ativo encontrado.');
 
     const text = editor.document.getText();
     const cursor = editor.selection.active;
-    const regex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)\s*.*?RETURN\s+([^\s;]+)/gis;
+
+    // Regex para funções
+    const functionRegex = /\b(STATIC FUNCTION|USER FUNCTION)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)/gis;
+
+    // Regex para defines
+    const defineRegex = /#DEFINE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+)/gi;
 
     let match;
-    while ((match = regex.exec(text))) {
+
+    // Verificar se o cursor está em uma função
+    while ((match = functionRegex.exec(text))) {
         const start = editor.document.positionAt(match.index);
         const end = editor.document.positionAt(match.index + match[0].length);
         if (cursor.isAfterOrEqual(start) && cursor.isBeforeOrEqual(end)) {
-            const [type, name, params, returnValue] = [match[1], match[2], match[3], match[4]];
+            const [type, name, params] = [match[1], match[2], match[3]];
             const paramList = params ? params.split(',').map(p => p.trim()) : [];
+
+            // Procurar o retorno da função
+            const functionBodyStart = match.index + match[0].length;
+            const functionBody = text.substring(functionBodyStart, text.indexOf('END FUNCTION', functionBodyStart));
+            const returnMatch = /\bRETURN\s+([^\s;]+)/i.exec(functionBody);
+            const returnValue = returnMatch ? returnMatch[1] : null;
 
             const inferType = (identifier) => {
                 const firstChar = identifier.charAt(0).toLowerCase();
@@ -459,12 +480,12 @@ function generateDocumentation() {
                 `@since ${new Date().toLocaleDateString()}`,
                 `@version 1.0`,
                 ...paramList.map(p => `@param ${p}, ${inferType(p)}, Descrição`),
-                `@return ${returnValue}, ${inferType(returnValue)}, Descrição`,
+                returnValue ? `@return ${returnValue}, ${inferType(returnValue)}, Descrição` : '',
                 `@example`,
                 `Exemplo de uso da função.`,
                 `@see Referências adicionais.`,
                 '/*/'
-            ];
+            ].filter(line => line); // Remove linhas vazias
 
             editor.edit(builder => {
                 builder.insert(start, docLines.join('\n') + '\n');
@@ -475,7 +496,35 @@ function generateDocumentation() {
         }
     }
 
-    vscode.window.showErrorMessage('Nenhuma função encontrada na posição atual.');
+    // Verificar se o cursor está em um define
+    while ((match = defineRegex.exec(text))) {
+        const start = editor.document.positionAt(match.index);
+        const end = editor.document.positionAt(match.index + match[0].length);
+        if (cursor.isAfterOrEqual(start) && cursor.isBeforeOrEqual(end)) {
+            const [name, value] = [match[1], match[2]];
+
+            const docLines = [
+                '/*/ {Protheus.doc}',
+                `Descrição: Descreva aqui o propósito do define.`,
+                `@define ${name}`,
+                `@value ${value}`,
+                `@since ${new Date().toLocaleDateString()}`,
+                `@example`,
+                `Exemplo de uso do define.`,
+                `@see Referências adicionais.`,
+                '/*/'
+            ];
+
+            editor.edit(builder => {
+                builder.insert(start, docLines.join('\n') + '\n');
+            });
+
+            vscode.window.showInformationMessage(`Documentação gerada para o define "${name}".`);
+            return;
+        }
+    }
+
+    vscode.window.showErrorMessage('Nenhuma função ou define encontrada na posição atual.');
 }
 
 module.exports = { activate, deactivate };
