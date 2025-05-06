@@ -14,6 +14,7 @@ function activate(context) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('advplSnippets.showServers', () => showServersWebView(context)),
+        vscode.commands.registerCommand('advplSnippets.showLaunch', () => showLaunchWebView(context)),
         vscode.commands.registerCommand('advplSnippets.generateDocumentation', generateDocumentation),
         registerHoverProvider(),
         registerCompletionProvider()
@@ -47,7 +48,7 @@ function showServersWebView(context) {
     const filePath = getServerConfigFile();
     const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
 
-    panel.webview.html = getWebviewContent(data);
+    panel.webview.html = getWebviewServer(data);
 
     panel.webview.onDidReceiveMessage(
         (message) => {
@@ -60,6 +61,16 @@ function showServersWebView(context) {
                     break;
                 case 'duplicate':
                     const duplicateConfig = { ...data.configurations[message.index] };
+                    let originalName = duplicateConfig.name || 'Duplicated Config';
+                    let newName = originalName;
+                    let counter = 1;
+
+                    // Garantir que o nome seja único
+                    while (data.configurations.some(config => config.name === newName)) {
+                        newName = `${originalName} (${counter++})`;
+                    }
+
+                    duplicateConfig.name = newName;
                     data.configurations.push(duplicateConfig);
                     break;
                 case 'copyConfig':
@@ -100,7 +111,7 @@ function showServersWebView(context) {
             }
     
             fs.writeFileSync(filePath, JSON.stringify(data, null, 4));
-            panel.webview.html = getWebviewContent(JSON.stringify(data));
+            panel.webview.html = getWebviewServer(JSON.stringify(data));
         },
         undefined,
         context.subscriptions
@@ -115,7 +126,131 @@ function getServerConfigPath() {
     return isWorkspaceServerConfig()
       ? getVSCodePath()
       : path.join(homedir, "/.totvsls");
-  }
+}
+
+function getWebviewLaunch(jsonData) {
+    const configurations = JSON.parse(jsonData).configurations || [];
+    const tableRows = configurations.map((config, index) => {
+        const ip = config.smartclientUrl ? config.smartclientUrl.split(':')[1]?.replace('//', '') : '';
+        const port = config.smartclientUrl ? config.smartclientUrl.split(':')[2] : '';
+        return `
+        <tr>
+            <td>${config.name || ''}</td>
+            <td>${config.type || ''}</td>
+            <td>${ip}</td>
+            <td>${port || ''}</td>
+            <td>
+                <button onclick="deleteConfig(${index})">Excluir</button>
+                <button onclick="editConfig(${index})">Editar</button>
+            </td>
+        </tr>
+        `;
+    }).join('');
+
+    return `
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Launch Configurations</title>
+        <style>
+            body { font-family: sans-serif; padding: 1rem; }
+            table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f4f4f4; }
+            button { margin: 0 5px; padding: 5px 10px; cursor: pointer; }
+        </style>
+    </head>
+    <body>
+        <h1>Configurações de Launch</h1>
+        <button onclick="addConfig()">Adicionar Configuração</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>IP</th>
+                    <th>Porta</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
+        <script>
+            const vscode = acquireVsCodeApi();
+
+            function deleteConfig(index) {
+                vscode.postMessage({ command: 'delete', index });
+            }
+
+            function addConfig() {
+                vscode.postMessage({ command: 'add' });
+            }
+
+            function editConfig(index) {
+                const key = prompt('Digite o campo que deseja editar (name, type, request, program):');
+                const value = prompt('Digite o novo valor:');
+                if (key && value) {
+                    vscode.postMessage({ command: 'edit', index, key, value });
+                }
+            }
+        </script>
+    </body>
+    </html>`;
+}
+
+function showLaunchWebView(context) {
+    const panel = vscode.window.createWebviewPanel(
+        'launchView',
+        'Launch Configurations',
+        vscode.ViewColumn.One,
+        { enableScripts: true }
+    );
+
+    const filePath = getLaunchConfigFile();
+    const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
+
+    panel.webview.html = getWebviewLaunch(data);
+
+    panel.webview.onDidReceiveMessage(
+        (message) => {
+            const filePath = getLaunchConfigFile();
+            const data = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : { configurations: [] };
+
+            switch (message.command) {
+                case 'delete':
+                    data.configurations.splice(message.index, 1);
+                    break;
+                case 'add':
+                    data.configurations.push({
+                        name: 'Nova Configuração',
+                        type: 'node',
+                        request: 'launch',
+                        program: '${workspaceFolder}/app.js'
+                    });
+                    break;
+                case 'edit':
+                    const config = data.configurations[message.index];
+                    config[message.key] = message.value;
+                    break;
+            }
+
+            fs.writeFileSync(filePath, JSON.stringify(data, null, 4));
+            panel.webview.html = getWebviewLaunch(JSON.stringify(data));
+        },
+        undefined,
+        context.subscriptions
+    );
+}
+
+function getLaunchConfigFile() {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders.length === 0) return '';
+    return path.join(workspaceFolders[0].uri.fsPath, '.vscode', 'launch.json');
+}
 
 
 function isWorkspaceServerConfig() {
@@ -134,7 +269,7 @@ function getVSCodePath() {
 }
 
 
-function getWebviewContent(jsonData) {
+function getWebviewServer(jsonData) {
     const configurations = JSON.parse(jsonData).configurations || [];
     const tableRows = configurations.map((config, index) => `
         <tr>
@@ -144,7 +279,6 @@ function getWebviewContent(jsonData) {
             <td>${config.port || ''}</td>
             <td>${config.username || ''}</td>
             <td>${config.environments ? config.environments.join(', ') : ''}</td>
-            <td>${config.environment || ''}</td>
             <td>
                 <button onclick="deleteConfig(${index})">Excluir</button>
                 <button onclick="duplicateConfig(${index})">Duplicar</button>
