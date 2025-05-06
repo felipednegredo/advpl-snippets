@@ -62,7 +62,7 @@ function showServersWebView(context) {
                     const duplicateConfig = { ...data.configurations[message.index] };
                     data.configurations.push(duplicateConfig);
                     break;
-                case 'copy':
+                case 'copyConfig':
                     const copiedConfig = JSON.stringify(data.configurations[message.index], null, 4);
                     if (vscode.env.clipboard) {
                         vscode.env.clipboard.writeText(copiedConfig).then(() => {
