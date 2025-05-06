@@ -21,7 +21,6 @@
             "\tElse",
             "\t\t",
             "\tEndIf",
-            "If ${1:lCond}",
             "\t$2",
             "Else",
             "\t$3",
@@ -43,6 +42,14 @@
             "\tEndIf"
         ],
         "description": "Estrutura de decisão IF-ELSEIF-ELSE em ADVPL",
+        "documentation": "https://tdn.totvs.com/display/public/framework/IF+...+ENDIF"
+    },
+    "EndIf": {
+        "prefix": "EndIf",
+        "body": [
+            "\tEndIf"
+        ],
+        "description": "EndIf Statement",
         "documentation": "https://tdn.totvs.com/display/public/framework/IF+...+ENDIF"
     },
     "While": {
@@ -236,16 +243,14 @@
     "StrTran": {
         "prefix": "StrTran",
         "body": [
-            "StrTran(${string},${old},${new})",
-            "StrTran(${cString},${cSearch},${1:/*cReplace*/},${2:/*nStart*/},${3:/*nCount*/})"
+            "StrTran(${string},${old},${new})"
         ],
         "description": "StrTran-Search and replace a set of characters from a string. StrTran(<cString>,<cSearch>,[cReplace],[nStart],[nCount])"
     },
     "Len": {
         "prefix": "Len",
         "body": [
-            "Len(${string})",
-            "Len(${xParam})"
+            "Len(${string})"
         ],
         "description": "Len-Returns the size of a variable. Len(<xParam>)"
     },
@@ -385,7 +390,6 @@
     "HttpGet": {
         "prefix": "HttpGet",
         "body": [
-            "HttpGet(${url})",
             "HttpGet(${cUrl},${1:/*cGetParms*/},${2:/*nTimeOut*/},${3:/*aHeadStr*/},@${4:/*cHeaderGet*/})"
         ],
         "description": "HttpGet-Allows you to emulate a client HTTP - Hypertext Transfer Protocol, through a function of the language AdvPL, accessing a particular HTML document, published on a Web server, using the GET method, allowing to pass parameters via the URL and waiting for a certain time (time-out) for a response from the requested server. HttpGet(<cUrl>,[cGetParms],[nTimeOut],[aHeadStr],[@cHeaderGet])"
@@ -435,7 +439,6 @@
     "Abs": {
         "prefix": "Abs",
         "body": [
-            "Abs(${value})",
             "Abs(${nExp})"
         ],
         "description": "Abs-Returns the absolute value (independent of sign) of a numeric expression. Abs(<nExp>)"
@@ -443,7 +446,6 @@
     "ASize": {
         "prefix": "ASize",
         "body": [
-            "ASize(${array},${dimension})",
             "ASize(${aDestino},${nTamanho})"
         ],
         "description": "ASize-Increases or decreases an array to a specified size ASize(<aDestino>,<nTamanho>)"
@@ -451,7 +453,6 @@
     "Lower": {
         "prefix": "Lower",
         "body": [
-            "Lower(${string})",
             "Lower(${cText})"
         ],
         "description": "Lower-Converts the text to lowercase letters. Lower(<cText>)"
@@ -459,7 +460,6 @@
     "PadL": {
         "prefix": "PadL",
         "body": [
-            "PadL(${string}, ${size}, ${char})",
             "PadL(${xExp},${nLen},${1:/*cFill*/})"
         ],
         "description": "PadL-Adds padding characters to the left of the contents of a variable. PadL(<xExp>,<nLen>,[cFill])"
@@ -467,7 +467,6 @@
     "SubStr": {
         "prefix": "SubStr",
         "body": [
-            "SubStr(${string}, ${start}, ${length})",
             "SubStr(${cText},${nIndex},${1:/*nLen*/})"
         ],
         "description": "SubStr-Returns a specific part of the string. SubStr(<cText>,<nIndex>,[nLen])"
@@ -475,7 +474,6 @@
     "PadR": {
         "prefix": "PadR",
         "body": [
-            "PadR(${string}, ${size}, ${char})",
             "PadR(${xExp},${nLen},${1:/*cFill*/})"
         ],
         "description": "PadR-Adds padding characters to the right of the content of a variable. PadR(<xExp>,<nLen>,[cFill])"
@@ -483,7 +481,6 @@
     "Upper": {
         "prefix": "Upper",
         "body": [
-            "Upper(${string})",
             "Upper(${cText})"
         ],
         "description": "Upper-Converts the text to uppercase letters Upper(<cText>)"
@@ -498,7 +495,6 @@
     "Stuff": {
         "prefix": "Stuff",
         "body": [
-            "Stuff(${string}, ${start}, ${length}, ${newString})",
             "Stuff(${cString},${nInicio},${nElimina},${cInsere})"
         ],
         "description": "Stuff-Deletes and inserts characters into a string. For this, the function deletes <nElimina> caracteres a partir da posição inicial <nInicio>. After, insert <cInsere> na string resultante a partir do início <nInicio>, to form the string that will be returned. Stuff(<cString>,<nInicio>,<nElimina>,<cInsere>)"
@@ -506,24 +502,9 @@
     "At": {
         "prefix": "At",
         "body": [
-            "At(${substring}, ${string}, ${start})",
             "At(${cPesquisa},${cDestino},${1:/*nStart*/})"
         ],
         "description": "At-Returns the position of the first occurrence of a substring in a string. For this, the function searches the string target from the right At(<cPesquisa>,<cDestino>,[nStart])"
-    },
-    "Protheus doc": {
-        "prefix": "protheusdoc",
-        "body": [
-            "//-------------------------------------------------------------------",
-            "/*/{Protheus.doc} ${1:function}",
-            "${2:description}",
-            "@author  ${3:author}",
-            "@since   ${4:date}",
-            "@version ${5:version}",
-            "/*/",
-            "//-------------------------------------------------------------------"
-        ],
-        "description": "Protheus doc"
     },
     "If ElseIf": {
         "prefix": "ifelseif",
@@ -537,7 +518,7 @@
         ],
         "description": "If ElseIf Statement"
     },
-    "Query": {
+    "QueryOld": {
         "prefix": "Query",
         "body": [
             "Local ${1:cQuery} := ''",

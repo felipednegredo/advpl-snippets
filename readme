@@ -1,5 +1,9 @@
 # ADVPL Snippets Extension
 
+![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
+![Licença](https://img.shields.io/badge/licença-AGPL--3.0-green)
+![Downloads](https://img.shields.io/visual-studio-marketplace/d/felipe_dnegredo.advpl-snippets)
+
 Uma extensão para o Visual Studio Code que fornece snippets úteis para a linguagem ADVPL, facilitando o desenvolvimento e aumentando a produtividade.
 
 ## 🚀 Funcionalidades
@@ -7,6 +11,11 @@ Uma extensão para o Visual Studio Code que fornece snippets úteis para a lingu
 - 📌 **Snippets prontos para uso** com estruturas comuns da linguagem ADVPL.
 - ⚡ **Aumento da produtividade** ao escrever código ADVPL.
 - 📂 **Suporte para arquivos** `.prw` e `.prx`.
+
+## 📋 Pré-requisitos
+
+- Visual Studio Code versão 1.70 ou superior.
+- Extensão ADVPL instalada e configurada (opcional, mas recomendada).
 
 ## 📦 Instalação
 
@@ -19,6 +28,14 @@ Uma extensão para o Visual Studio Code que fornece snippets úteis para a lingu
 2. Pressione `Ctrl+Space` para visualizar as sugestões de snippets.
 3. Digite o prefixo do snippet desejado e pressione `Tab` para expandi-lo.
 
+### Exemplos de Snippets
+
+| Prefixo       | Descrição                     |
+|---------------|-------------------------------|
+| `ifelse`      | Estrutura condicional `if-else`. |
+| `forloop`     | Estrutura de loop `for`.      |
+| `function`    | Declaração de função.         |
+
 ## 🤝 Contribuição
 
 Contribuições são bem-vindas! Se você encontrou um problema ou tem uma ideia para melhorar a extensão, siga os passos abaixo:
@@ -28,6 +45,8 @@ Contribuições são bem-vindas! Se você encontrou um problema ou tem uma ideia
 3. Envie suas alterações: `git commit -m "Descrição da alteração"`.
 4. Faça um push para a branch: `git push origin minha-feature`.
 5. Abra um pull request no [repositório GitHub](https://github.com/felipe_dnegredo/advpl-snippets).
+
+Para mais detalhes, consulte o [guia de contribuição](CONTRIBUTING.md).
 
 ## 📄 Licença
 

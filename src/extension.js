@@ -244,11 +244,6 @@ function registerHoverProvider() {
                             }
                         }
 
-                        if (commentLines.length > 0) {
-                            markdown.appendMarkdown('\n#### Comentários:\n');
-                            markdown.appendMarkdown(commentLines.reverse().join('\n') + '\n');
-                        }
-
                         // Extrair parâmetros dos comentários
                         const paramRegex = /@param\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*(.+)/gi;
                         const params = [];
@@ -270,13 +265,43 @@ function registerHoverProvider() {
                         for (const line of commentLines) {
                             let returnMatch;
                             while ((returnMatch = returnRegex.exec(line)) !== null) {
-                                returnInfo.push(`- (${returnMatch[2]}): ${returnMatch[3]}`);
+                                returnInfo.push(`- \`${returnMatch[1]}\` (${returnMatch[2]}): ${returnMatch[3]}`);
                             }
                         }
 
                         if (returnInfo.length > 0) {
                             markdown.appendMarkdown('\n#### Retorno:\n');
                             markdown.appendMarkdown(returnInfo.join('\n') + '\n');
+                        }
+
+                        // Extrair exemplo dos comentários
+                        const exampleRegex = /@example\s*(.+)/gi;
+                        const examples = [];
+                        for (const line of commentLines) {
+                            let exampleMatch;
+                            while ((exampleMatch = exampleRegex.exec(line)) !== null) {
+                                examples.push(exampleMatch[1]);
+                            }
+                        }
+
+                        if (examples.length > 0) {
+                            markdown.appendMarkdown('\n#### Exemplo:\n');
+                            markdown.appendMarkdown(examples.join('\n') + '\n');
+                        }
+
+                        // Extrair referências dos comentários
+                        const seeRegex = /@see\s*(.+)/gi;
+                        const references = [];
+                        for (const line of commentLines) {
+                            let seeMatch;
+                            while ((seeMatch = seeRegex.exec(line)) !== null) {
+                                references.push(`- ${seeMatch[1]}`);
+                            }
+                        }
+
+                        if (references.length > 0) {
+                            markdown.appendMarkdown('\n#### Referências:\n');
+                            markdown.appendMarkdown(references.join('\n') + '\n');
                         }
 
                         markdown.isTrusted = true;
