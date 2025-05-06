@@ -207,6 +207,10 @@ function getWebviewContent(jsonData) {
             function importConfig() {
                 vscode.postMessage({ command: 'import' });
             }
+            
+            function copyConfig(index) {
+                vscode.postMessage({ command: 'copyConfig', index });
+            }
         </script>
     </body>
     </html>`;
