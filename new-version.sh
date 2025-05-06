@@ -47,3 +47,12 @@ echo "Versão atualizada para: $NEW_VERSION"
 
 # Substituir apenas quando o texto for no formato "version": "0.0.11"
 find . -type f \( -name "package.json" -o -name "package-lock.json" \) -exec sed -i -E "s/\"version\": \"$CURRENT_VERSION\"/\"version\": \"$NEW_VERSION\"/g" {} +
+
+# Atualizar a versão no README.md (assumindo que a versão aparece no formato "Versão: 0.0.11")
+README_PATH="readme" # Caminho relativo para o README.md
+if [ -f "$README_PATH" ]; then
+    sed -i -E "s/(Versão: )$CURRENT_VERSION/\1$NEW_VERSION/g" "$README_PATH"
+    echo "README.md atualizado com a nova versão."
+else
+    echo "README.md não encontrado no caminho especificado ($README_PATH). Pulando atualização no README."
+fi

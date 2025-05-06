@@ -131,16 +131,17 @@ function getServerConfigPath() {
 function getWebviewLaunch(jsonData) {
     const configurations = JSON.parse(jsonData).configurations || [];
     const tableRows = configurations.map((config, index) => {
-        const ip = config.smartclientUrl ? config.smartclientUrl.split(':')[1]?.replace('//', '') : '';
-        const port = config.smartclientUrl ? config.smartclientUrl.split(':')[2] : '';
+        const ip = config.smartclientUrl ? config.smartclientUrl.split(':')[1]?.replace('//', '') : 'N/A';
+        const port = config.smartclientUrl ? config.smartclientUrl.split(':')[2] : 'N/A';
         return `
         <tr>
-            <td>${config.name || ''}</td>
-            <td>${config.type || ''}</td>
+            <td>${config.name || 'Sem Nome'}</td>
+            <td>${config.type || 'Sem Tipo'}</td>
             <td>${ip}</td>
-            <td>${port || ''}</td>
+            <td>${port}</td>
             <td>
                 <button onclick="deleteConfig(${index})">Excluir</button>
+                <button onclick="copyConfig(${index})">Copiar</button>
                 <button onclick="editConfig(${index})">Editar</button>
             </td>
         </tr>
@@ -190,6 +191,10 @@ function getWebviewLaunch(jsonData) {
                 vscode.postMessage({ command: 'add' });
             }
 
+            function copyConfig(index) {
+                vscode.postMessage({ command: 'copyConfig', index });
+            }
+
             function editConfig(index) {
                 const key = prompt('Digite o campo que deseja editar (name, type, request, program):');
                 const value = prompt('Digite o novo valor:');
@@ -223,6 +228,18 @@ function showLaunchWebView(context) {
             switch (message.command) {
                 case 'delete':
                     data.configurations.splice(message.index, 1);
+                    break;
+                case 'copyConfig':
+                    const copiedConfig = JSON.stringify(data.configurations[message.index], null, 4);
+                    if (vscode.env.clipboard) {
+                        vscode.env.clipboard.writeText(copiedConfig).then(() => {
+                            vscode.window.showInformationMessage('Configuração copiada para a área de transferência.');
+                        }, (err) => {
+                            vscode.window.showErrorMessage('Erro ao copiar para a área de transferência: ' + err.message);
+                        });
+                    } else {
+                        vscode.window.showErrorMessage('Clipboard API não está disponível no ambiente atual.');
+                    }
                     break;
                 case 'add':
                     data.configurations.push({
