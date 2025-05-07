@@ -58,8 +58,10 @@ function showServersWebView(context) {
 
     const htmlPath = path.join(context.extensionPath,'src', 'webviews', 'servers.html');
     const htmlTemplate = fs.readFileSync(htmlPath, 'utf8');
-
-    panel.webview.html = htmlTemplate.replace('{{data}}', JSON.stringify(jsonData).replace(/</g, '\\u003c'));
+    
+    panel.webview.html = htmlTemplate;
+    panel.webview.postMessage(JSON.parse(jsonData)); // envia os dados dinamicamente
+    
 
     panel.webview.onDidReceiveMessage(
         (message) => {

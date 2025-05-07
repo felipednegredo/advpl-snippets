@@ -1,173 +1,156 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Servidores Configurados</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 2rem;
-      color: #333;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Servidores Configurados</title>
+    <style>
+        :root {
+            --primary: #007acc;
+            --danger: #d9534f;
+            --light-gray: #f4f4f4;
+            --border: #ddd;
+            --text: #333;
+        }
 
-    h1 {
-      margin-bottom: 1.5rem;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 1.5rem;
+            background-color: #fff;
+            color: var(--text);
+        }
 
-    .actions {
-      margin-bottom: 1rem;
-    }
+        h1 {
+            margin-bottom: 1rem;
+        }
 
-    .actions button {
-      background-color: #007acc;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      margin-right: 0.5rem;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
-    }
+        .actions {
+            margin-bottom: 1rem;
+        }
 
-    .actions button:hover {
-      background-color: #005fa3;
-    }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            margin-right: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-    }
+        button.danger {
+            background-color: var(--danger);
+        }
 
-    th, td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid #eaeaea;
-    }
+        button:hover {
+            opacity: 0.9;
+        }
 
-    th {
-      background-color: #f3f3f3;
-      font-weight: bold;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
 
-    td button {
-      background-color: #e0e0e0;
-      border: none;
-      padding: 0.3rem 0.6rem;
-      margin-right: 4px;
-      border-radius: 3px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
+        th, td {
+            padding: 10px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
 
-    td button:hover {
-      background-color: #d0d0d0;
-    }
+        th {
+            background-color: var(--light-gray);
+        }
 
-    @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
+        td button {
+            margin-right: 5px;
+        }
 
-      thead {
-        display: none;
-      }
-
-      tr {
-        margin-bottom: 1rem;
-        background: white;
-        padding: 1rem;
-        border-radius: 6px;
-        box-shadow: 0 0 5px rgba(0,0,0,0.05);
-      }
-
-      td {
-        border: none;
-        display: flex;
-        justify-content: space-between;
-        padding: 0.5rem 0;
-      }
-
-      td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #555;
-      }
-    }
-  </style>
+        .no-configs {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-  <h1>Servidores Configurados</h1>
-  <div class="actions">
-    <button onclick="addConfig()">Incluir Novo</button>
-    <button onclick="importConfig()">Importar</button>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Tipo</th>
-        <th>Nome</th>
-        <th>Endereço</th>
-        <th>Porta</th>
-        <th>Usuário</th>
-        <th>Environments</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="configurations">
-      <!-- Preenchido dinamicamente -->
-    </tbody>
-  </table>
+    <h1>Servidores Configurados</h1>
+    <div class="actions">
+        <button onclick="addConfig()">Incluir Novo</button>
+        <button onclick="importConfig()">Importar</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Nome</th>
+                <th>Endereço</th>
+                <th>Porta</th>
+                <th>Usuário</th>
+                <th>Ambientes</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="configurations">
+            <tr class="no-configs">
+                <td colspan="7">Nenhuma configuração disponível</td>
+            </tr>
+        </tbody>
+    </table>
 
-  <script>
-    const vscode = acquireVsCodeApi();
-    const data = JSON.parse('{{data}}');
-    const configurations = data.configurations || [];
-    const tbody = document.getElementById('configurations');
+    <script>
+        const vscode = acquireVsCodeApi();
+        const tbody = document.getElementById('configurations');
 
-    configurations.forEach((config, index) => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td data-label="Tipo">${config.type || ''}</td>
-        <td data-label="Nome">${config.name || ''}</td>
-        <td data-label="Endereço">${config.address || ''}</td>
-        <td data-label="Porta">${config.port || ''}</td>
-        <td data-label="Usuário">${config.username || ''}</td>
-        <td data-label="Environments">${config.environments ? config.environments.join(', ') : ''}</td>
-        <td data-label="Ações">
-          <button onclick="deleteConfig(${index})">Excluir</button>
-          <button onclick="duplicateConfig(${index})">Duplicar</button>
-          <button onclick="copyConfig(${index})">Copiar</button>
-        </td>
-      `;
-      tbody.appendChild(row);
-    });
+        window.addEventListener('message', event => {
+            const data = event.data;
+            const configurations = data.configurations || [];
+            tbody.innerHTML = '';
 
-    function deleteConfig(index) {
-      vscode.postMessage({ command: 'delete', index });
-    }
+            if (configurations.length === 0) {
+                tbody.innerHTML = '<tr class="no-configs"><td colspan="7">Nenhuma configuração disponível</td></tr>';
+                return;
+            }
 
-    function duplicateConfig(index) {
-      vscode.postMessage({ command: 'duplicate', index });
-    }
+            configurations.forEach((config, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${config.type || ''}</td>
+                    <td>${config.name || ''}</td>
+                    <td>${config.address || ''}</td>
+                    <td>${config.port || ''}</td>
+                    <td>${config.username || ''}</td>
+                    <td>${Array.isArray(config.environments) ? config.environments.join(', ') : ''}</td>
+                    <td>
+                        <button onclick="deleteConfig(${index})" class="danger">Excluir</button>
+                        <button onclick="duplicateConfig(${index})">Duplicar</button>
+                        <button onclick="copyConfig(${index})">Copiar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
 
-    function addConfig() {
-      vscode.postMessage({ command: 'add' });
-    }
+        function deleteConfig(index) {
+            vscode.postMessage({ command: 'delete', index });
+        }
 
-    function importConfig() {
-      vscode.postMessage({ command: 'import' });
-    }
+        function duplicateConfig(index) {
+            vscode.postMessage({ command: 'duplicate', index });
+        }
 
-    function copyConfig(index) {
-      vscode.postMessage({ command: 'copyConfig', index });
-    }
-  </script>
+        function copyConfig(index) {
+            vscode.postMessage({ command: 'copyConfig', index });
+        }
+
+        function addConfig() {
+            vscode.postMessage({ command: 'add' });
+        }
+
+        function importConfig() {
+            vscode.postMessage({ command: 'import' });
+        }
+    </script>
 </body>
 </html>
