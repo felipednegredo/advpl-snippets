@@ -48,7 +48,7 @@ function showServersWebView(context) {
     const filePath = getServerConfigFile();
     const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
 
-    const htmlPath = path.join(context.extensionPath, 'webviews', 'servers.html');
+    const htmlPath = path.join(context.extensionPath, 'src/webviews', 'servers.html');
     const htmlTemplate = fs.readFileSync(htmlPath, 'utf8');
     panel.webview.html = htmlTemplate.replace('{{data}}', data);
 
