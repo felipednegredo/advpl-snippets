@@ -101,18 +101,11 @@
 
     <script>
         const vscode = acquireVsCodeApi();
-        const tbody = document.getElementById('configurations');
-
+    
         window.addEventListener('message', event => {
-            const data = event.data;
-            const configurations = data.configurations || [];
-            tbody.innerHTML = '';
-
-            if (configurations.length === 0) {
-                tbody.innerHTML = '<tr class="no-configs"><td colspan="7">Nenhuma configuração disponível</td></tr>';
-                return;
-            }
-
+            const { configurations } = event.data;
+            const tbody = document.getElementById('configurations');
+            tbody.innerHTML = ''; // limpa a tabela
             configurations.forEach((config, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -121,9 +114,9 @@
                     <td>${config.address || ''}</td>
                     <td>${config.port || ''}</td>
                     <td>${config.username || ''}</td>
-                    <td>${Array.isArray(config.environments) ? config.environments.join(', ') : ''}</td>
+                    <td>${config.environments ? config.environments.join(', ') : ''}</td>
                     <td>
-                        <button onclick="deleteConfig(${index})" class="danger">Excluir</button>
+                        <button onclick="deleteConfig(${index})">Excluir</button>
                         <button onclick="duplicateConfig(${index})">Duplicar</button>
                         <button onclick="copyConfig(${index})">Copiar</button>
                     </td>
@@ -131,26 +124,31 @@
                 tbody.appendChild(row);
             });
         });
-
+    
+        window.addEventListener('DOMContentLoaded', () => {
+            vscode.postMessage({ command: 'ready' });
+        });
+    
         function deleteConfig(index) {
             vscode.postMessage({ command: 'delete', index });
         }
-
+    
         function duplicateConfig(index) {
             vscode.postMessage({ command: 'duplicate', index });
         }
-
+    
         function copyConfig(index) {
             vscode.postMessage({ command: 'copyConfig', index });
         }
-
+    
         function addConfig() {
             vscode.postMessage({ command: 'add' });
         }
-
+    
         function importConfig() {
             vscode.postMessage({ command: 'import' });
         }
     </script>
+    
 </body>
 </html>

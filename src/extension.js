@@ -46,35 +46,29 @@ function showServersWebView(context) {
     );
 
     const filePath = getServerConfigFile();
-    const rawData = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
-
     let jsonData;
+
     try {
-        jsonData = JSON.parse(rawData);
-    } catch (e) {
-        vscode.window.showErrorMessage('Erro ao analisar JSON de configurações: ' + e.message);
+        jsonData = fs.existsSync(filePath)
+            ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
+            : { configurations: [] };
+    } catch (err) {
+        vscode.window.showErrorMessage('Erro ao ler arquivo de configurações: ' + err.message);
         jsonData = { configurations: [] };
     }
 
-    const htmlPath = path.join(context.extensionPath,'src', 'webviews', 'servers.html');
+    const htmlPath = path.join(context.extensionPath, 'webviews', 'servers.html');
     const htmlTemplate = fs.readFileSync(htmlPath, 'utf8');
-    
     panel.webview.html = htmlTemplate;
-    panel.webview.postMessage(JSON.parse(jsonData)); // envia os dados dinamicamente
-    
 
+    // Quando a WebView estiver pronta, envie os dados
     panel.webview.onDidReceiveMessage(
         (message) => {
-            try {
-                jsonData = fs.existsSync(filePath)
-                    ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
-                    : { configurations: [] };
-            } catch (err) {
-                vscode.window.showErrorMessage('Erro ao ler configurações: ' + err.message);
-                jsonData = { configurations: [] };
-            }
-
             switch (message.command) {
+                case 'ready':
+                    panel.webview.postMessage({ configurations: jsonData.configurations });
+                    return;
+
                 case 'delete':
                     jsonData.configurations.splice(message.index, 1);
                     break;
@@ -85,9 +79,11 @@ function showServersWebView(context) {
                     const baseName = duplicate.name || 'Duplicated Config';
                     let newName = baseName;
                     let count = 1;
+
                     while (jsonData.configurations.some(cfg => cfg.name === newName)) {
                         newName = `${baseName} (${count++})`;
                     }
+
                     duplicate.name = newName;
                     jsonData.configurations.push(duplicate);
                     break;
@@ -105,7 +101,7 @@ function showServersWebView(context) {
                     })();
                     break;
                 }
-
+                
                 case 'add':
                     vscode.env.clipboard.readText().then(text => {
                         try {
@@ -113,13 +109,13 @@ function showServersWebView(context) {
                             if (typeof newConfig === 'object') {
                                 jsonData.configurations.push(newConfig);
                                 vscode.window.showInformationMessage('Configuração adicionada da área de transferência.');
+                                update();
                             } else {
                                 vscode.window.showErrorMessage('Conteúdo inválido na área de transferência.');
                             }
                         } catch (err) {
                             vscode.window.showErrorMessage('Erro: conteúdo da área de transferência não é JSON válido.');
                         }
-                        updateView(); // garantir que atualizará após o .then
                     });
                     return;
 
@@ -129,9 +125,9 @@ function showServersWebView(context) {
                             try {
                                 const imported = JSON.parse(fs.readFileSync(files[0].fsPath, 'utf8'));
                                 jsonData.configurations = jsonData.configurations.concat(imported.configurations || []);
-                                updateView();
+                                update();
                             } catch (err) {
-                                vscode.window.showErrorMessage('Erro ao importar: ' + err.message);
+                                vscode.window.showErrorMessage('Erro ao importar arquivo: ' + err.message);
                             }
                         }
                     });
@@ -139,15 +135,15 @@ function showServersWebView(context) {
             }
 
             fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 4));
-            updateView();
-
-            function updateView() {
-                panel.webview.html = htmlTemplate.replace('{{data}}', JSON.stringify(jsonData).replace(/</g, '\\u003c'));
-            }
+            update();
         },
         undefined,
         context.subscriptions
     );
+
+    function update() {
+        panel.webview.postMessage({ configurations: jsonData.configurations });
+    }
 }
 
 
