@@ -48,70 +48,93 @@ function showServersWebView(context) {
     const filePath = getServerConfigFile();
     const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
 
-    panel.webview.html = getWebviewServer(data);
+    const htmlPath = path.join(context.extensionPath, 'webviews', 'servers.html');
+    const htmlTemplate = fs.readFileSync(htmlPath, 'utf8');
+    panel.webview.html = htmlTemplate.replace('{{data}}', data);
 
     panel.webview.onDidReceiveMessage(
         (message) => {
-            const filePath = getServerConfigFile();
-            const data = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : { configurations: [] };
-    
+            let jsonData;
+            try {
+                jsonData = fs.existsSync(filePath)
+                    ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
+                    : { configurations: [] };
+            } catch (err) {
+                vscode.window.showErrorMessage('Erro ao ler arquivo de configurações: ' + err.message);
+                jsonData = { configurations: [] };
+            }
+
             switch (message.command) {
                 case 'delete':
-                    data.configurations.splice(message.index, 1);
+                    jsonData.configurations.splice(message.index, 1);
                     break;
-                case 'duplicate':
-                    const duplicateConfig = { ...data.configurations[message.index] };
-                    let originalName = duplicateConfig.name || 'Duplicated Config';
-                    let newName = originalName;
-                    let counter = 1;
 
-                    // Garantir que o nome seja único
-                    while (data.configurations.some(config => config.name === newName)) {
-                        newName = `${originalName} (${counter++})`;
+                case 'duplicate': {
+                    const original = jsonData.configurations[message.index];
+                    const duplicate = { ...original };
+                    const baseName = duplicate.name || 'Duplicated Config';
+                    let newName = baseName;
+                    let count = 1;
+
+                    while (jsonData.configurations.some(cfg => cfg.name === newName)) {
+                        newName = `${baseName} (${count++})`;
                     }
 
-                    duplicateConfig.name = newName;
-                    data.configurations.push(duplicateConfig);
+                    duplicate.name = newName;
+                    jsonData.configurations.push(duplicate);
                     break;
-                case 'copyConfig':
-                    const copiedConfig = JSON.stringify(data.configurations[message.index], null, 4);
-                    if (vscode.env.clipboard) {
-                        vscode.env.clipboard.writeText(copiedConfig).then(() => {
-                            vscode.window.showInformationMessage('Configuração copiada para a área de transferência.');
-                        }, (err) => {
-                            vscode.window.showErrorMessage('Erro ao copiar para a área de transferência: ' + err.message);
-                        });
-                    } else {
-                        vscode.window.showErrorMessage('Clipboard API não está disponível no ambiente atual.');
-                    }
-                    break;
-                case 'add':
-                    vscode.env.clipboard.readText().then((clipboardText) => {
+                }
+
+                case 'copyConfig': {
+                    const configText = JSON.stringify(jsonData.configurations[message.index], null, 4);
+                    (async () => {
                         try {
-                            const newConfig = JSON.parse(clipboardText);
-                            if (newConfig && typeof newConfig === 'object') {
-                                data.configurations.push(newConfig);
-                                vscode.window.showInformationMessage('Configuração adicionada a partir da área de transferência.');
+                            await vscode.env.clipboard.writeText(configText);
+                            vscode.window.showInformationMessage('Configuração copiada para a área de transferência.');
+                        } catch (err) {
+                            vscode.window.showErrorMessage('Erro ao copiar: ' + err.message);
+                        }
+                    })();
+                    break;
+                }
+                case 'add':
+                    vscode.env.clipboard.readText().then(text => {
+                        try {
+                            const newConfig = JSON.parse(text);
+                            if (typeof newConfig === 'object') {
+                                jsonData.configurations.push(newConfig);
+                                vscode.window.showInformationMessage('Configuração adicionada da área de transferência.');
                             } else {
-                                vscode.window.showErrorMessage('O conteúdo da área de transferência não é uma configuração válida.');
+                                vscode.window.showErrorMessage('Conteúdo inválido na área de transferência.');
                             }
                         } catch (err) {
-                            vscode.window.showErrorMessage('Erro ao adicionar configuração: O conteúdo da área de transferência não é um JSON válido.');
+                            vscode.window.showErrorMessage('Erro: conteúdo da área de transferência não é JSON válido.');
                         }
+                        updateView();
                     });
-                    break;
+                    return; // evitar duplo update
+
                 case 'import':
-                    vscode.window.showOpenDialog({ filters: { 'JSON Files': ['json'] } }).then((files) => {
+                    vscode.window.showOpenDialog({ filters: { 'JSON Files': ['json'] } }).then(files => {
                         if (files && files.length > 0) {
-                            const importedData = JSON.parse(fs.readFileSync(files[0].fsPath, 'utf8'));
-                            data.configurations = data.configurations.concat(importedData.configurations || []);
+                            try {
+                                const imported = JSON.parse(fs.readFileSync(files[0].fsPath, 'utf8'));
+                                jsonData.configurations = jsonData.configurations.concat(imported.configurations || []);
+                                updateView();
+                            } catch (err) {
+                                vscode.window.showErrorMessage('Erro ao importar arquivo: ' + err.message);
+                            }
                         }
                     });
-                    break;
+                    return; // evitar duplo update
             }
-    
-            fs.writeFileSync(filePath, JSON.stringify(data, null, 4));
-            panel.webview.html = getWebviewServer(JSON.stringify(data));
+
+            fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 4));
+            updateView();
+
+            function updateView() {
+                panel.webview.html = htmlTemplate.replace('{{data}}', JSON.stringify(jsonData));
+            }
         },
         undefined,
         context.subscriptions

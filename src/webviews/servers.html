@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Servers</title>
+    <style>
+        body { font-family: sans-serif; padding: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        button { margin: 0 5px; padding: 5px 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Servidores Configurados</h1>
+    <button onclick="addConfig()">Incluir Novo</button>
+    <button onclick="importConfig()">Importar</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Nome</th>
+                <th>Endereço</th>
+                <th>Porta</th>
+                <th>Usuário</th>
+                <th>Environments</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="configurations">
+            <!-- Conteúdo será preenchido dinamicamente -->
+        </tbody>
+    </table>
+    <script>
+        const vscode = acquireVsCodeApi();
+        const data = JSON.parse('{{data}}');
+        const configurations = data.configurations || [];
+        const tbody = document.getElementById('configurations');
+
+        configurations.forEach((config, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${config.type || ''}</td>
+                <td>${config.name || ''}</td>
+                <td>${config.address || ''}</td>
+                <td>${config.port || ''}</td>
+                <td>${config.username || ''}</td>
+                <td>${config.environments ? config.environments.join(', ') : ''}</td>
+                <td>
+                    <button onclick="deleteConfig(${index})">Excluir</button>
+                    <button onclick="duplicateConfig(${index})">Duplicar</button>
+                    <button onclick="copyConfig(${index})">Copiar</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        function deleteConfig(index) {
+            vscode.postMessage({ command: 'delete', index });
+        }
+
+        function duplicateConfig(index) {
+            vscode.postMessage({ command: 'duplicate', index });
+        }
+
+        function addConfig() {
+            vscode.postMessage({ command: 'add' });
+        }
+
+        function importConfig() {
+            vscode.postMessage({ command: 'import' });
+        }
+
+        function copyConfig(index) {
+            vscode.postMessage({ command: 'copyConfig', index });
+        }
+    </script>
+</body>
+</html>
