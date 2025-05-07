@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configurações de Launch</title>
+    <style>
+        :root {
+            --primary: #007acc;
+            --danger: #d9534f;
+            --light-gray: #f4f4f4;
+            --border: #ddd;
+            --text: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 1.5rem;
+            background-color: #fff;
+            color: var(--text);
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        .actions {
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            margin-right: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        button.danger {
+            background-color: var(--danger);
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--light-gray);
+        }
+
+        td button {
+            margin-right: 5px;
+        }
+
+        .no-configs {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Servidores Configurados</h1>
+    <div class="actions">
+        <button onclick="addConfig()">Incluir Novo</button>
+        <button onclick="importConfig()">Importar</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>IP</th>
+                <th>Porta</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="configurations">
+            <tr class="no-configs">
+                <td colspan="7">Nenhuma configuração disponível</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+    
+        window.addEventListener('message', event => {
+            const { configurations } = event.data;
+            const tbody = document.getElementById('configurations');
+            tbody.innerHTML = ''; // limpa a tabela
+            configurations.forEach((config, index) => {
+                const ip = config.smartclientUrl ? config.smartclientUrl.split(':')[1]?.replace('//', '') : 'N/A';
+                const port = config.smartclientUrl ? config.smartclientUrl.split(':')[2] : 'N/A';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${config.name || 'Sem Nome'}</td>
+                    <td>${config.type || 'Sem Tipo'}</td>
+                    <td>${ip}</td>
+                    <td>${port}</td>
+                    <td>
+                        <button onclick="deleteConfig(${index})">Excluir</button>
+                        <button onclick="duplicateConfig(${index})">Duplicar</button>
+                        <button onclick="copyConfig(${index})">Copiar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+    
+        window.addEventListener('DOMContentLoaded', () => {
+            vscode.postMessage({ command: 'ready' });
+        });
+    
+        function deleteConfig(index) {
+            vscode.postMessage({ command: 'delete', index });
+        }
+    
+        function duplicateConfig(index) {
+            vscode.postMessage({ command: 'duplicate', index });
+        }
+    
+        function copyConfig(index) {
+            vscode.postMessage({ command: 'copyConfig', index });
+        }
+    
+        function addConfig() {
+            vscode.postMessage({ command: 'add' });
+        }
+    
+        function importConfig() {
+            vscode.postMessage({ command: 'import' });
+        }
+    </script>
+    
+</body>
+</html>

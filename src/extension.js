@@ -17,7 +17,8 @@ function activate(context) {
         vscode.commands.registerCommand('advplSnippets.showLaunch', () => showLaunchWebView(context)),
         vscode.commands.registerCommand('advplSnippets.generateDocumentation', generateDocumentation),
         registerHoverProvider(),
-        registerCompletionProvider()
+        registerCompletionProvider(),
+        createHoverFromDescription()
     );
 }
 
@@ -245,9 +246,20 @@ function showLaunchWebView(context) {
     );
 
     const filePath = getLaunchConfigFile();
-    const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
+    let jsonData;
 
-    panel.webview.html = getWebviewLaunch(data);
+    try {
+        jsonData = fs.existsSync(filePath)
+            ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
+            : { configurations: [] };
+    } catch (err) {
+        vscode.window.showErrorMessage('Erro ao ler arquivo de configurações: ' + err.message);
+        jsonData = { configurations: [] };
+    }
+
+    const htmlPath = path.join(context.extensionPath, 'src', 'webviews', 'launch.html');
+    const htmlTemplate = fs.readFileSync(htmlPath, 'utf8');
+    panel.webview.html = htmlTemplate;
 
     panel.webview.onDidReceiveMessage(
         (message) => {
@@ -312,88 +324,6 @@ function getVSCodePath() {
     if (!workspaceFolders || workspaceFolders.length === 0) return '';
     
     return path.join(workspaceFolders[0].uri.fsPath, '.vscode');
-}
-
-
-function getWebviewServer(jsonData) {
-    const configurations = JSON.parse(jsonData).configurations || [];
-    const tableRows = configurations.map((config, index) => `
-        <tr>
-            <td>${config.type || ''}</td>
-            <td>${config.name || ''}</td>
-            <td>${config.address || ''}</td>
-            <td>${config.port || ''}</td>
-            <td>${config.username || ''}</td>
-            <td>${config.environments ? config.environments.join(', ') : ''}</td>
-            <td>
-                <button onclick="deleteConfig(${index})">Excluir</button>
-                <button onclick="duplicateConfig(${index})">Duplicar</button>
-                <button onclick="copyConfig(${index})">Copiar</button>
-            </td>
-        </tr>
-    `).join('');
-
-    return `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Servers</title>
-        <style>
-            body { font-family: sans-serif; padding: 1rem; }
-            table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f4f4f4; }
-            button { margin: 0 5px; padding: 5px 10px; cursor: pointer; }
-        </style>
-    </head>
-    <body>
-        <h1>Servidores Configurados</h1>
-        <button onclick="addConfig()">Incluir Novo</button>
-        <button onclick="importConfig()">Importar</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>Tipo</th>
-                    <th>Nome</th>
-                    <th>Endereço</th>
-                    <th>Porta</th>
-                    <th>Usuário</th>
-                    <th>Environments</th>
-                    <th>Environment</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${tableRows}
-            </tbody>
-        </table>
-        <script>
-            const vscode = acquireVsCodeApi();
-
-            function deleteConfig(index) {
-                vscode.postMessage({ command: 'delete', index });
-            }
-
-            function duplicateConfig(index) {
-                vscode.postMessage({ command: 'duplicate', index });
-            }
-
-            function addConfig() {
-                vscode.postMessage({ command: 'add' });
-            }
-
-            function importConfig() {
-                vscode.postMessage({ command: 'import' });
-            }
-            
-            function copyConfig(index) {
-                vscode.postMessage({ command: 'copyConfig', index });
-            }
-        </script>
-    </body>
-    </html>`;
 }
 
 function registerHoverProvider() {
