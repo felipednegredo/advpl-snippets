@@ -46,11 +46,13 @@ function showServersWebView(context) {
     );
 
     const filePath = getServerConfigFile();
-    const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
+    const initialJson = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
 
-    const htmlPath = path.join(context.extensionPath, 'src/webviews', 'servers.html');
+    const htmlPath = path.join(context.extensionPath, 'webviews', 'servers.html');
     const htmlTemplate = fs.readFileSync(htmlPath, 'utf8');
-    panel.webview.html = htmlTemplate.replace('{{data}}', data);
+
+    const safeInitialData = initialJson.replace(/</g, '\\u003c');
+    panel.webview.html = htmlTemplate.replace('{{data}}', safeInitialData);
 
     panel.webview.onDidReceiveMessage(
         (message) => {
@@ -96,7 +98,7 @@ function showServersWebView(context) {
                         }
                     })();
                     break;
-                }
+                }                
                 case 'add':
                     vscode.env.clipboard.readText().then(text => {
                         try {
@@ -110,9 +112,9 @@ function showServersWebView(context) {
                         } catch (err) {
                             vscode.window.showErrorMessage('Erro: conteúdo da área de transferência não é JSON válido.');
                         }
-                        updateView();
+                        updateView(); // só dentro do .then para evitar duplo update
                     });
-                    return; // evitar duplo update
+                    return;
 
                 case 'import':
                     vscode.window.showOpenDialog({ filters: { 'JSON Files': ['json'] } }).then(files => {
@@ -126,20 +128,22 @@ function showServersWebView(context) {
                             }
                         }
                     });
-                    return; // evitar duplo update
+                    return;
             }
 
             fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 4));
             updateView();
 
             function updateView() {
-                panel.webview.html = htmlTemplate.replace('{{data}}', JSON.stringify(jsonData));
+                const safeJson = JSON.stringify(jsonData).replace(/</g, '\\u003c');
+                panel.webview.html = htmlTemplate.replace('{{data}}', safeJson);
             }
         },
         undefined,
         context.subscriptions
     );
 }
+
 
 function getServerConfigFile() {
     return path.join(getServerConfigPath(), "servers.json");

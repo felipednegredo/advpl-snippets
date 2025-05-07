@@ -1,80 +1,173 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Servers</title>
-    <style>
-        body { font-family: sans-serif; padding: 1rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        button { margin: 0 5px; padding: 5px 10px; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servidores Configurados</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 2rem;
+      color: #333;
+    }
+
+    h1 {
+      margin-bottom: 1.5rem;
+    }
+
+    .actions {
+      margin-bottom: 1rem;
+    }
+
+    .actions button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      margin-right: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .actions button:hover {
+      background-color: #005fa3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #eaeaea;
+    }
+
+    th {
+      background-color: #f3f3f3;
+      font-weight: bold;
+    }
+
+    td button {
+      background-color: #e0e0e0;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      margin-right: 4px;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    td button:hover {
+      background-color: #d0d0d0;
+    }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 1rem;
+        background: white;
+        padding: 1rem;
+        border-radius: 6px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.05);
+      }
+
+      td {
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #555;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>Servidores Configurados</h1>
+  <h1>Servidores Configurados</h1>
+  <div class="actions">
     <button onclick="addConfig()">Incluir Novo</button>
     <button onclick="importConfig()">Importar</button>
-    <table>
-        <thead>
-            <tr>
-                <th>Tipo</th>
-                <th>Nome</th>
-                <th>Endereço</th>
-                <th>Porta</th>
-                <th>Usuário</th>
-                <th>Environments</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody id="configurations">
-            <!-- Conteúdo será preenchido dinamicamente -->
-        </tbody>
-    </table>
-    <script>
-        const vscode = acquireVsCodeApi();
-        const data = JSON.parse('{{data}}');
-        const configurations = data.configurations || [];
-        const tbody = document.getElementById('configurations');
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Nome</th>
+        <th>Endereço</th>
+        <th>Porta</th>
+        <th>Usuário</th>
+        <th>Environments</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="configurations">
+      <!-- Preenchido dinamicamente -->
+    </tbody>
+  </table>
 
-        configurations.forEach((config, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${config.type || ''}</td>
-                <td>${config.name || ''}</td>
-                <td>${config.address || ''}</td>
-                <td>${config.port || ''}</td>
-                <td>${config.username || ''}</td>
-                <td>${config.environments ? config.environments.join(', ') : ''}</td>
-                <td>
-                    <button onclick="deleteConfig(${index})">Excluir</button>
-                    <button onclick="duplicateConfig(${index})">Duplicar</button>
-                    <button onclick="copyConfig(${index})">Copiar</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
+  <script>
+    const vscode = acquireVsCodeApi();
+    const data = JSON.parse('{{data}}');
+    const configurations = data.configurations || [];
+    const tbody = document.getElementById('configurations');
 
-        function deleteConfig(index) {
-            vscode.postMessage({ command: 'delete', index });
-        }
+    configurations.forEach((config, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td data-label="Tipo">${config.type || ''}</td>
+        <td data-label="Nome">${config.name || ''}</td>
+        <td data-label="Endereço">${config.address || ''}</td>
+        <td data-label="Porta">${config.port || ''}</td>
+        <td data-label="Usuário">${config.username || ''}</td>
+        <td data-label="Environments">${config.environments ? config.environments.join(', ') : ''}</td>
+        <td data-label="Ações">
+          <button onclick="deleteConfig(${index})">Excluir</button>
+          <button onclick="duplicateConfig(${index})">Duplicar</button>
+          <button onclick="copyConfig(${index})">Copiar</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
 
-        function duplicateConfig(index) {
-            vscode.postMessage({ command: 'duplicate', index });
-        }
+    function deleteConfig(index) {
+      vscode.postMessage({ command: 'delete', index });
+    }
 
-        function addConfig() {
-            vscode.postMessage({ command: 'add' });
-        }
+    function duplicateConfig(index) {
+      vscode.postMessage({ command: 'duplicate', index });
+    }
 
-        function importConfig() {
-            vscode.postMessage({ command: 'import' });
-        }
+    function addConfig() {
+      vscode.postMessage({ command: 'add' });
+    }
 
-        function copyConfig(index) {
-            vscode.postMessage({ command: 'copyConfig', index });
-        }
-    </script>
+    function importConfig() {
+      vscode.postMessage({ command: 'import' });
+    }
+
+    function copyConfig(index) {
+      vscode.postMessage({ command: 'copyConfig', index });
+    }
+  </script>
 </body>
 </html>
