@@ -57,7 +57,7 @@ function showServersWebView(context) {
         jsonData = { configurations: [] };
     }
 
-    const htmlPath = path.join(context.extensionPath, 'webviews', 'servers.html');
+    const htmlPath = path.join(context.extensionPath, 'src', 'webviews', 'servers.html');
     const htmlTemplate = fs.readFileSync(htmlPath, 'utf8');
     panel.webview.html = htmlTemplate;
 
