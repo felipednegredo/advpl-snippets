@@ -204,13 +204,35 @@ function showLaunchWebView(context) {
                     }
                     break;
                 case 'add':
-                    data.configurations.push({
-                        name: 'Nova Configuração',
-                        type: 'node',
-                        request: 'launch',
-                        program: '${workspaceFolder}/app.js'
+                    vscode.env.clipboard.readText().then(text => {
+                        try {
+                            const newConfig = JSON.parse(text);
+                            if (typeof newConfig === 'object') {
+                                jsonData.configurations.push(newConfig);
+                                vscode.window.showInformationMessage('Configuração adicionada da área de transferência.');
+                                update();
+                            } else {
+                                vscode.window.showErrorMessage('Conteúdo inválido na área de transferência.');
+                            }
+                        } catch (err) {
+                            vscode.window.showErrorMessage('Erro: conteúdo da área de transferência não é JSON válido.');
+                        }
                     });
-                    break;
+                    return;
+
+                    case 'import':
+                        vscode.window.showOpenDialog({ filters: { 'JSON Files': ['json'] } }).then(files => {
+                            if (files && files.length > 0) {
+                                try {
+                                    const imported = JSON.parse(fs.readFileSync(files[0].fsPath, 'utf8'));
+                                    jsonData.configurations = jsonData.configurations.concat(imported.configurations || []);
+                                    update();
+                                } catch (err) {
+                                    vscode.window.showErrorMessage('Erro ao importar arquivo: ' + err.message);
+                                }
+                            }
+                        });
+                        return;
                 case 'edit':
                     const config = data.configurations[message.index];
                     config[message.key] = message.value;
