@@ -40,8 +40,8 @@ function loadJson(fileName, toLowerCaseKeys = false) {
 
 function showServersWebView(context) {
     const panel = vscode.window.createWebviewPanel(
-        'serverView',
-        'Servers View',
+        'servidoresConfigurados',
+        'Servidores Configurados',
         vscode.ViewColumn.One,
         { enableScripts: true }
     );
@@ -160,8 +160,8 @@ function getServerConfigPath() {
 
 function showLaunchWebView(context) {
     const panel = vscode.window.createWebviewPanel(
-        'launchView',
-        'Launch Configurations',
+        'configuracoesDebug',
+        'Configurações de Debug',
         vscode.ViewColumn.One,
         { enableScripts: true }
     );
