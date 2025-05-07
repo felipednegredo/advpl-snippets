@@ -158,85 +158,6 @@ function getServerConfigPath() {
       : path.join(homedir, "/.totvsls");
 }
 
-function getWebviewLaunch(jsonData) {
-    const configurations = JSON.parse(jsonData).configurations || [];
-    const tableRows = configurations.map((config, index) => {
-        const ip = config.smartclientUrl ? config.smartclientUrl.split(':')[1]?.replace('//', '') : 'N/A';
-        const port = config.smartclientUrl ? config.smartclientUrl.split(':')[2] : 'N/A';
-        return `
-        <tr>
-            <td>${config.name || 'Sem Nome'}</td>
-            <td>${config.type || 'Sem Tipo'}</td>
-            <td>${ip}</td>
-            <td>${port}</td>
-            <td>
-                <button onclick="deleteConfig(${index})">Excluir</button>
-                <button onclick="copyConfig(${index})">Copiar</button>
-                <button onclick="editConfig(${index})">Editar</button>
-            </td>
-        </tr>
-        `;
-    }).join('');
-
-    return `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Launch Configurations</title>
-        <style>
-            body { font-family: sans-serif; padding: 1rem; }
-            table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f4f4f4; }
-            button { margin: 0 5px; padding: 5px 10px; cursor: pointer; }
-        </style>
-    </head>
-    <body>
-        <h1>Configurações de Launch</h1>
-        <button onclick="addConfig()">Adicionar Configuração</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Tipo</th>
-                    <th>IP</th>
-                    <th>Porta</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${tableRows}
-            </tbody>
-        </table>
-        <script>
-            const vscode = acquireVsCodeApi();
-
-            function deleteConfig(index) {
-                vscode.postMessage({ command: 'delete', index });
-            }
-
-            function addConfig() {
-                vscode.postMessage({ command: 'add' });
-            }
-
-            function copyConfig(index) {
-                vscode.postMessage({ command: 'copyConfig', index });
-            }
-
-            function editConfig(index) {
-                const key = prompt('Digite o campo que deseja editar (name, type, request, program):');
-                const value = prompt('Digite o novo valor:');
-                if (key && value) {
-                    vscode.postMessage({ command: 'edit', index, key, value });
-                }
-            }
-        </script>
-    </body>
-    </html>`;
-}
-
 function showLaunchWebView(context) {
     const panel = vscode.window.createWebviewPanel(
         'launchView',
@@ -297,11 +218,15 @@ function showLaunchWebView(context) {
             }
 
             fs.writeFileSync(filePath, JSON.stringify(data, null, 4));
-            panel.webview.html = getWebviewLaunch(JSON.stringify(data));
+            update();
         },
         undefined,
         context.subscriptions
     );
+
+    function update() {
+        panel.webview.postMessage({ configurations: jsonData.configurations });
+    }
 }
 
 function getLaunchConfigFile() {
