@@ -48,7 +48,7 @@ function showServersWebView(context) {
     const filePath = getServerConfigFile();
     const initialJson = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
 
-    const htmlPath = path.join(context.extensionPath, 'webviews', 'servers.html');
+    const htmlPath = path.join(context.extensionPath, 'src', 'webviews', 'servers.html');
     const htmlTemplate = fs.readFileSync(htmlPath, 'utf8');
 
     const safeInitialData = initialJson.replace(/</g, '\\u003c');
