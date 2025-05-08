@@ -79,6 +79,7 @@
     <div class="actions">
         <button onclick="addConfig()">Incluir Novo</button>
         <button onclick="importConfig()">Importar</button>
+        <button onclick="exportConfig()">Exportar</button>
     </div>
     <table>
         <thead>
@@ -109,11 +110,14 @@
                 const port = config.smartclientUrl ? config.smartclientUrl.split(':')[2] : 'N/A';
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${config.name || 'Sem Nome'}</td>
-                    <td>${config.type || 'Sem Tipo'}</td>
-                    <td>${ip}</td>
-                    <td>${port}</td>
+                    <td><span class="view-mode">${config.name || 'Sem Nome'}</span><input class="edit-mode" type="text" value="${config.name || ''}" style="display:none;" /></td>
+                    <td><span class="view-mode">${config.type || 'Sem Tipo'}</span><input class="edit-mode" type="text" value="${config.type || ''}" style="display:none;" /></td>
+                    <td><span class="view-mode">${ip}</span><input class="edit-mode" type="text" value="${ip}" style="display:none;" /></td>
+                    <td><span class="view-mode">${port}</span><input class="edit-mode" type="text" value="${port}" style="display:none;" /></td>
                     <td>
+                        <button class="view-mode" onclick="enableEdit(${index}, this)">Editar</button>
+                        <button class="edit-mode" style="display:none;" onclick="saveEdit(${index}, this)">Salvar</button>
+                        <button class="edit-mode" style="display:none;" onclick="cancelEdit(${index}, this)">Cancelar</button>
                         <button onclick="deleteConfig(${index})">Excluir</button>
                         <button onclick="duplicateConfig(${index})">Duplicar</button>
                         <button onclick="copyConfig(${index})">Copiar</button>
@@ -122,6 +126,32 @@
                 tbody.appendChild(row);
             });
         });
+    
+        function enableEdit(index, button) {
+            const row = button.closest('tr');
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = '');
+        }
+    
+        function saveEdit(index, button) {
+            const row = button.closest('tr');
+            const inputs = row.querySelectorAll('.edit-mode input');
+            const updatedConfig = {
+                name: inputs[0].value,
+                type: inputs[1].value,
+                smartclientUrl: `http://${inputs[2].value}:${inputs[3].value}`
+            };
+            vscode.postMessage({ command: 'edit', index, updatedConfig });
+            row.querySelectorAll('.view-mode').forEach((el, i) => el.textContent = Object.values(updatedConfig)[i]);
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = '');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+        }
+    
+        function cancelEdit(index, button) {
+            const row = button.closest('tr');
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = '');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+        }
     
         window.addEventListener('DOMContentLoaded', () => {
             vscode.postMessage({ command: 'ready' });
@@ -145,6 +175,10 @@
     
         function importConfig() {
             vscode.postMessage({ command: 'import' });
+        }
+    
+        function exportConfig() {
+            vscode.postMessage({ command: 'export' });
         }
     </script>
     

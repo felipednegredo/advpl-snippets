@@ -102,6 +102,14 @@ function showServersWebView(context) {
                     })();
                     break;
                 }
+
+                case 'export':
+                    const configText = JSON.stringify(jsonData.configurations[message.index], null, 4);
+                    const fileName = jsonData.configurations[message.index].name || 'servers-new.json';
+                    const filePath = path.join(homedir, fileName);
+                    fs.writeFileSync(filePath, configText);
+                    vscode.window.showInformationMessage(`Configuração exportada para ${filePath}`);
+                return;
                 
                 case 'add':
                     vscode.env.clipboard.readText().then(text => {
@@ -133,6 +141,12 @@ function showServersWebView(context) {
                         }
                     });
                     return;
+
+                case 'edit':
+                    const serverConfig = jsonData.configurations[message.index];
+                    serverConfig[message.key] = message.value;
+                    break;
+    
             }
 
             fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 4));
@@ -219,6 +233,13 @@ function showLaunchWebView(context) {
                         }
                     });
                     return;
+                    case 'export':
+                        const configText = JSON.stringify(data.configurations[message.index], null, 4);
+                        const fileName = data.configurations[message.index].name || 'launch-new.json';
+                        const filePath = path.join(homedir, fileName);
+                        fs.writeFileSync(filePath, configText);
+                        vscode.window.showInformationMessage(`Configuração exportada para ${filePath}`);
+                    return;
 
                     case 'import':
                         vscode.window.showOpenDialog({ filters: { 'JSON Files': ['json'] } }).then(files => {
@@ -233,9 +254,9 @@ function showLaunchWebView(context) {
                             }
                         });
                         return;
-                case 'edit':
-                    const config = data.configurations[message.index];
-                    config[message.key] = message.value;
+                    case 'edit':
+                        const serverConfig = jsonData.configurations[message.index];
+                        serverConfig[message.key] = message.value;
                     break;
             }
 

@@ -79,6 +79,7 @@
     <div class="actions">
         <button onclick="addConfig()">Incluir Novo</button>
         <button onclick="importConfig()">Importar</button>
+        <button onclick="exportConfig()">Exportar</button>
     </div>
     <table>
         <thead>
@@ -109,13 +110,16 @@
             configurations.forEach((config, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${config.type || ''}</td>
-                    <td>${config.name || ''}</td>
-                    <td>${config.address || ''}</td>
-                    <td>${config.port || ''}</td>
-                    <td>${config.username || ''}</td>
-                    <td>${config.environments ? config.environments.join(', ') : ''}</td>
+                    <td><span class="view-mode">${config.type || ''}</span><input class="edit-mode" type="text" value="${config.type || ''}" style="display:none;" /></td>
+                    <td><span class="view-mode">${config.name || ''}</span><input class="edit-mode" type="text" value="${config.name || ''}" style="display:none;" /></td>
+                    <td><span class="view-mode">${config.address || ''}</span><input class="edit-mode" type="text" value="${config.address || ''}" style="display:none;" /></td>
+                    <td><span class="view-mode">${config.port || ''}</span><input class="edit-mode" type="number" value="${config.port || ''}" style="display:none;" /></td>
+                    <td><span class="view-mode">${config.username || ''}</span><input class="edit-mode" type="text" value="${config.username || ''}" style="display:none;" /></td>
+                    <td><span class="view-mode">${config.environments ? config.environments.join(', ') : ''}</span><input class="edit-mode" type="text" value="${config.environments ? config.environments.join(', ') : ''}" style="display:none;" /></td>
                     <td>
+                        <button class="view-mode" onclick="enableEdit(${index}, this)">Editar</button>
+                        <button class="edit-mode" style="display:none;" onclick="saveEdit(${index}, this)">Salvar</button>
+                        <button class="edit-mode" style="display:none;" onclick="cancelEdit(${index}, this)">Cancelar</button>
                         <button onclick="deleteConfig(${index})">Excluir</button>
                         <button onclick="duplicateConfig(${index})">Duplicar</button>
                         <button onclick="copyConfig(${index})">Copiar</button>
@@ -124,6 +128,35 @@
                 tbody.appendChild(row);
             });
         });
+    
+        function enableEdit(index, button) {
+            const row = button.closest('tr');
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = '');
+        }
+    
+        function saveEdit(index, button) {
+            const row = button.closest('tr');
+            const inputs = row.querySelectorAll('.edit-mode input');
+            const updatedConfig = {
+                type: inputs[0].value,
+                name: inputs[1].value,
+                address: inputs[2].value,
+                port: parseInt(inputs[3].value, 10),
+                username: inputs[4].value,
+                environments: inputs[5].value.split(',').map(e => e.trim())
+            };
+            vscode.postMessage({ command: 'edit', index, updatedConfig });
+            row.querySelectorAll('.view-mode').forEach((el, i) => el.textContent = Object.values(updatedConfig)[i]);
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = '');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+        }
+    
+        function cancelEdit(index, button) {
+            const row = button.closest('tr');
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = '');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+        }
     
         window.addEventListener('DOMContentLoaded', () => {
             vscode.postMessage({ command: 'ready' });
@@ -147,6 +180,10 @@
     
         function importConfig() {
             vscode.postMessage({ command: 'import' });
+        }
+    
+        function exportConfig() {
+            vscode.postMessage({ command: 'export' });
         }
     </script>
     
