@@ -146,8 +146,15 @@
                 username: inputs[4].value,
                 environments: inputs[5].value.split(',').map(e => e.trim())
             };
+
             vscode.postMessage({ command: 'edit', index, updatedConfig });
-            row.querySelectorAll('.view-mode').forEach((el, i) => el.textContent = Object.values(updatedConfig)[i]);
+
+            // Atualiza os valores visuais na tabela
+            row.querySelectorAll('.view-mode').forEach((el, i) => {
+                el.textContent = Object.values(updatedConfig)[i];
+            });
+
+            // Alterna os modos de exibição
             row.querySelectorAll('.view-mode').forEach(el => el.style.display = '');
             row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
         }

@@ -3,8 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const { showServersWebView } = require('./webviews/servers');
 const { showLaunchWebView } = require('./webviews/launch');
-const { registerCompletionProvider } = require('./providers/completationProvider')
-const { registerHoverProvider, createHoverFromDescription } = require('./providers/hoverProvider');
+const { registerCompletionProvider } = require('./providers/completationProvider');
+const { registerHoverProvider } = require('./providers/hoverProvider');
 
 let descriptions = {};
 let classesData = {};
@@ -17,9 +17,9 @@ function activate(context) {
         vscode.commands.registerCommand('advplSnippets.showServers', () => showServersWebView(context)),
         vscode.commands.registerCommand('advplSnippets.showLaunch', () => showLaunchWebView(context)),
         vscode.commands.registerCommand('advplSnippets.generateDocumentation', generateDocumentation),
-        registerHoverProvider(),
+        registerHoverProvider(descriptions), // Passa o objeto descriptions corretamente
         registerCompletionProvider()
-        );
+    );
 }
 
 function deactivate() {}
@@ -37,7 +37,6 @@ function loadJson(fileName, toLowerCaseKeys = false) {
         return {};
     }
 }
-
 
 function generateDocumentation() {
     const editor = vscode.window.activeTextEditor;
