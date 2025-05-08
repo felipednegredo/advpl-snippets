@@ -1,6 +1,6 @@
 # ADVPL Snippets Extension
 
-![Versão](https://img.shields.io/badge/versão-1.8.0-blue)
+![Versão](https://img.shields.io/badge/versão-1.8.1-blue)
 ![Licença](https://img.shields.io/badge/licença-AGPL--3.0-green)
 ![Downloads](https://img.shields.io/visual-studio-marketplace/d/felipednegredo.advpl-devtools)
 

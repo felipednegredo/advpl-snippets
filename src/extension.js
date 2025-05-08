@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs');
+const { getServerConfigFile, getLaunchConfigFile, isWorkspaceServerConfig, getVSCodePath } = require('./utils/config');
 
 const homedir = require("os").homedir();
 
@@ -161,17 +162,6 @@ function showServersWebView(context) {
     }
 }
 
-
-function getServerConfigFile() {
-    return path.join(getServerConfigPath(), "servers.json");
-}
-
-function getServerConfigPath() {
-    return isWorkspaceServerConfig()
-      ? getVSCodePath()
-      : path.join(homedir, "/.totvsls");
-}
-
 function showLaunchWebView(context) {
     const panel = vscode.window.createWebviewPanel(
         'configuracoesDebug',
@@ -270,28 +260,6 @@ function showLaunchWebView(context) {
     function update() {
         panel.webview.postMessage({ configurations: jsonData.configurations });
     }
-}
-
-function getLaunchConfigFile() {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders || workspaceFolders.length === 0) return '';
-    return path.join(workspaceFolders[0].uri.fsPath, '.vscode', 'launch.json');
-}
-
-
-function isWorkspaceServerConfig() {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders || workspaceFolders.length === 0) return false;
-
-    const settingsPath = path.join(workspaceFolders[0].uri.fsPath, '.vscode', 'settings.json');
-    return fs.existsSync(settingsPath);
-}
-
-function getVSCodePath() {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders || workspaceFolders.length === 0) return '';
-    
-    return path.join(workspaceFolders[0].uri.fsPath, '.vscode');
 }
 
 function registerHoverProvider() {
