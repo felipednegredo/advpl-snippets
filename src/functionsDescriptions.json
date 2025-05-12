@@ -1,490 +1,421 @@
 {
-    "DbSelectArea": {
-        "description": "Estrutura de Seleção de Área de Banco de Dados em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/DbSelectArea",
-        "example": "DbSelectArea('1') // Retorna: .T. ou .F.",
-        "parameters": {
-            "cArea": {
-                "type": "caractere",
-                "description": "Nome da área de banco de dados a ser selecionada. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "lógico",
-            "description": "Retorna verdadeiro (.T.) se a área foi selecionada com sucesso, caso contrário, falso (.F.)."
-        }
+  "FWUpper": {
+    "description": "Converte todas as letras da string especificada para maiúsculas, incluindo caracteres multibyte.",
+    "parameters": {
+      "cText": {
+        "type": "caractere",
+        "description": "Texto de entrada a ser convertido em maiúsculas. Valor padrão: ''."
+      }
     },
-    "DbSeek": {
-        "description": "Função para Posicionar o Cursor em um Registro de Banco de Dados em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/DbSeek",
-        "example": "DbSeek('12345') // Retorna: .T. ou .F.",
-        "parameters": {
-            "cKey": {
-                "type": "caractere",
-                "description": "Chave a ser buscada no banco de dados. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "lógico",
-            "description": "Retorna verdadeiro (.T.) se a chave foi encontrada, caso contrário, falso (.F.)."
-        }
+    "returns": {
+      "type": "caractere",
+      "description": "String resultante com todas as letras em maiúsculas."
     },
-    "FWNoAccent": {
-        "description": "Função para Remover Acentos de uma String em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/FWNoAccent",
-        "example": "FWNoAccent('ação') // Retorna: 'acao'",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String que terá sua acentuação removida. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "String sem acentuação."
-        }
+    "example": "FWUpper('Olá Mundo') // Retorna 'OLÁ MUNDO'",
+    "documentation": "https://tdn.totvs.com/display/public/framework/FWUpper"
+  },
+  "FWLower": {
+    "description": "Converte todas as letras da string especificada para minúsculas, incluindo caracteres multibyte.",
+    "parameters": {
+      "cText": {
+        "type": "caractere",
+        "description": "Texto de entrada a ser convertido em minúsculas. Valor padrão: ''."
+      }
     },
-    "FWMsgRun": {
-        "description": "Função para Exibir Mensagem de Execução em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/FWMsgRun",
-        "example": "FWMsgRun([oComponent], <bAction>, [cHeader], [cText]) // Retorna: Nenhum valor retornado.",
-        "parameters": {
-            "oComponent": {
-                "type": "object",
-                "description": "Componente que será sobreposto com o painel."
-            },
-            "bAction": {
-                "type": "code-block",
-                "description": "Bloco de código a ser executado (o Bloco de código receberá o objeto TSay para atualizações)."
-            },
-            "cHeader": {
-                "type": "string",
-                "description": "Texto do Header. Valor padrão: \"\"."
-            },
-            "cText": {
-                "type": "string",
-                "description": "Texto do Corpo. Valor padrão: \"\"."
-            }
-        }
+    "returns": {
+      "type": "caractere",
+      "description": "String resultante com todas as letras em minúsculas."
     },
-    "HttpGet": {
-        "description": "Função para Realizar Requisição GET em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/tec/HTTPGet",
-        "example": "HttpGet('http://example.com', '', 120, {'Content-Type|application/json'}, @cHeaderGet) // Retorna: Conteúdo da resposta HTTP.",
-        "parameters": {
-            "cUrl": {
-                "type": "caractere",
-                "description": "Indica o endereço HTTP com a pasta e o documento solicitado."
-            },
-            "cGetParms": {
-                "type": "caractere",
-                "description": "Indica a lista de strings de parâmetros que serão enviadas ao servidor HTTP, através da URI. Caso este parâmetro não seja especificado, o mesmo será considerado vazio ('')."
-            },
-            "nTimeOut": {
-                "type": "numérico",
-                "description": "Indica o tempo, em segundos, máximo de inatividade permitido durante a recepção do documento. Caso este parâmetro não seja especificado, o valor padrão assumido será de 120 segundos (2 minutos)."
-            },
-            "aHeadStr": {
-                "type": "vetor",
-                "description": "Indica o array que contêm as strings que serão acrescentadas ao header da requisição que será realizada. Utilizar '|' (pipes) para separação entre parâmetro e valor."
-            },
-            "cHeaderGet": {
-                "type": "caractere",
-                "description": "Indica o retorno, através de referência, da header de resposta HTTP enviada pelo servidor requisitado. Observação: A variável deve ser declarada antes da chamada da função."
-            }
-        }
+    "example": "FWLower('Olá Mundo') // Retorna 'olá mundo'",
+    "documentation": "https://tdn.totvs.com/display/public/framework/FWLower"
+  },
+  "FWNoAccent": {
+    "description": "Remove marcas diacríticas (acentos) de todos os caracteres na string.",
+    "parameters": {
+      "cText": {
+        "type": "caractere",
+        "description": "Texto de entrada do qual os acentos serão removidos. Valor padrão: ''."
+      }
     },
-    "Len": {
-        "description": "Função para Retornar o Comprimento de uma String em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/Len",
-        "example": "Len('exemplo') // Retorna: 7",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser medida. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "numérico",
-            "description": "Retorna o comprimento da string."
-        }
+    "returns": {
+      "type": "caractere",
+      "description": "String resultante sem caracteres acentuados."
     },
-    "Time": {
-        "description": "Função para Retornar o Horário Atual em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/tec/Time",
-        "example": "Time() // Retorna: 'HH:MM:SS'",
-        "parameters": {},
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna o horário atual no formato HH:MM:SS."
-        }
+    "example": "FWNoAccent('áéíóú') // Retorna 'aeiou'",
+    "documentation": "https://tdn.totvs.com/display/public/framework/FWNoAccent"
+  },
+  "DbUseArea": {
+    "description": "Abre (ou cria) um arquivo de dados em uma área de trabalho especificada.",
+    "parameters": {
+      "nArea": {
+        "type": "numérico",
+        "description": "Número da área de trabalho a ser utilizada. Valor padrão: 0."
+      },
+      "cAlias": {
+        "type": "caractere",
+        "description": "Apelido para referenciar a área. Valor padrão: '' ."
+      }
     },
-    "Val": {
-        "description": "Função para Converter String em Número em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/Val",
-        "example": "Val('123.45') // Retorna: 123.45",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser convertida. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "numérico",
-            "description": "Retorna o valor numérico da string."
-        }
+    "returns": {
+      "type": "lógico",
+      "description": "Retorna .T. se a área foi aberta com sucesso, .F. caso contrário."
     },
-    "ValType": {
-        "description": "Função para Retornar o Tipo de Valor em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/ValType",
-        "example": "ValType(123) // Retorna: 'N'",
-        "parameters": {
-            "vValue": {
-                "type": "variável",
-                "description": "Valor a ser verificado. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna o tipo do valor (C, N, D, L, T, A)."
-        }
+    "example": "DbUseArea(1, 'Clientes') // Retorna .T. se bem-sucedido",
+    "documentation": "https://tdn.totvs.com/display/public/framework/DbUseArea"
+  },
+  "DbSelectArea": {
+    "description": "Seleciona a área de trabalho atual para operações de banco de dados.",
+    "parameters": {
+      "nArea": {
+        "type": "numérico",
+        "description": "Número da área de trabalho a ser selecionada. Valor padrão: 0."
+      }
     },
-    "Eval": {
-        "description": "Função para Avaliar Expressões em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/Eval",
-        "example": "Eval('1 + 1') // Retorna: 2",
-        "parameters": {
-            "cExpression": {
-                "type": "caractere",
-                "description": "Expressão a ser avaliada. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "variável",
-            "description": "Retorna o resultado da expressão avaliada."
-        }
+    "returns": {
+      "type": "lógico",
+      "description": "Retorna .T. se a área foi selecionada com sucesso, .F. caso contrário."
     },
-    "AllTrim": {
-        "description": "Função para Remover Espaços em Branco de uma String em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/AllTrim",
-        "example": "AllTrim('   exemplo   ') // Retorna: 'exemplo'",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser tratada. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna a string sem espaços em branco."
-        }
+    "example": "DbSelectArea(1) // Retorna .T. se bem-sucedido",
+    "documentation": "https://tdn.totvs.com/display/public/framework/DbSelectArea"
+  },
+  "DbSeek": {
+    "description": "Posiciona o cursor em um registro de banco de dados.",
+    "parameters": {
+      "cKey": {
+        "type": "caractere",
+        "description": "Chave a ser buscada no banco de dados. Valor padrão: ''."
+      }
     },
-    "Str": {
-        "description": "Função para Converter Número em String em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/Str",
-        "example": "Str(123.45, 10, 2) // Retorna: '    123.45'",
-        "parameters": {
-            "nNumero": {
-                "type": "numérico",
-                "description": "Indica o valor numérico que será convertido para string."
-            },
-            "nTamanho": {
-                "type": "numérico",
-                "description": "Indica o tamanho da string que será gerada."
-            },
-            "nDecimais": {
-                "type": "numérico",
-                "description": "Indica o número de casas após o símbolo decimal."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna uma string a partir do valor numérico e do tamanho informado no parâmetro."
-        }
+    "returns": {
+      "type": "lógico",
+      "description": "Retorna verdadeiro (.T.) se a chave foi encontrada, caso contrário, falso (.F.)."
     },
-    "SubStr": {
-        "description": "Função para Retornar Substring em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/SubStr",
-        "example": "SubStr('exemplo', 2, 3) // Retorna: 'xem'",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser manipulada. Valor padrão: \"\"."
-            },
-            "nPosicao": {
-                "type": "numérico",
-                "description": "Posição inicial da substring."
-            },
-            "nTamanho": {
-                "type": "numérico",
-                "description": "Tamanho da substring. (Não Obrigatório)"
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna a substring extraída."
-        }
+    "example": "DbSeek('12345') // Retorna .T. se bem-sucedido, .F. caso contrário.",
+    "documentation": "https://tdn.totvs.com/display/public/framework/DbSeek"
+  },
+  "DbGoTop": {
+    "description": "Posiciona o cursor no primeiro registro do banco de dados.",
+    "parameters": {},
+    "returns": {
+      "type": "lógico",
+      "description": "Retorna .T. se o ponteiro foi movido para o primeiro registro, .F. caso contrário."
     },
-    "SubString": {
-        "description": "Função para Retornar Substring em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/SubString",
-        "example": "SubString('exemplo', 2, 3) // Retorna: 'xem'",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser manipulada. Valor padrão: \"\"."
-            },
-            "nPosicao": {
-                "type": "numérico",
-                "description": "Posição inicial da substring."
-            },
-            "nTamanho": {
-                "type": "numérico",
-                "description": "Tamanho da substring."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna a substring extraída."
-        }
+    "example": "DbGoTop() // Retorna .T. se bem-sucedido",
+    "documentation": "https://tdn.totvs.com/display/public/framework/DbGoTop"
+  },
+  "DbSkip": {
+    "description": "Move o cursor pelo número especificado de registros a partir da posição atual.",
+    "parameters": {
+      "nCount": {
+        "type": "numérico",
+        "description": "Número de registros a pular. Pode ser negativo para retroceder."
+      }
     },
-    "Stuff": {
-        "description": "Função para Eliminar e Inserir Caracteres em uma String em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/Stuff",
-        "example": "Stuff('Meu gato tem pulgas.', 10, 0, 'não ') // Retorna: 'Meu gato não tem pulgas.'",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String destino na qual serão eliminados e inseridos caracteres."
-            },
-            "nInicio": {
-                "type": "numérico",
-                "description": "Posição inicial na string destino em que ocorre a inserção/eliminação."
-            },
-            "nElimina": {
-                "type": "numérico",
-                "description": "Quantidade de caracteres que serão eliminados. (Se for 0, não elimina nada.)"
-            },
-            "cInsere": {
-                "type": "caractere",
-                "description": "String que será inserida."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna uma nova string com os caracteres especificados eliminados e a string inserida."
-        }
+    "returns": {
+      "type": "lógico",
+      "description": "Retorna .T. se o deslocamento for bem-sucedido, .F. caso contrário."
     },
-    "At": {
-        "description": "Função para Retornar a Posição de uma Substring em uma String em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/At",
-        "example": "At('gato', 'Meu gato tem pulgas.') // Retorna: 5",
-        "parameters": {
-            "cSubstring": {
-                "type": "caractere",
-                "description": "Substring a ser buscada."
-            },
-            "cString": {
-                "type": "caractere",
-                "description": "String na qual será feita a busca."
-            }
-        },
-        "returns": {
-            "type": "numérico",
-            "description": "Retorna a posição da substring na string. Se não encontrada, retorna 0."
-        }
+    "example": "DbSkip(5) // Move 5 registros à frente",
+    "documentation": "https://tdn.totvs.com/display/public/framework/DbSkip"
+  },
+  "MsgInfo": {
+    "description": "Exibe uma caixa de mensagem informativa para o usuário com título e botões customizados.",
+    "parameters": {
+      "cTitle": {
+        "type": "caractere",
+        "description": "Título da janela de mensagem."
+      },
+      "cText": {
+        "type": "caractere",
+        "description": "Texto da mensagem a ser exibida."
+      }
     },
-    "Upper": {
-        "description": "Função para Converter String para Maiúsculas em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/Upper",
-        "example": "Upper('exemplo') // Retorna: 'EXEMPLO'",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser convertida. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna a string convertida para maiúsculas."
-        }
+    "returns": {
+      "type": "lógico",
+      "description": "Retorna .T. se o usuário clicar no botão confirmar, .F. caso contrário."
     },
-    "Lower": {
-        "description": "Função para Converter String para Minúsculas em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/Lower",
-        "example": "Lower('EXEMPLO') // Retorna: 'exemplo'",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser convertida. Valor padrão: \"\"."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna a string convertida para minúsculas."
-        }
+    "example": "MsgInfo('Atenção','Operação concluída!') // Retorna .T.",
+    "documentation": "https://tdn.totvs.com/display/public/framework/MsgInfo"
+  },
+  "InputBox": {
+    "description": "Exibe uma caixa de diálogo para capturar entrada do usuário como string.",
+    "parameters": {
+      "cPrompt": {
+        "type": "caractere",
+        "description": "Mensagem de instrução para o usuário."
+      },
+      "cDefault": {
+        "type": "caractere",
+        "description": "Valor padrão exibido no campo de entrada."
+      }
     },
-    "Posicione": {
-        "description": "Função para Posicionar uma Tabela em Determinado Registro em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/Posicione",
-        "example": "// Retorna o valor do campo A1_NOME com base na posição do alias SF2 e índice 1 do alias SA1\nPosicione(\"SA1\", 1, xFilial(\"SA1\") + SF2->F2_CLIENTE + SF2->F2_LOJA, \"A1_NOME\")",
-        "parameters": {
-            "cAlias": {
-                "type": "caractere",
-                "description": "Alias da tabela a ser posicionada."
-            },
-            "nOrdem": {
-                "type": "caractere",
-                "description": "Ordem de índice a ser utilizada."
-            },
-            "cSeek": {
-                "type": "caractere",
-                "description": "Expressão a ser utilizada na busca."
-            },
-            "cField": {
-                "type": "caractere",
-                "description": "Campo da tabela a ser retornado."
-            },
-            "cNickName": {
-                "type": "caractere",
-                "description": "NickName da ordem de índice a ser posicionado. Se informado, o parâmetro nOrdem será desconsiderado."
-            }
-        },
-        "returns": {
-            "type": "variável",
-            "description": "Retorna o conteúdo do campo informado no parâmetro cField."
-        }
+    "returns": {
+      "type": "caractere",
+      "description": "Texto digitado pelo usuário, ou string vazia se cancelado."
     },
-    "RpcSetEnv": {
-        "description": "Função para Definir o Ambiente de Execução em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/RpcSetEnv",
-        "example": "RpcSetEnv('PRODUCAO') // Retorna: .T. ou .F.",
-        "parameters": {
-            "cRpcEmp": {
-                "type": "caractere",
-                "description": "Código da empresa."
-            },
-            "cRpcFil": {
-                "type": "caractere",
-                "description": "Código da filial."
-            },
-            "cEnvUser": {
-                "type": "caractere",
-                "description": "Nome do usuário."
-            },
-            "cEnvPass": {
-                "type": "caractere",
-                "description": "Senha do usuário."
-            },
-            "cEnvMod": {
-                "type": "caractere",
-                "description": "Código do módulo. Valor padrão: 'FAT'."
-            },
-            "cFunName": {
-                "type": "caractere",
-                "description": "Nome da rotina que será setada para retorno da função FunName(). Valor padrão: 'RPC'."
-            },
-            "aTables": {
-                "type": "vetor",
-                "description": "Array contendo as tabelas a serem abertas. Valor padrão: {}."
-            },
-            "lShowFinal": {
-                "type": "lógico",
-                "description": "Alimenta a variável pública lMsFinalAuto. Valor padrão: .F.."
-            },
-            "lAbend": {
-                "type": "lógico",
-                "description": "Se .T., gera mensagem de erro ao ocorrer erro ao checar a licença para a estação. Valor padrão: .T.."
-            },
-            "lOpenSX": {
-                "type": "lógico",
-                "description": "Se .T., pega a primeira filial do arquivo SM0 quando não passar a filial e realiza a abertura dos SXs. Valor padrão: .T.."
-            },
-            "lConnect": {
-                "type": "lógico",
-                "description": "Se .T., faz a abertura da conexão com servidor As400, SQL Server etc. Valor padrão: .T.."
-            }
-        },
-        "returns": {
-            "type": "lógico",
-            "description": "Retorna .T. se abriu corretamente o ambiente com a empresa e filial. Caso contrário, retorna .F.."
-        }
+    "example": "InputBox('Digite seu nome','') // Retorna o nome informado",
+    "documentation": "https://tdn.totvs.com/display/public/framework/InputBox"
+  }
+,
+  "AllTrim": {
+    "description": "Remove os espaços em branco à direita e à esquerda de uma string.",
+    "parameters": {
+      "cText": {
+        "type": "caractere",
+        "description": "Texto cujos espaços serão removidos."
+      }
     },
-    "RpcClearEnv": {
-        "description": "Função para Limpar o Ambiente de Execução em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/RpcClearEnv",
-        "example": "RpcClearEnv() // Retorna: .T. ou .F.",
-        "parameters": {},
-        "returns": {
-            "type": "lógico",
-            "description": "Retorna .T. se o ambiente foi limpo corretamente. Caso contrário, retorna .F.."
-        }
+    "returns": {
+      "type": "caractere",
+      "description": "String resultante sem espaços nas extremidades."
     },
-    "AAdd": {
-        "description": "Função para Adicionar Elementos a um Array em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/AAdd",
-        "example": "AAdd(aArray, 'novo elemento') // Retorna: .T. ou .F.",
-        "parameters": {
-            "aArray": {
-                "type": "vetor",
-                "description": "Array ao qual o elemento será adicionado."
-            },
-            "vElement": {
-                "type": "variável",
-                "description": "Elemento a ser adicionado ao array."
-            }
-        },
-        "returns": {
-            "type": "lógico",
-            "description": "Retorna .T. se o elemento foi adicionado com sucesso. Caso contrário, retorna .F.."
-        }
+    "example": "AllTrim('  Texto  ') // Retorna 'Texto'",
+    "documentation": "https://tdn.totvs.com/display/framework/AllTrim"
+  },
+  "RTrim": {
+    "description": "Remove espaços em branco à direita de uma string.",
+    "parameters": {
+      "cText": {
+        "type": "caractere",
+        "description": "Texto cujo espaço à direita será removido."
+      }
     },
-    "PadR": {
-        "description": "Função para Preencher String à Direita em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/PadR",
-        "example": "PadR('exemplo', 10) // Retorna: 'exemplo   '",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser preenchida. Valor padrão: \"\"."
-            },
-            "nTamanho": {
-                "type": "numérico",
-                "description": "Tamanho total da string após o preenchimento."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna a string preenchida à direita."
-        }
+    "returns": {
+      "type": "caractere",
+      "description": "String resultante sem espaços à direita."
     },
-    "PadL": {
-        "description": "Função para Preencher String à Esquerda em ADVPL.",
-        "documentation": "https://tdn.totvs.com/display/public/framework/PadL",
-        "example": "PadL('exemplo', 10) // Retorna: '   exemplo'",
-        "parameters": {
-            "cString": {
-                "type": "caractere",
-                "description": "String a ser preenchida. Valor padrão: \"\"."
-            },
-            "nTamanho": {
-                "type": "numérico",
-                "description": "Tamanho total da string após o preenchimento."
-            }
-        },
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna a string preenchida à esquerda."
-        }
+    "example": "RTrim('Texto  ') // Retorna 'Texto'",
+    "documentation": "https://tdn.totvs.com/display/framework/RTrim"
+  },
+  "PadC": {
+    "description": "Centraliza texto em uma largura específica, preenchendo com um caractere.",
+    "parameters": {
+      "cExp": { "type": "caractere", "description": "Texto a ser centralizado." },
+      "nLen": { "type": "numérico", "description": "Largura total da string resultante." },
+      "cFill": { "type": "caractere", "description": "Caracter de preenchimento (opcional). Padrão: espaço." }
     },
-    "GetNextAlias": {
-        "description": "Função para Obter o Próximo Alias em ADVPL.",
-        "documentation": "https://terminaldeinformacao.com/knowledgebase/getnextalias/",
-        "example": "GetNextAlias() // Retorna: 'ALIAS1'",
-        "parameters": {},
-        "returns": {
-            "type": "caractere",
-            "description": "Retorna o próximo alias disponível."
-        }
-    }
+    "returns": { "type": "caractere", "description": "Texto centralizado com preenchimento." },
+    "example": "PadC('X',5) // Retorna '  X  '",
+    "documentation": "https://tdn.totvs.com/display/tec/PadC"
+  },
+  "PadL": {
+    "description": "Alinha texto à esquerda em uma largura específica, preenchendo com um caractere.",
+    "parameters": {
+      "cExp": { "type": "caractere", "description": "Texto a ser alinhado à esquerda." },
+      "nLen": { "type": "numérico", "description": "Largura total da string resultante." },
+      "cFill": { "type": "caractere", "description": "Caracter de preenchimento (opcional). Padrão: espaço." }
+    },
+    "returns": { "type": "caractere", "description": "Texto alinhado à esquerda com preenchimento." },
+    "example": "PadL('X',5,'*') // Retorna 'X****'",
+    "documentation": "https://tdn.totvs.com/display/tec/PadL"
+  },
+  "PadR": {
+    "description": "Alinha texto à direita em uma largura específica, preenchendo com um caractere.",
+    "parameters": {
+      "cExp": { "type": "caractere", "description": "Texto a ser alinhado à direita." },
+      "nLen": { "type": "numérico", "description": "Largura total da string resultante." },
+      "cFill": { "type": "caractere", "description": "Caracter de preenchimento (opcional). Padrão: espaço." }
+    },
+    "returns": { "type": "caractere", "description": "Texto alinhado à direita com preenchimento." },
+    "example": "PadR('X',5,'*') // Retorna '****X'",
+    "documentation": "https://tdn.totvs.com/display/tec/PadR"
+  },
+  "StrZero": {
+    "description": "Converte número em string, preenchendo com zeros à esquerda e definindo decimais.",
+    "parameters": {
+      "nValor": { "type": "numérico", "description": "Valor numérico a converter." },
+      "nTamanho": { "type": "numérico", "description": "Tamanho total da string resultante." },
+      "nDecimal": { "type": "numérico", "description": "Número de casas decimais (opcional)." }
+    },
+    "returns": { "type": "caractere", "description": "String formatada com zeros." },
+    "example": "StrZero(10,5,0) // Retorna '00010'",
+    "documentation": "https://tdn.totvs.com/display/tec/StrZero"
+  },
+  "Str": {
+    "description": "Converte número em string, preenchendo com espaços à esquerda e definindo decimais.",
+    "parameters": {
+      "nNumero": { "type": "numérico", "description": "Valor numérico a converter." },
+      "nTamanho": { "type": "numérico", "description": "Tamanho total da string resultante (opcional)." },
+      "nDecimais": { "type": "numérico", "description": "Número de casas decimais (opcional)." }
+    },
+    "returns": { "type": "caractere", "description": "String formatada com espaços." },
+    "example": "Str(123.45,7,2) // Retorna ' 123.45'",
+    "documentation": "https://tdn.totvs.com/display/tec/Str"
+  },
+  "FT_FReadLn": {
+    "description": "Lê e retorna uma linha de texto de um arquivo aberto com FT_FUse().",
+    "parameters": {},
+    "returns": { "type": "caractere", "description": "Linha de texto sem delimitadores CRLF." },
+    "example": "FT_FReadLn() // Retorna próxima linha do arquivo",
+    "documentation": "https://tdn.totvs.com/display/tec/FT_FReadLn"
+  },
+  "ExecInDllOpen": {
+    "description": "Abre uma DLL para execução de funções ou procedures.",
+    "parameters": {
+      "cPath": { "type": "caractere", "description": "Caminho da DLL a ser aberta." }
+    },
+    "returns": { "type": "numérico", "description": "Handle da DLL aberto." },
+    "example": "hHandle := ExecInDllOpen('caminho.dll')",
+    "documentation": "https://tdn.totvs.com/display/tec/ExecInDLLOpen"
+  },
+  "LocalToUTC": {
+    "description": "Converte data e hora local para UTC.",
+    "parameters": {
+      "cDate": { "type": "caractere", "description": "Data local (yyyyMMdd)." },
+      "cTime": { "type": "caractere", "description": "Hora local (hh:mm:ss)." },
+      "nDST": { "type": "numérico", "description": "Indicador de horário de verão (0 ou 1, opcional)." }
+    },
+    "returns": { "type": "vetor", "description": "Array [DataUTC,HoraUTC]" },
+    "example": "LocalToUTC('20250110','13:00:00',1)",
+    "documentation": "https://tdn.totvs.com/display/tec/LocalToUTC"
+  },
+  "UTCToLocal": {
+    "description": "Converte data e hora UTC para local.",
+    "parameters": {
+      "cDate": { "type": "caractere", "description": "Data UTC (yyyyMMdd)." },
+      "cTime": { "type": "caractere", "description": "Hora UTC (hh:mm:ss)." },
+      "nDST": { "type": "numérico", "description": "Indicador de horário de verão (0 ou 1, opcional)." }
+    },
+    "returns": { "type": "vetor", "description": "Array [DataLocal,HoraLocal]" },
+    "example": "UTCToLocal('20250110','15:00:00',0)",
+    "documentation": "https://tdn.totvs.com/display/tec/UTCToLocal"
+  }
+,
+  "FError": {
+    "description": "Recupera o código de erro após operações de arquivo falhas.",
+    "parameters": {},
+    "returns": {
+      "type": "numérico",
+      "description": "Código de erro da última operação de I/O."      
+    },
+    "example": "nErr := FError() // Retorna código de erro da última operação.",
+    "documentation": "https://tdn.totvs.com/display/tec/FError"
+  },
+  "MsgStop": {
+    "description": "Exibe uma caixa de mensagem de advertência com ícone visual.",
+    "parameters": {
+      "cText": { "type": "caractere", "description": "Texto da mensagem a ser exibida." },
+      "cTitle": { "type": "caractere", "description": "Título da janela de mensagem." }
+    },
+    "returns": {
+      "type": "lógico",
+      "description": "Retorna .T. se o usuário confirmar, .F. caso contrário."    
+    },
+    "example": "MsgStop('Ocorreu um erro','Erro') // Exibe aviso de erro.",
+    "documentation": "https://tdn.totvs.com/pages/viewpage.action?pageId=24346998"
+  },
+  "Directory": {
+    "description": "Retorna um array com o conteúdo de um diretório especificado.",
+    "parameters": {
+      "cDirEsp": { "type": "caractere", "description": "Máscara de diretório (ex: '/tmp/*.*')." },
+      "cAtributos": { "type": "caractere", "description": "Tipos de arquivos/diretórios a incluir." },
+      "uParam1": { "type": "numérico", "description": "Parâmetro de compatibilidade (não usado)." },
+      "lConvertCase": { "type": "lógico", "description": "Retorna nomes em maiúsculo se .T." },
+      "nTypeOrder": { "type": "numérico", "description": "Tipo de ordenação do resultado." }
+    },
+    "returns": {
+      "type": "vetor",
+      "description": "Array bidimensional contendo nomes e atributos."    
+    },
+    "example": "aFiles := Directory('/tmp/*.*','D') // Lista diretórios.",
+    "documentation": "https://tdn.totvs.com/display/tec/Directory"
+  },
+  "HTTPGet": {
+    "description": "Emula um cliente HTTP usando método GET.",
+    "parameters": {
+      "cUrl": { "type": "caractere", "description": "URL de destino." },
+      "cGetParms": { "type": "caractere", "description": "Parâmetros GET na URL (opcional)." },
+      "nTimeOut": { "type": "numérico", "description": "Tempo de espera em segundos (opcional)." },
+      "@cHeaderRet": { "type": "referência", "description": "Variável para receber cabeçalhos de resposta (opcional)." }
+    },
+    "returns": {
+      "type": "caractere",
+      "description": "Conteúdo retornado pelo servidor."    
+    },
+    "example": "cHtml := HTTPGet('http://exemplo.com','',30) // Retorna HTML.",
+    "documentation": "https://tdn.totvs.com/display/tec/HTTPGet"
+  },
+  "HTTPPost": {
+    "description": "Emula um cliente HTTP usando método POST.",
+    "parameters": {
+      "cUrl": { "type": "caractere", "description": "URL de destino." },
+      "cGETParms": { "type": "caractere", "description": "Parâmetros GET (opcional)." },
+      "cPOSTParms": { "type": "caractere", "description": "Parâmetros POST (opcional)." },
+      "nTimeOut": { "type": "numérico", "description": "Tempo de espera em segundos (opcional)." },
+      "aHeadStr": { "type": "vetor", "description": "Cabeçalhos adicionais (opcional)." },
+      "@cHeaderRet": { "type": "referência", "description": "Variável para receber cabeçalhos de resposta (opcional)." }
+    },
+    "returns": {
+      "type": "caractere",
+      "description": "Conteúdo retornado pelo servidor."    
+    },
+    "example": "cResp := HTTPPost('http://exemplo.com','','param=1',30) // Retorna resposta.",
+    "documentation": "https://tdn.totvs.com/display/tec/HTTPPost"
+  },
+  "HTTPSGet": {
+    "description": "Emula um cliente HTTPS usando método GET.",
+    "parameters": {
+      "cUrl": { "type": "caractere", "description": "URL HTTPS de destino." },
+      "cGetParms": { "type": "caractere", "description": "Parâmetros GET (opcional)." },
+      "nTimeOut": { "type": "numérico", "description": "Tempo de espera (opcional)." }
+    },
+    "returns": {
+      "type": "caractere",
+      "description": "Conteúdo retornado pelo servidor HTTPS."    
+    },
+    "example": "cHtml := HTTPSGet('https://exemplo.com') // Retorna HTML seguro.",
+    "documentation": "https://tdn.totvs.com/display/tec/HTTPSGet"
+  },
+  "HTTPSPost": {
+    "description": "Emula um cliente HTTPS usando método POST.",
+    "parameters": {
+      "cUrl": { "type": "caractere", "description": "URL HTTPS de destino." },
+      "cGETParms": { "type": "caractere", "description": "Parâmetros GET (opcional)." },
+      "cPOSTParms": { "type": "caractere", "description": "Parâmetros POST (opcional)." },
+      "nTimeOut": { "type": "numérico", "description": "Tempo de espera (opcional)." }
+    },
+    "returns": {
+      "type": "caractere",
+      "description": "Conteúdo retornado pelo servidor HTTPS."    
+    },
+    "example": "cResp := HTTPSPost('https://exemplo.com','','\"param=1\"') // Retorna resposta.",
+    "documentation": "https://tdn.totvs.com/display/tec/HTTPSPost"
+  },
+  "HTTPGetStatus": {
+    "description": "Retorna o status da última requisição HTTP efetuada.",
+    "parameters": {},
+    "returns": {
+      "type": "numérico",
+      "description": "Código de status HTTP conforme protocolo."    
+    },
+    "example": "nStatus := HTTPGetStatus() // Ex: 200 para sucesso.",
+    "documentation": "https://tdn.totvs.com/display/tec/HTTPGetStatus"
+  },
+  "HTTPCTType": {
+    "description": "Define o tipo de pacote HTTP que será enviado na requisição.",
+    "parameters": {
+      "cType": { "type": "caractere", "description": "Tipo de conteúdo (ex: 'JSON')." }
+    },
+    "returns": {
+      "type": "Nil",
+      "description": "Sem retorno."    
+    },
+    "example": "HTTPCTType('JSON') // Define JSON como content-type.",
+    "documentation": "https://tdn.totvs.com/display/tec/HTTPCTType"
+  },
+  "HTTPPostXml": {
+    "description": "Emula um cliente HTTP POST para envio de arquivos XML.",
+    "parameters": {
+      "cUrl": { "type": "caractere", "description": "URL de destino." },
+      "cParam": { "type": "caractere", "description": "Parâmetros adicionais (opcional)." },
+      "cFile": { "type": "caractere", "description": "Caminho do arquivo XML a enviar." },
+      "nTimeOut": { "type": "numérico", "description": "Tempo de espera (opcional)." }
+    },
+    "returns": {
+      "type": "caractere",
+      "description": "Conteúdo retornado pelo servidor após envio do XML."    
+    },
+    "example": "cResp := HTTPPostXml('http://exemplo.com','','data.xml',30) // Retorna resposta.",
+    "documentation": "https://tdn.totvs.com/display/tec/HTTPPostXml"
+  }
 }

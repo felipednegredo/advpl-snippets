@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const { collectFunctions, collectVariables, collectDefines, collectClasses } = require('./collectors');
 
 
+
 let cache = null;
 let classesData = {};
 

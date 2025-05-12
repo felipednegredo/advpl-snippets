@@ -5,6 +5,7 @@ const { showServersWebView } = require('./webviews/servers');
 const { showLaunchWebView } = require('./webviews/launch');
 const { registerCompletionProvider } = require('./providers/completationProvider');
 const { registerHoverProvider } = require('./providers/hoverProvider');
+const { registerClassMethodCompletion } = require('./providers/classMethodProvider');
 
 let descriptions = {};
 let classesData = {};
@@ -18,12 +19,19 @@ function activate(context) {
         vscode.commands.registerCommand('advplSnippets.showLaunch', () => showLaunchWebView(context)),
         vscode.commands.registerCommand('advplSnippets.generateDocumentation', generateDocumentation),
         registerHoverProvider(descriptions), // Passa o objeto descriptions corretamente
-        registerCompletionProvider()
+        registerCompletionProvider(),
+        registerClassMethodCompletion(classesData), // Passa o objeto classesData corretamente
     );
 }
 
 function deactivate() {}
 
+/**
+ * Carrega um arquivo JSON e retorna seu conteúdo.
+ * @param {string} fileName - Nome do arquivo JSON.
+ * @param {boolean} toLowerCaseKeys - Se verdadeiro, converte as chaves para minúsculas.
+ * @returns {object} - Conteúdo do arquivo JSON.
+ */
 function loadJson(fileName, toLowerCaseKeys = false) {
     try {
         const filePath = path.join(__dirname, fileName);
@@ -37,7 +45,10 @@ function loadJson(fileName, toLowerCaseKeys = false) {
         return {};
     }
 }
-
+/**
+ * Gera a documentação para funções e defines no código.
+ * Adiciona comentários de documentação no local apropriado.
+ */
 function generateDocumentation() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return vscode.window.showErrorMessage('Nenhum editor ativo encontrado.');
